@@ -1,27 +1,27 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 2.0.0  
+**Document Version:** 2.5.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `e93b483` / Full Platform Architecture Review  
+**Target Codebase Baseline:** Commit `c905de0` / Full Specification & Deep-Dive Architecture Audit  
 
 ---
 
-## 1. Executive Summary & Core Platform Thesis
+## 1. Executive Summary & Core Engineering Thesis
 
-**Drishti** (Sanskrit/Hindi: *दृष्टि* — *"vision"*, *"insight"*) is an enterprise-grade, AI-powered defensive cybersecurity platform engineered to bridge the fundamental divide between disconnected point-in-time CVE scans and actionable, business-centric threat exposure modeling.
+**Drishti** (Sanskrit/Hindi: *दृष्टि* — *"vision"*, *"insight"*) is an enterprise-grade, AI-powered defensive cybersecurity platform engineered to solve the most pervasive problem in modern security operations: **the disconnect between raw vulnerability lists and business-critical threat exposure**.
 
 ### 1.1 The Fundamental Flaws in Legacy Security Scanners
-Traditional vulnerability scanners (e.g., Nessus, Qualys, OpenVAS, Inspector) exhibit several systemic shortcomings:
+Traditional vulnerability scanners (e.g., Nessus, Qualys, OpenVAS, Inspector) operate on a flawed point-in-time model:
 1. **Isolated Vulnerability Cataloging**: Vulnerabilities are treated as flat, independent line items rather than interconnected steps in a chained lateral movement attack vector.
-2. **Artificial CVSS Prioritization**: A CVSS 9.8 flaw residing on an isolated internal host with no inbound routes is often flagged with higher urgency than a CVSS 7.2 flaw on an internet-facing gateway protecting crown-jewel databases.
+2. **Artificial CVSS Prioritization**: A CVSS 9.8 flaw residing on an isolated internal host with no inbound routes is flagged with higher urgency than a CVSS 7.2 flaw on an internet-facing gateway protecting crown-jewel databases.
 3. **Absence of Financial Quantification**: Security leaders are forced to communicate with executive boards using abstract technical scores rather than concrete financial exposure metrics.
 4. **Vulnerability to AI Hallucinations**: Standard LLM integrations frequently hallucinate risk metrics, miscalculate impact figures, or risk generating weaponized exploit scripts when prompted about vulnerabilities.
 
 ### 1.2 Drishti's Mathematical & Architectural Solution
 - **Directed Attack Surface Topology**: Models networks as in-memory directed graphs (`networkx.DiGraph`), mapping entry points (`INTERNET`), perimeter firewalls, DMZs, internal subnets, workstations, and crown-jewel databases.
-- **Bounded Yen's k-Shortest Attack Path Enumeration**: Computes and ranks the easiest multi-hop attack paths an adversary can traverse from internet exposure to critical assets.
+- **Bounded Yen's k-Shortest Attack Path Enumeration**: Computes and ranks the easiest multi-hop attack paths an adversary can traverse from internet exposure to critical assets ($k \le 5$, $\text{hops} \le 6$, $\text{top\_k} = 25$).
 - **Deterministic Financial Exposure Modeling**: Financial impact ($ USD) is calculated exclusively via pure mathematical formulas, strictly overwriting any LLM narrative output to prevent hallucination.
 - **Defensive-Only AI Guardrails**: Employs strict output-side marker scanning (`reverse shell`, `bind shell`, `weaponize`, `exfiltrate`, `ransomware`) to guarantee all generated guidance remains 100% defensive.
 
@@ -41,7 +41,7 @@ flowchart TB
         MW["Middleware Pipeline<br/>MaxBodySize (1MB) · CORS · Structured JSON Logging"]
         ROUTERS["14 REST Routers (/api/*)"]
         DEPS["Core Security & Dependency Injection<br/>JWT HS256 · Bcrypt · Agent Hash · In-Memory TokenBucket"]
-        SERVICES["Domain Services Layer<br/>ingest · recompute · live · deepscan · netconfig · urltrust · ai"]
+        SERVICES["Domain Services Layer<br/>ingest · recompute · live · deepscan · netconfig · urltrust · ai · intel · hardening"]
         ENGINE["Pure Graph Risk Engine<br/>NetworkX DiGraph · Yen's k-Shortest Paths · Dollar Impact"]
         ORM["SQLAlchemy 2 ORM (21 Entity Tables)"]
     end
@@ -90,106 +90,27 @@ flowchart TB
 
 ---
 
-## 3. Deep Static Code Review & Codebase Analysis
+## 3. Deep Static Code Review & Codebase Findings
 
-A rigorous file-by-file audit of the backend repository (`server/app/`) revealed key structural insights and specific code defects:
+A file-by-file inspection of `server/app/` identified the following concrete defects and architectural considerations:
 
 ### 3.1 Static Code Defects & Bug Matrix
 
-```mermaid
-classDiagram
-    class Base {
-        +DeclarativeBase
-    }
-    class Organization {
-        +String id (PK)
-        +String name
-        +String slug
-    }
-    class User {
-        +String id (PK)
-        +String org_id (FK)
-        +String email
-        +String password_hash
-        +String role
-        +Integer token_version
-    }
-    class Asset {
-        +String id (PK)
-        +String org_id (FK)
-        +String ip
-        +String asset_type
-        +String criticality
-        +Float business_value
-        +Boolean internet_facing
-        +Float risk_score
-        +Integer blast_radius_count
-    }
-    class Vulnerability {
-        +String id (PK)
-        +String cve_id
-        +String title
-        +Float cvss
-        +String severity
-        +Float exploitability
-    }
-    class AssetVulnerability {
-        +String id (PK)
-        +String asset_id (FK)
-        +String vulnerability_id (FK)
-        +String status
-    }
-    class AttackPath {
-        +String id (PK)
-        +String target_asset_id (FK)
-        +Integer hop_count
-        +Float path_risk
-        +Float likelihood
-        +Float impact_usd
-    }
-
-    Base <|-- Organization
-    Base <|-- User
-    Base <|-- Asset
-    Base <|-- Vulnerability
-    Base <|-- AssetVulnerability
-    Base <|-- AttackPath
-    Organization "1" *-- "*" User
-    Organization "1" *-- "*" Asset
-    Asset "1" *-- "*" AssetVulnerability
-    Vulnerability "1" *-- "*" AssetVulnerability
-    Asset "1" *-- "*" AttackPath
-```
-
-#### Defect 1: Unresolved `timezone` in `server/app/models/vuln.py`
-- **Lines Affected:** `server/app/models/vuln.py:18, 38`
-- **Root Cause:** Uses `datetime.now(timezone.utc)` but only imports `from datetime import datetime`.
-- **Consequence:** `NameError: name 'timezone' is not defined` whenever a new `Vulnerability` or `AssetVulnerability` record is created.
-- **Required Fix:** Change import to `from datetime import datetime, timezone`.
-
-#### Defect 2: Missing `Text`, `Index`, and `datetime/timezone` in `server/app/models/path.py`
-- **Lines Affected:** `server/app/models/path.py:1, 17, 18, 25`
-- **Root Cause:** `Text` (line 17) and `Index` (line 25) are referenced in column and `__table_args__` definitions without being imported from `sqlalchemy`. `datetime.now(timezone.utc)` (line 18) lacks `datetime` and `timezone` imports.
-- **Consequence:** Model import failure crashes the application on startup during schema registration.
-- **Required Fix:** Import `Text, Index` from `sqlalchemy` and `datetime, timezone` from `datetime`.
-
-#### Defect 3: Missing `datetime/timezone` in `server/app/models/scan.py`
-- **Lines Affected:** `server/app/models/scan.py:12, 34`
-- **Root Cause:** `Scan.started_at` and `ThreatIntel.shared_at` invoke `datetime.now(timezone.utc)` without datetime imports.
-- **Consequence:** `NameError` on scan initialization.
-- **Required Fix:** Add `from datetime import datetime, timezone`.
-
-#### Defect 4: Declarative Base Fragmentation
-- **Location:** `server/app/db.py:28` vs `server/app/models/base.py:7` vs `server/app/db_init.py:5`
-- **Root Cause:** `db.py` creates an independent `class Base(DeclarativeBase): pass`, while `models/base.py` creates another `Base`. `db_init.py` imports `Base` from `app.db`.
-- **Consequence:** `reconcile_columns()` calls `Base.__subclasses__()` on `app.db.Base`, which returns an empty list because all models inherit from `app.models.base.Base`. Additive column migrations fail silently.
-- **Required Fix:** Centralize `Base` in `app.models.base` and import that canonical class into `app.db` and `app.db_init`.
+| # | File Location | Defect Type | Root Cause | Severity |
+|---|---|---|---|---|
+| 1 | `server/app/models/vuln.py:18, 38` | Runtime `NameError` | Missing `timezone` from datetime import (`datetime.now(timezone.utc)` called without import). | **High** |
+| 2 | `server/app/models/path.py:1, 17, 18, 25` | Import & Runtime Failure | `Text` and `Index` not imported from `sqlalchemy`; `datetime/timezone` not imported from `datetime`. | **High** |
+| 3 | `server/app/models/scan.py:12, 34` | Runtime `NameError` | Missing `datetime/timezone` imports on `started_at` and `shared_at` column defaults. | **High** |
+| 4 | `server/app/db.py:28` vs `models/base.py:7` | Schema Migration Bug | Dual `DeclarativeBase` instances cause `db_init.py:reconcile_columns` to find 0 domain models. | **High** |
+| 5 | `server/app/core/deps.py:38-47` | Cache Thrashing | In-memory `_rate_buckets` calls `clear()` on $>10,000$ entries, instantly resetting all client limits. | **Medium** |
+| 6 | `server/app/core/security.py:25` | Architectural Strength | Pre-hashes passwords with `sha256_hex` before `bcrypt.hashpw`, safely bypassing bcrypt's 72-byte limit. | **Positive** |
+| 7 | `server/app/core/security.py:60-61` | Security Strength | Precomputed `DUMMY_PASSWORD_HASH` prevents timing attacks on unrecognized email logins. | **Positive** |
 
 ---
 
-## 4. Mathematical Risk Engine & Financial Modeling
+## 4. Mathematical Risk Engine & Financial Impact Modeling
 
-The core risk engine operates as a pure mathematical function over an in-memory `networkx.DiGraph`. There are zero database reads or network calls inside the mathematical loop.
+The risk engine is engineered as a **pure mathematical function** operating on an in-memory `networkx.DiGraph`. There are zero database reads or network calls inside the mathematical loop.
 
 ```mermaid
 flowchart LR
@@ -229,11 +150,7 @@ $$\text{BASE} = \{\text{exposure}: 0.10, \text{network}: 0.20, \text{trust}: 0.2
 $$\text{HopEase}(u \to v) = \max\Big( \text{Ease}(v), \text{RELATION\_EASE}[r] \Big)$$
 $$\text{RELATION\_EASE} = \{\text{exposure}: 0.50, \text{network}: 0.40, \text{trust}: 0.45, \text{admin}: 0.50\}$$
 
-*Key Mechanic:* When a vulnerability on node $v$ is resolved, $\text{Ease}(v)$ drops to 0, which raises the edge weight to $\text{BASE}[r] + 1.0$ and floors the hop ease to $\text{RELATION\_EASE}[r]$. This mathematically ensures that fixing a CVE reduces path likelihood and exposure without breaking the underlying physical network topology.
-
-### 4.3 Bounded Yen's k-Shortest Paths Algorithm
-
-To prevent exponential path explosion on dense enterprise graphs, Yen's algorithm is strictly bounded:
+### 4.3 Bounded Attack Path Enumeration (Yen's Algorithm)
 - **Target Selection**: Nodes where $\text{zone} == \text{'crown\_jewel'} \lor \text{criticality} == \text{'critical'} \lor \text{business\_value} \ge P_{90}$.
 - **Algorithmic Bounds**:
   - $\text{max\_hops} = 6$ (maximum path length)
@@ -257,9 +174,46 @@ $$\text{Total Enterprise Exposure (\$) } = \sum_{t \in \text{Unique Targets}} \m
 
 ---
 
-## 5. Security Model, Defensive Posture & Cryptographic Integrity
+## 5. Subsystems Deep-Dive
 
-### 5.1 Authentication & Cryptographic Rigor
+### 5.1 Edge Agent Architecture (`drishti_agent.py` & `drishti_watch.py`)
+- **Zero-Dependency Scripting**: `drishti_agent.py` relies solely on Python standard library modules (`urllib`, `socket`, `subprocess`), ensuring trivial zero-footprint deployment on Linux, macOS, and Windows edge boxes.
+- **Telemetry Sweeps (`drishti_watch.py`)**: Runs periodic 8-second discovery cycles:
+  1. ARP / Ping discovery mapping active IP, MAC, hostname, and vendor OUIs.
+  2. Connection-to-process inspection via `/proc/net/tcp` (Linux) and `lsof -i` (macOS).
+  3. Domain observations reported directly to `/api/live/observe`.
+- **Subnet Safety Isolation**: The agent reports `active_subnets`. Stale prunes only affect subnets actively observed by that agent instance, preventing multi-agent collision across distinct network segments.
+
+### 5.2 Chrome Extension — Drishti Web Guard
+- **Manifest V3 Service Worker**: Background service worker querying the `/api/url-analyzer` endpoint upon navigation events.
+- **Client-Side Verdict Cache**: Caches URL trust bands locally to eliminate latency on repeat visits. High-risk destinations trigger a SOC-branded interstitial blocking page before TCP socket establishment.
+
+### 5.3 Deep Scan & CVE Resolution Engine
+- **Consent Gates**: Requires explicit `consent: true` and validates target IP against private RFC1918 ranges ($\le /22$ prefix). Public IPs are rejected with HTTP 422.
+- **Real `nmap -sV` Integration**: Executes controlled top-200 port sweeps with bounded timeouts (120s single host, 300s batch).
+- **Graceful Degradation**: Queries NVD REST API v2 and Vulners. If external lookups fail, records `available: false` with truthful reasons rather than fabricating CVEs.
+
+### 5.4 URL Trust Scoring Engine
+- **Evaluated Signals Base**: Evaluates HTTPS, TLS certificate validity, DNS resolution, punycode/homograph attacks, `@`-symbol obfuscation, raw-IP hosting, and brand lookalikes. Renormalized across evaluated weights.
+- **Hard Risk Caps**: Severe flags ceiling the maximum possible score (e.g., Safe Browsing hit caps at 15, VirusTotal hit caps at 20, embedded credentials cap at 30, invalid TLS caps at 50).
+
+### 5.5 Network Config Auditor
+- **Router Parser**: Parses Cisco IOS and Huawei network configuration files.
+- **Detectors**: DMZ segment separation, NAT boundary enforcement, DHCP gateway validation, and detection of cleartext protocols (Telnet, HTTP, FTP, SNMPv1/v2).
+
+### 5.6 Telegram Alerting Subsystem
+- **Background Dispatcher**: 30-second polling daemon querying for unacknowledged `critical` findings or active `arp_spoof` / `rogue_device` threats.
+- **Defensive Scope**: Outbound notification only; no inbound webhook listener to minimize attack surface.
+
+### 5.7 ML Anomaly & Hardening Simulator
+- **IsolationForest & KMeans (`services/intel.py`)**: Unsupervised anomaly detection flagging abnormal host connectivity and clustering assets into topological risk bands.
+- **Quantified Hardening Projections (`services/hardening.py`)**: Simulates PATCH, VLAN isolation, and firewall containment actions, returning measured percentage risk reduction projections per asset.
+
+---
+
+## 6. Security Model, Defensive Posture & Cryptographic Integrity
+
+### 6.1 Cryptographic Guarantees
 1. **Timing-Safe Login Mechanism**:
    - `core/security.py` precomputes `DUMMY_PASSWORD_HASH = hash_password(secrets.token_urlsafe(32))`.
    - When an unregistered email is queried, the system performs a dummy bcrypt check against `DUMMY_PASSWORD_HASH`. Response latencies remain statistically indistinguishable between valid and invalid user queries, neutralizing username enumeration attacks.
@@ -270,7 +224,7 @@ $$\text{Total Enterprise Exposure (\$) } = \sum_{t \in \text{Unique Targets}} \m
 4. **Zero-Knowledge Agent Authentication**:
    - Edge agents authenticate using `drishti_<urlsafe-base64>` tokens. The raw token is returned exactly once during generation. Only the SHA256 digest is stored in the database.
 
-### 5.2 AI Defensive Guardrails & Output Sanitization
+### 6.2 Defensive AI Guardrails
 - **Strict Output-Side Marker Scanning**: Rather than fragile input prompt filtering, all LLM completions are scanned against explicit offensive markers:
   ```python
   _OFFENSIVE_MARKERS = (
@@ -280,44 +234,6 @@ $$\text{Total Enterprise Exposure (\$) } = \sum_{t \in \text{Unique Targets}} \m
   ```
 - If an offensive marker is detected in the model output, the request is immediately refused (`{"refused": true, "reason": "Defensive guardrail triggered"}`).
 - **Input Context Preservation**: Incoming CVE descriptions containing terms like "exploit" or "payload" are permitted in incoming data to preserve defensive triage capabilities.
-
-### 5.3 Consent & Scope Enclosures
-- **RFC1918 Private Address Enforcement**: Deep scans validate IP addresses using Python's `ipaddress` module. Scans targeting public IPs, loopback (`127.0.0.1`), or link-local addresses (`169.254.169.254` AWS metadata) are rejected with HTTP 422.
-- **Explicit Consent**: Deep scanning strictly enforces `consent: true` in the request body. Subnet ranges are capped at $\le /22$ (maximum 1,024 hosts).
-
----
-
-## 6. Subsystem Architectural Evaluations
-
-### 6.1 Edge Agent Architecture (`drishti_watch.py`)
-- **Discovery Modes**:
-  1. `devices`: Periodic ARP sweep (via scapy or socket fallback) discovering active LAN devices.
-  2. `ingest`: Host configuration, open ports, local vulnerability mapping, and connectivity.
-  3. `observe`: Active domain visits and DNS query logging.
-  4. `conn`: Real-time network socket connection monitoring.
-- **WiFi-Aware Subnet Tracking**: Agent reports `active_subnets`. Devices unseen for $>90\text{s}$ or belonging to an inactive subnet are marked offline.
-
-### 6.2 Chrome Extension — Drishti Web Guard
-- **Manifest V3 Architecture**: Lightweight background service worker interfacing with `/api/url-analyzer`.
-- **Zero-Latency In-Browser Defense**: Cached domain verdicts intercept navigation to `High Risk` domains, presenting a SOC-branded warning interstitial before network traffic is dispatched.
-
-### 6.3 Deep Scan & nmap Integration
-- **Execution Architecture**: Real `nmap -sV` subprocess execution (top 200 ports for single-host scans, top 100 ports for range scans).
-- **CVE Resolution Pipeline**: Queries NVD REST API v2 (~5 req/30s unkeyed, ~50 req/30s keyed) and Vulners API. If an external API is unavailable, the scan reports `available: false` with an honest reason rather than fabricating CVEs.
-
-### 6.4 URL Trust Analyzer
-- **Transparent Two-Part Scoring**:
-  1. **Evaluated Signals Base**: Evaluates TLS validity, HTTPS enforcement, DNS resolution, punycode/homograph detection, `@`-symbol obfuscation, raw-IP hosting, embedded credentials, and brand lookalikes. Renormalized across evaluated weights.
-  2. **Hard Risk Caps**: Severe flags ceiling the maximum possible score (e.g., Safe Browsing hit caps at 15, VirusTotal hit caps at 20, embedded credentials cap at 30, invalid TLS caps at 50).
-- **Trust Bands**: `Trusted` ($\ge 75$), `Caution` ($\ge 40$), `High Risk` ($< 40$).
-
-### 6.5 Network Config Auditor
-- **Router Parser**: Analyzes Cisco IOS and Huawei network configuration files.
-- **Detectors**: DMZ segment separation, NAT boundary enforcement, DHCP gateway validation, and detection of cleartext protocols (Telnet, HTTP, FTP, SNMPv1/v2).
-
-### 6.6 Telegram Alerting Subsystem
-- **Background Dispatcher**: 30-second polling daemon querying for unacknowledged `critical` findings or active `arp_spoof` / `rogue_device` threats.
-- **Defensive Scope**: Outbound notification only; no inbound webhook listener to minimize attack surface.
 
 ---
 
@@ -383,4 +299,4 @@ flowchart TD
 
 ## 10. Audit Conclusion & Sign-Off
 
-The **Drishti** architecture represents a state-of-the-art leap in defensive cybersecurity engineering. By uniting topological graph theory, bounded shortest-path algorithms, deterministic dollar exposure quantification, and output-guarded defensive AI, Drishti establishes an uncompromised defensive security standard. Addressing the identified model imports and consolidating schema reconciliation will finalize the system for enterprise-grade deployment.
+The **Drishti** architecture represents a state-of-the-art leap in defensive cybersecurity engineering. By uniting topological graph theory, bounded shortest-path algorithms, deterministic dollar exposure quantification, and output-guarded defensive AI, Drishti establishes an uncompromised defensive security standard. Resolving the identified model imports and consolidating schema reconciliation will finalize the system for enterprise-grade deployment.
