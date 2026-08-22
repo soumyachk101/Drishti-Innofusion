@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 4.1.0  
+**Document Version:** 4.2.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `c3faefd` / Continuous Automated Audit Cycle (Iteration 27)  
+**Target Codebase Baseline:** Commit `c3faefd` / Continuous 5-Minute Automated Audit Cycle (Iteration 1)  
 
 ---
 
@@ -69,25 +69,25 @@ flowchart TB
     SERVICES -.->|"Consent-Gated nmap -sV"| LAN
 ```
 
-### 2.1 Full REST Router Implementation Matrix (15 Routers)
+### 2.1 Complete Full-Stack API Layer (15 REST Modules & Web Clients)
 
-| Router Prefix | Module File | Auth Scheme | Role Scope | Key Endpoints & Features |
-|---|---|---|---|---|
-| `/` & `/health` | `api/v1/health.py` | Public | None | Root status, health diagnostics, readiness probe. |
-| `/api/v1/auth` | `api/v1/auth.py` | Public / Bearer JWT | User | Register, login (timing-safe), token refresh, current user profile. |
-| `/api/v1/admin` | `api/v1/admin.py` | Bearer JWT | Admin | Organization config, tenant user management, sample network seed, token rotation. |
-| `/api/v1/assets` | `api/v1/assets.py` | Bearer JWT | Analyst / Admin | Asset CRUD, zone assignment, risk values, criticality calibration. |
-| `/api/v1/findings`| `api/v1/findings.py`| Bearer JWT | Analyst / Admin | Finding lifecycle (`open`, `remediating`, `resolved`, `accepted`). |
-| `/api/v1/remediation`| `api/v1/remediation.py`| Bearer JWT | Analyst / Admin | Playbook generation, hardening templates, and remediation changelog. |
-| `/api/v1/graph` | `api/v1/graph.py` | Bearer JWT | Analyst / Admin | React Flow topological node/edge graph with blast radius annotations. |
-| `/api/v1/paths` | `api/v1/paths.py` | Bearer JWT | Analyst / Admin | Bounded Yen's k-shortest paths, hop details, target blast radius. |
-| `/api/v1/ai` | `api/v1/ai.py` | Bearer JWT | Analyst / Admin | AI remediation playbooks (Ansible/shell), impact narrative, risk prediction. |
-| `/api/v1/dashboard`| `api/v1/dashboard.py`| Bearer JWT | Analyst / Admin | Executive KPIs, zone exposure breakdown, manual recompute trigger. |
-| `/api/v1/reports` | `api/v1/reports.py` | Bearer JWT | Analyst / Admin | CVE aggregation, severity distributions, ML anomaly report, hardening metrics. |
-| `/api/v1/live` | `api/v1/live.py` | Bearer JWT / Agent | Hybrid | Live device discovery, threat detection (T1557, T1200, T1210, T1071), deep scan. |
-| `/api/v1/urltrust` | `api/v1/urltrust.py`| Bearer JWT | Analyst / Admin | URL trust scoring, certificate verification, reputation integration. |
-| `/api/v1/scan` | `api/v1/scan.py` | Agent / JWT | Hybrid | Scan job execution, agent payload ingestion, result aggregation. |
-| `/api/v1/intel` | `api/v1/intel.py` | Bearer JWT | Analyst / Admin | Threat intelligence feed caching, indicator lookup. |
+| Router Prefix | Server Module | Web API Client | Primary Role & Features |
+|---|---|---|---|
+| `/` & `/health` | `api/v1/health.py` | `web/src/api/health.ts` | Liveness probe (`/`), readiness probe (`/health`), system status. |
+| `/api/v1/auth` | `api/v1/auth.py` | `web/src/api/auth.ts` | Timing-safe authentication, token refresh rotation, user registration. |
+| `/api/v1/admin` | `api/v1/admin.py` | `web/src/api/admin.ts` | Tenant organization configuration, member directory, token creation. |
+| `/api/v1/assets` | `api/v1/assets.py` | `web/src/api/assets.ts` | Asset inventory CRUD, zone calibration, risk value assignment. |
+| `/api/v1/findings` | `api/v1/findings.py` | `web/src/api/findings.ts` | Finding triage lifecycle (`open`, `remediating`, `resolved`, `accepted`). |
+| `/api/v1/remediation`| `api/v1/remediation.py`| `web/src/api/remediation.ts`| Playbook generation (Ansible/shell), hardening templates, changelog. |
+| `/api/v1/graph` | `api/v1/graph.py` | `web/src/api/graph.ts` | React Flow topological node/edge graph with blast radius annotations. |
+| `/api/v1/paths` | `api/v1/paths.py` | `web/src/api/paths.ts` | Bounded Yen's k-shortest paths, hop details, target blast radius. |
+| `/api/v1/ai` | `api/v1/ai.py` | `web/src/api/ai.ts` | AI remediation playbooks, impact narrative, risk prediction. |
+| `/api/v1/dashboard`| `api/v1/dashboard.py`| `web/src/api/dashboard.ts`| Executive headline exposure ($), zone metrics, recompute triggers. |
+| `/api/v1/reports` | `api/v1/reports.py` | `web/src/api/reports.ts` | CVE severity distributions, ML anomaly reports, compliance metrics. |
+| `/api/v1/live` | `api/v1/live.py` | `web/src/api/live.ts` | Live device discovery, threat detection (T1557, T1200, T1210, T1071), deep scan. |
+| `/api/v1/urltrust` | `api/v1/urltrust.py`| `web/src/api/urltrust.ts`| URL trust scoring, certificate verification, reputation feeds. |
+| `/api/v1/scan` | `api/v1/scan.py` | `web/src/api/scan.ts` | Scan job execution, agent payload ingestion, result aggregation. |
+| `/api/v1/intel` | `api/v1/intel.py` | `web/src/api/intel.ts` | Threat intelligence feed caching, indicator lookup. |
 
 ---
 
@@ -103,12 +103,10 @@ A comprehensive file-by-file inspection of `server/app/`, `src/`, and `web/` ide
 | 2 | `server/app/models/path.py:1, 17, 18, 25` | Import & Runtime Failure | `Text` and `Index` not imported from `sqlalchemy`; `datetime/timezone` not imported from `datetime`. | **Fixed / Reviewed** |
 | 3 | `server/app/models/scan.py:12, 34` | Runtime `NameError` | Missing `datetime/timezone` imports on `started_at` and `shared_at` column defaults. | **Fixed / Reviewed** |
 | 4 | `server/app/db.py:28` vs `models/base.py:7` | Schema Migration Bug | Dual `DeclarativeBase` instances cause `db_init.py:reconcile_columns` to find 0 domain models. | **Fixed / Reviewed** |
-| 5 | `web/src/contexts/AuthContext.tsx` | Clean Client Integration | Refactored with `apiClient` Axios wrapper and persistent user serialization. | **Positive** |
-| 6 | `web/src/components/Layout.tsx` | Modular Import Resolution | Clean relative path resolution to `../contexts/AuthContext`. | **Positive** |
+| 5 | `server/app/api/deps.py:21, 46` | Auth Security Fix | Resolved `jwt_secret` parameter alignment and authenticated `org_header` derivation. | **Positive** |
+| 6 | `web/src/api/` | Full API Parity | Complete coverage of all 15 backend router interfaces in TypeScript client services. | **Positive** |
 | 7 | `web/src/features/remediation/` | Remediation Console | Tabbed playbook management interface (`Plans`, `Actions`, `Policy`, `Templates`, `Changelog`). | **Positive** |
-| 8 | `web/src/features/findings/` | Findings Table | High-density DataGrid displaying CVE findings, CVSS scores, and status lifecycle. | **Positive** |
-| 9 | `web/src/features/paths/` | Path Data Grid | Attack path asset traversal metrics with vulnerability counts and risk scoring. | **Positive** |
-| 10 | `web/src/features/attackMap/` | Interactive DAG | React Flow 11 topology visualizer with organization and criticality filtering. | **Positive** |
+| 8 | `web/src/features/attackMap/` | Interactive DAG | React Flow 11 topology visualizer with organization and criticality filtering. | **Positive** |
 
 ---
 
@@ -317,6 +315,7 @@ flowchart TD
 - [x] **Model Layer Stabilization**: Registered all 21 models with canonical `Base` in `models/base.py`.
 - [x] **15 REST Routers & Services**: Full service architecture implemented in `server/app/`.
 - [x] **Frontend Complete Pages & Features**: Implemented `Dashboard`, `AttackMap`, `Findings`, `Paths`, `LiveWatch`, `RemediationConsole`, `Report`, `SettingsPage`, `URLTrust`, `LoginPage`, `RegisterPage`.
+- [x] **Frontend API Parity**: Added full TypeScript API client modules for all 15 endpoints in `web/src/api/`.
 
 ### Phase 2: Medium Priority (Integration & Live Testing)
 - [ ] **Live Telemetry Connection**: Verify edge agent stream to `/api/v1/live/devices` and ForceMap rendering.

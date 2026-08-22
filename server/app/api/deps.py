@@ -1,7 +1,7 @@
 """Dependency injection for FastAPI routes."""
 from __future__ import annotations
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -18,7 +18,7 @@ def get_current_user(
 ) -> User:
  token = credentials.credentials
  try:
- payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+ payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
  user_id: str = payload.get("sub")
  org_id: str = payload.get("org_id")
  role: str = payload.get("role")
@@ -43,5 +43,5 @@ def require_admin(current: User = Depends(get_current_user)) -> User:
  return current
 
 
-def org_header(org_id: str) -> str:
- return org_id
+def org_header(current: User = Depends(get_current_user)) -> str:
+ return current.org_id
