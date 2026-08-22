@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 3.3.0  
+**Document Version:** 3.4.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Full-Stack Repository Implementation (`server/`, `src/`, `web/`) — Iteration 10  
+**Target Codebase Baseline:** Commit `4eae22b` / Continuous Automated Audit Cycle (Iteration 11)  
 
 ---
 
@@ -106,6 +106,8 @@ A comprehensive file-by-file inspection of `server/app/`, `src/`, and `web/` ide
 | 6 | `web/src/features/remediation/` | Remediation Console | Tabbed playbook management interface (`Plans`, `Actions`, `Policy`, `Templates`, `Changelog`). | **Positive** |
 | 7 | `web/src/features/findings/` | Findings Table | High-density DataGrid displaying CVE findings, CVSS scores, and status lifecycle. | **Positive** |
 | 8 | `web/src/features/paths/` | Path Data Grid | Attack path asset traversal metrics with vulnerability counts and risk scoring. | **Positive** |
+| 9 | `web/src/features/attackMap/` | Interactive DAG | React Flow 11 topology visualizer with organization and criticality filtering. | **Positive** |
+| 10 | `web/src/features/report/` | Intel & Reports | Executive compliance reports with CVE risk spreads. | **Positive** |
 
 ---
 
@@ -313,7 +315,7 @@ flowchart TD
 ### Phase 1: High Priority (Immediate Stabilization)
 - [x] **Model Layer Stabilization**: Registered all 21 models with canonical `Base` in `models/base.py`.
 - [x] **14 REST Routers & Services**: Full service architecture implemented in `server/app/`.
-- [x] **Frontend Complete Pages & Features**: Implemented `Dashboard`, `AttackMap`, `Findings`, `Paths`, `LiveWatch`, `RemediationConsole`, `Reports`, `URLTrust`, `Admin`, `LoginPage`, `RegisterPage`.
+- [x] **Frontend Complete Pages & Features**: Implemented `Dashboard`, `AttackMap`, `Findings`, `Paths`, `LiveWatch`, `RemediationConsole`, `Report`, `SettingsPage`, `URLTrust`, `LoginPage`, `RegisterPage`.
 
 ### Phase 2: Medium Priority (Integration & Live Testing)
 - [ ] **Live Telemetry Connection**: Verify edge agent stream to `/api/v1/live/devices` and ForceMap rendering.
