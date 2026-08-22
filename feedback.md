@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 4.2.0  
+**Document Version:** 4.3.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `c3faefd` / Continuous 5-Minute Automated Audit Cycle (Iteration 1)  
+**Target Codebase Baseline:** Commit `7189bf7` / Continuous 5-Minute Automated Audit Cycle (Iteration 2)  
 
 ---
 
@@ -40,7 +40,7 @@ flowchart TB
     subgraph Server["Server Tier — FastAPI (:8000)"]
         MW["Middleware Pipeline<br/>MaxBodySize (1MB) · CORS · Structured JSON Logging"]
         ROUTERS["15 REST Routers (/api/v1/*)"]
-        DEPS["Core Security & Dependency Injection<br/>JWT HS256 · Bcrypt · Agent Hash · In-Memory TokenBucket"]
+        DEPS["Core Security & Dependency Injection<br/>JWT HS256 · Bcrypt · Agent Hash · In-Memory TokenBucket · Session Provider"]
         SERVICES["Domain Services Layer<br/>ingest · recompute · live · deepscan · netconfig · urltrust · ai · intel · hardening · remediation"]
         ENGINE["Pure Graph Risk Engine<br/>NetworkX DiGraph · Yen's k-Shortest Paths · Dollar Impact"]
         ORM["SQLAlchemy 2 ORM (21 Entity Tables)"]
@@ -103,7 +103,7 @@ A comprehensive file-by-file inspection of `server/app/`, `src/`, and `web/` ide
 | 2 | `server/app/models/path.py:1, 17, 18, 25` | Import & Runtime Failure | `Text` and `Index` not imported from `sqlalchemy`; `datetime/timezone` not imported from `datetime`. | **Fixed / Reviewed** |
 | 3 | `server/app/models/scan.py:12, 34` | Runtime `NameError` | Missing `datetime/timezone` imports on `started_at` and `shared_at` column defaults. | **Fixed / Reviewed** |
 | 4 | `server/app/db.py:28` vs `models/base.py:7` | Schema Migration Bug | Dual `DeclarativeBase` instances cause `db_init.py:reconcile_columns` to find 0 domain models. | **Fixed / Reviewed** |
-| 5 | `server/app/api/deps.py:21, 46` | Auth Security Fix | Resolved `jwt_secret` parameter alignment and authenticated `org_header` derivation. | **Positive** |
+| 5 | `server/app/db/session.py` | Session Injection | Canonical `get_db()` generator yielding per-request scoped SQLAlchemy sessions. | **Positive** |
 | 6 | `web/src/api/` | Full API Parity | Complete coverage of all 15 backend router interfaces in TypeScript client services. | **Positive** |
 | 7 | `web/src/features/remediation/` | Remediation Console | Tabbed playbook management interface (`Plans`, `Actions`, `Policy`, `Templates`, `Changelog`). | **Positive** |
 | 8 | `web/src/features/attackMap/` | Interactive DAG | React Flow 11 topology visualizer with organization and criticality filtering. | **Positive** |
