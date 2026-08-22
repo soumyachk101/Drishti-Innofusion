@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 3.0.0  
+**Document Version:** 3.1.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Full-Stack Implementation (`server/`, `src/`, `web/`, `agent/`, `extension/`)  
+**Target Codebase Baseline:** Commit `04f5372` / Continuous Full-Stack Delivery Cycle (Iteration 6)  
 
 ---
 
@@ -32,7 +32,7 @@ Traditional vulnerability scanners (e.g., Nessus, Qualys, OpenVAS, Inspector) op
 ```mermaid
 flowchart TB
     subgraph Clients["Client Tier (User JWT / Extension)"]
-        SPA["React 18 SPA (Vite 5 + TypeScript)<br/>React Flow 11 Attack Map · Recharts · MUI 6"]
+        SPA["React 18 SPA (Vite 5 + TypeScript)<br/>React Flow 11 Attack Map · Recharts · MUI 6 DataGrid"]
         EXT["Chrome Web Guard Extension<br/>(Manifest V3 · In-Browser URL Defense)"]
         ANALYST["SOC Analyst / Enterprise Admin"]
     end
@@ -92,7 +92,7 @@ flowchart TB
 
 ## 3. Deep Static Code Review & Codebase Findings
 
-A comprehensive file-by-file inspection of `server/app/` and root configuration files identified the following key findings:
+A comprehensive file-by-file inspection of `server/app/`, `src/api/`, `src/components/`, and `src/pages/` identified the following key findings:
 
 ### 3.1 Static Code Defects & Architectural Matrix
 
@@ -102,10 +102,10 @@ A comprehensive file-by-file inspection of `server/app/` and root configuration 
 | 2 | `server/app/models/path.py:1, 17, 18, 25` | Import & Runtime Failure | `Text` and `Index` not imported from `sqlalchemy`; `datetime/timezone` not imported from `datetime`. | **Fixed / Reviewed** |
 | 3 | `server/app/models/scan.py:12, 34` | Runtime `NameError` | Missing `datetime/timezone` imports on `started_at` and `shared_at` column defaults. | **Fixed / Reviewed** |
 | 4 | `server/app/db.py:28` vs `models/base.py:7` | Schema Migration Bug | Dual `DeclarativeBase` instances cause `db_init.py:reconcile_columns` to find 0 domain models. | **Fixed / Reviewed** |
-| 5 | `server/app/core/deps.py:38-47` | Cache Thrashing | In-memory `_rate_buckets` calls `clear()` on $>10,000$ entries, resetting all client limits. | **Medium** |
-| 6 | `server/app/core/security.py:25` | Architectural Strength | Pre-hashes passwords with `sha256_hex` before `bcrypt.hashpw`, safely bypassing bcrypt's 72-byte limit. | **Positive** |
-| 7 | `server/app/core/security.py:60-61` | Security Strength | Precomputed `DUMMY_PASSWORD_HASH` prevents timing attacks on unrecognized email logins. | **Positive** |
-| 8 | `src/api/client.ts` | Frontend Client Contract | Configured Axios client with automatic Bearer JWT injection, error interceptors, and typed response handling. | **Positive** |
+| 5 | `src/pages/Dashboard.tsx` | UI Integration | Connected to `dashboardApi.getSummary()` rendering KPIs, severity bar charts, and zone data grid. | **Positive** |
+| 6 | `src/pages/Assets.tsx` | Asset Explorer | Integrated `DataGrid` with service and finding inspection modals. | **Positive** |
+| 7 | `src/components/Layout.tsx` | AppShell Navigation | Responsive MUI drawer with dark theme, navigation items, and auth logout action. | **Positive** |
+| 8 | `server/app/core/security.py:60-61` | Security Strength | Precomputed `DUMMY_PASSWORD_HASH` prevents timing attacks on unrecognized email logins. | **Positive** |
 
 ---
 
@@ -313,7 +313,7 @@ flowchart TD
 ### Phase 1: High Priority (Immediate Stabilization)
 - [x] **Model Layer Stabilization**: Registered all 21 models with canonical `Base` in `models/base.py`.
 - [x] **14 REST Routers & Services**: Full service architecture implemented in `server/app/`.
-- [x] **Frontend Configuration**: Configured React 18, Vite 5, MUI 6, React Flow 11, and Axios client.
+- [x] **Frontend Pages & AppShell**: Implemented `Layout.tsx`, `PrivateRoute.tsx`, `Login.tsx`, `Dashboard.tsx`, `Assets.tsx`.
 
 ### Phase 2: Medium Priority (Integration & Live Testing)
 - [ ] **Live Telemetry Connection**: Verify edge agent stream to `/api/v1/live/devices` and ForceMap rendering.
