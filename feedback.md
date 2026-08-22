@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 2.8.0  
+**Document Version:** 2.9.1  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `8c0c11d` / Continuous Automated Audit Cycle (Iteration 3)  
+**Target Codebase Baseline:** Commit `73ac1e5` / Continuous Automated Audit Cycle (Iteration 4)  
 
 ---
 
@@ -32,7 +32,7 @@ Traditional vulnerability scanners (e.g., Nessus, Qualys, OpenVAS, Inspector) op
 ```mermaid
 flowchart TB
     subgraph Clients["Client Tier (User JWT / Extension)"]
-        SPA["React 18 SPA (Vite + TypeScript)<br/>React Flow Attack Map · D3 ForceMap"]
+        SPA["React 18 SPA (Vite 5 + TypeScript)<br/>React Flow 11 Attack Map · Recharts · MUI 6"]
         EXT["Chrome Web Guard Extension<br/>(Manifest V3 · In-Browser URL Defense)"]
         ANALYST["SOC Analyst / Enterprise Admin"]
     end
@@ -92,7 +92,7 @@ flowchart TB
 
 ## 3. Deep Static Code Review & Codebase Findings
 
-A file-by-file inspection of `server/app/` identified the following concrete defects and architectural considerations:
+A file-by-file inspection of `server/app/` and root configuration files identified the following concrete defects and architectural considerations:
 
 ### 3.1 Static Code Defects & Bug Matrix
 
@@ -102,9 +102,10 @@ A file-by-file inspection of `server/app/` identified the following concrete def
 | 2 | `server/app/models/path.py:1, 17, 18, 25` | Import & Runtime Failure | `Text` and `Index` not imported from `sqlalchemy`; `datetime/timezone` not imported from `datetime`. | **High** |
 | 3 | `server/app/models/scan.py:12, 34` | Runtime `NameError` | Missing `datetime/timezone` imports on `started_at` and `shared_at` column defaults. | **High** |
 | 4 | `server/app/db.py:28` vs `models/base.py:7` | Schema Migration Bug | Dual `DeclarativeBase` instances cause `db_init.py:reconcile_columns` to find 0 domain models. | **High** |
-| 5 | `server/app/core/deps.py:38-47` | Cache Thrashing | In-memory `_rate_buckets` calls `clear()` on $>10,000$ entries, instantly resetting all client limits. | **Medium** |
-| 6 | `server/app/core/security.py:25` | Architectural Strength | Pre-hashes passwords with `sha256_hex` before `bcrypt.hashpw`, safely bypassing bcrypt's 72-byte limit. | **Positive** |
-| 7 | `server/app/core/security.py:60-61` | Security Strength | Precomputed `DUMMY_PASSWORD_HASH` prevents timing attacks on unrecognized email logins. | **Positive** |
+| 5 | `tsconfig.json:20` vs `web/src/` | Build Path Mismatch | `tsconfig.json` includes `["src"]` while UI sources are located in `web/src`. Needs path alignment. | **Medium** |
+| 6 | `server/app/core/deps.py:38-47` | Cache Thrashing | In-memory `_rate_buckets` calls `clear()` on $>10,000$ entries, instantly resetting all client limits. | **Medium** |
+| 7 | `server/app/core/security.py:25` | Architectural Strength | Pre-hashes passwords with `sha256_hex` before `bcrypt.hashpw`, safely bypassing bcrypt's 72-byte limit. | **Positive** |
+| 8 | `server/app/core/security.py:60-61` | Security Strength | Precomputed `DUMMY_PASSWORD_HASH` prevents timing attacks on unrecognized email logins. | **Positive** |
 
 ---
 
@@ -257,29 +258,28 @@ flowchart TD
 
 ---
 
-## 7. Frontend Design System & User Experience
+## 7. Frontend Design System & Technology Stack
 
 ```mermaid
 flowchart TD
-    Shell["AppShell (:5173)"]
-    Shell --> Nav["Navigation Bar"]
+    Shell["AppShell (Vite 5 + React 18)"]
+    Shell --> Nav["Navigation Bar (MUI 6)"]
     Shell --> Main["Main Viewport"]
     Main --> EB1["ErrorBoundary (Global)"]
     EB1 --> EB2["ErrorBoundary (AttackMap Isolated)"]
-    EB2 --> Flow["React Flow Attack Map (Layered DAG)"]
-    Main --> Force["D3 ForceMap (Live Telemetry)"]
+    EB2 --> Flow["React Flow 11 Attack Map (Layered DAG)"]
+    Main --> Charts["Recharts Visualizations"]
+    Main --> Grid["MUI X Data Grid (Findings & Assets)"]
     Main --> Console["Remediation Console (Ansible/Shell Playbooks)"]
     Main --> Dash["Executive Dashboard ($ Headline Exposure)"]
 ```
 
-### 7.1 SOC-Blue Design System Tokens
-- **Theme Palettes**: Optimized for security operations centers with dark mode default (`slate-950` / `zinc-900`) and high-contrast status accents:
-  - `Critical`: `rose-500` / `red-600` (pulse animation on threats)
-  - `High`: `amber-500` / `orange-600`
-  - `Medium`: `yellow-500`
-  - `Low / Trusted`: `emerald-500` / `cyan-500`
-- **Component Isolation**: Isolated React Error Boundaries wrap `React Flow` to ensure canvas rendering errors do not crash surrounding navigation or sidebars.
-- **Framer Motion Dynamics**: Spring physics transitions on node selection, drawer expansion, and accordion state shifts (`staggerChildren: 0.05s`, layout transitions `0.15s–0.3s`).
+### 7.1 Frontend Architecture & Dependencies Review (`package.json`)
+- **React 18 & Vite 5**: High-speed ES module bundler with code-split routing and proxy setup (`vite.config.ts` proxies `/api` to `http://localhost:8000`).
+- **React Flow (`reactflow` 11.10.0)**: Canvas rendering for topological attack graphs with custom DAG node components and animated edge highlighting (`onTopPath`).
+- **MUI Material v6 & Emotion**: Professional enterprise UI framework with high-contrast theme tokens (`@mui/material`, `@mui/icons-material`, `@mui/x-data-grid`).
+- **Recharts (2.10.0)**: Responsive SVG charting for CVE distribution, risk-band spreads, and historical exposure trends.
+- **React Hot Toast**: Zero-configuration non-blocking notification dispatcher for asynchronous status updates and recompute feedback.
 
 ---
 
