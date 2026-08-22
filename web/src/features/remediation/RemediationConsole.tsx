@@ -15,6 +15,8 @@ import {
   Server,
   Layers,
   FileCode,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -25,17 +27,17 @@ import { SeverityBadge } from "../../components/SeverityBadge";
 import { Card, ErrorState, LoadingBlock } from "../../components/primitives";
 import { useToast } from "../../store/graphStore";
 
-const KINDS: { key: string; label: string; icon: typeof Terminal }[] = [
-  { key: "ansible", label: "Ansible Playbook", icon: Layers },
-  { key: "shell", label: "Shell Hardening", icon: Terminal },
-  { key: "cloud_cli", label: "Cloud Security Group", icon: Server },
+const KINDS: { key: string; label: string; icon: typeof Terminal; desc: string }[] = [
+  { key: "ansible", label: "Ansible Playbook", icon: Layers, desc: "Automated multi-node YAML playbook" },
+  { key: "shell", label: "Shell Hardening", icon: Terminal, desc: "Direct Bash script with rollback logic" },
+  { key: "cloud_cli", label: "Cloud Security Group", icon: Server, desc: "AWS CLI / VPC ingress firewall rule" },
 ];
 
 export function RemediationConsole() {
   const { findingId } = useParams<{ findingId: string }>();
   const qc = useQueryClient();
   const toast = useToast();
-  const [kind, setKind] = useState("ansible");
+  const [kind, setKind] = useState("shell");
 
   // load the finding context via the findings list (filtered client-side)
   const findingQ = useQuery({
@@ -63,10 +65,10 @@ export function RemediationConsole() {
     onError: () => toast.show("Couldn't update finding status", "error"),
   });
 
-  if (findingQ.isLoading) return <div className="p-8"><LoadingBlock label="Loading finding intelligence…" /></div>;
+  if (findingQ.isLoading) return <div className="p-10"><LoadingBlock label="Loading finding intelligence…" /></div>;
   if (findingQ.isError || !findingQ.data)
     return (
-      <div className="p-8">
+      <div className="p-10">
         <ErrorState message="Finding not found." onRetry={() => findingQ.refetch()} />
       </div>
     );
@@ -74,74 +76,89 @@ export function RemediationConsole() {
   const remediation = gen.data;
 
   return (
-    <div className="mx-auto max-w-5xl p-6 lg:p-8">
-      {/* Top Breadcrumb & Navigation */}
-      <Link
-        to="/app/findings"
-        className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-black/5 bg-white/60 px-3 py-1 text-xs font-semibold text-ink-muted hover:text-ink-primary hover:bg-white transition-all shadow-xs"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" /> Back to Findings List
-      </Link>
-
-      {/* Header */}
-      <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-black/5 pb-4">
-        <div>
-          <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-accent-500">
-            AI-Powered Patch Synthesis
+    <div className="w-full px-6 py-6 lg:px-10 space-y-6">
+      {/* Top Breadcrumb & Actions Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Link
+          to="/app/findings"
+          className="inline-flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3.5 py-1.5 text-xs font-bold text-ink-primary hover:bg-black/5 hover:border-black/20 transition-all shadow-xs"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to Findings Intelligence
+        </Link>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-mono font-bold text-emerald-700">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>NVIDIA / GROQ DEFENSIVE ENGINE: ONLINE</span>
           </div>
-          <h1 className="font-display text-2xl lg:text-3xl font-extrabold text-ink-primary tracking-tight">
-            Defensive Remediation Studio
-          </h1>
         </div>
-        <div className="flex items-center gap-2 text-xs text-ink-muted">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>LLM Guardrails: ACTIVE</span>
-        </div>
-      </header>
+      </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-        {/* Left Column: Finding Context */}
-        <FindingContext finding={f} />
-
-        {/* Right Column: Interactive Synthesis Studio */}
-        <div className="space-y-5">
-          {/* Format Selection Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-black/5 bg-white p-2 shadow-xs">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {KINDS.map((k) => {
-                const Icon = k.icon;
-                const active = kind === k.key;
-                return (
-                  <button
-                    key={k.key}
-                    onClick={() => setKind(k.key)}
-                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-                      active
-                        ? "bg-accent-500 text-white shadow-sm"
-                        : "text-ink-muted hover:bg-black/5 hover:text-ink-primary"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {k.label}
-                  </button>
-                );
-              })}
+      {/* Main Studio Title & Target Overview Strip */}
+      <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-accent-500 mb-1">
+              <Zap className="h-3.5 w-3.5" /> Context-Aware Automated Fix Engine
             </div>
+            <h1 className="font-display text-2xl lg:text-3xl font-extrabold text-ink-primary tracking-tight">
+              Remediation &amp; Defense Studio
+            </h1>
+            <p className="mt-1 text-xs text-ink-muted">
+              Synthesizing production-grade defensive playbooks grounded strictly in real host telemetry. Zero hallucinations.
+            </p>
+          </div>
 
+          <div className="flex flex-wrap items-center gap-3">
             <Button
               loading={gen.isPending}
               onClick={() => gen.mutate(!!remediation)}
-              className="bg-accent-500 text-white font-bold hover:bg-accent-600 shadow-sm"
+              className="bg-accent-500 text-white font-bold hover:bg-accent-600 shadow-sm text-sm px-5 py-2.5"
             >
               {remediation ? <RotateCw className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-              {remediation ? "Regenerate Patch" : "Synthesize Fix"}
+              {remediation ? "Regenerate Patch" : "Synthesize Defensive Fix"}
             </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Full Width 3-Column Responsive Grid */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[360px_1fr_360px]">
+        {/* Left Column: Finding Context & Attack Chain */}
+        <FindingContext finding={f} />
+
+        {/* Center Column: Interactive Patch Studio & Terminal */}
+        <div className="space-y-5">
+          {/* Format Selection Tabs with High-Tech Badges */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {KINDS.map((k) => {
+              const Icon = k.icon;
+              const active = kind === k.key;
+              return (
+                <button
+                  key={k.key}
+                  onClick={() => setKind(k.key)}
+                  className={`flex flex-col items-start justify-between rounded-xl border p-3.5 text-left transition-all ${
+                    active
+                      ? "border-accent-500 bg-accent-500/[0.06] shadow-xs ring-2 ring-accent-500/20"
+                      : "border-black/10 bg-white hover:bg-black/[0.02] hover:border-black/20"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 font-bold text-xs">
+                    <div className={`flex h-6 w-6 items-center justify-center rounded-lg ${active ? "bg-accent-500 text-white" : "bg-black/5 text-ink-muted"}`}>
+                      <Icon className="h-3.5 w-3.5" />
+                    </div>
+                    <span className={active ? "text-accent-600 font-extrabold" : "text-ink-primary"}>{k.label}</span>
+                  </div>
+                  <span className="mt-2 text-[11px] text-ink-muted leading-tight">{k.desc}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Generating Loading State */}
           {gen.isPending && (
-            <Card className="p-10 border border-accent-500/20 bg-white/80 text-center shadow-sm">
-              <LoadingBlock label="Synthesizing contextual defensive playbook with Llama 3.3 70B…" />
+            <Card className="p-12 border border-accent-500/25 bg-white text-center shadow-xs">
+              <LoadingBlock label="Synthesizing zero-exploit defensive patch with Llama 3.3 70B…" />
             </Card>
           )}
 
@@ -150,7 +167,7 @@ export function RemediationConsole() {
             <Card className="flex items-start gap-3 p-5 border border-amber-500/30 bg-amber-500/5 shadow-xs">
               <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
               <div className="text-xs leading-relaxed text-ink-secondary">
-                <div className="font-bold text-amber-600 mb-0.5">Defensive Guardrail Triggered</div>
+                <div className="font-bold text-amber-600 mb-0.5">Defensive Guardrail Enforced</div>
                 Drishti generates defensive containment fixes only.
                 {remediation.reason && (
                   <span className="block text-ink-muted mt-1">{remediation.reason}</span>
@@ -161,35 +178,38 @@ export function RemediationConsole() {
 
           {/* Generated Result View */}
           {remediation && !remediation.refused && (
-            <ResultView
-              remediation={remediation}
-              onResolve={() => setStatus.mutate("resolved")}
-              onRemediating={() => setStatus.mutate("remediating")}
-              resolving={setStatus.isPending}
-            />
+            <TerminalCenterView remediation={remediation} />
           )}
 
           {/* Empty Initial State */}
           {!remediation && !gen.isPending && (
-            <Card className="p-10 border border-black/5 bg-white text-center shadow-xs">
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-accent-500/10 text-accent-500">
-                <Sparkles className="h-6 w-6" />
+            <Card className="p-12 border border-black/10 bg-white text-center shadow-xs">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-500/10 text-accent-500">
+                <Sparkles className="h-7 w-7" />
               </div>
-              <h3 className="font-bold text-ink-primary text-base">Ready to Generate Patch</h3>
-              <p className="mx-auto mt-1 max-w-md text-xs text-ink-muted leading-relaxed">
-                Select your preferred deployment target format above and click <b>Synthesize Fix</b> to generate verified, zero-exploit remediation code for this host.
+              <h3 className="font-display font-bold text-ink-primary text-lg">Ready to Generate Patch</h3>
+              <p className="mx-auto mt-2 max-w-lg text-xs text-ink-muted leading-relaxed">
+                Click below to synthesize a verified, production-grade <b>{KINDS.find((k) => k.key === kind)?.label}</b> tailored to isolate and remediate this exposure.
               </p>
-              <div className="mt-5">
+              <div className="mt-6">
                 <button
                   onClick={() => gen.mutate(false)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-xs font-bold text-white hover:bg-accent-600 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-bold text-white hover:bg-accent-600 transition-all shadow-sm"
                 >
-                  <Sparkles className="h-3.5 w-3.5" /> Synthesize {KINDS.find((k) => k.key === kind)?.label}
+                  <Sparkles className="h-4 w-4" /> Synthesize {KINDS.find((k) => k.key === kind)?.label}
                 </button>
               </div>
             </Card>
           )}
         </div>
+
+        {/* Right Column: Execution Runbook & Actions */}
+        <ExecutionSidebar
+          remediation={remediation}
+          onResolve={() => setStatus.mutate("resolved")}
+          onRemediating={() => setStatus.mutate("remediating")}
+          resolving={setStatus.isPending}
+        />
       </div>
     </div>
   );
@@ -197,44 +217,57 @@ export function RemediationConsole() {
 
 function FindingContext({ finding: f }: { finding: Finding }) {
   return (
-    <Card className="h-fit p-5 border border-black/5 bg-white shadow-xs space-y-4">
-      <div>
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-muted">
-          Target Finding
-        </span>
-        <h3 className="mt-1 text-sm font-bold leading-snug text-ink-primary">
-          {f.title}
-        </h3>
-        <div className="mt-2 flex items-center gap-2">
-          <SeverityBadge severity={f.severity} score={f.cvss} />
-          <span className="font-mono text-xs font-bold text-ink-secondary">CVSS {f.cvss}</span>
-        </div>
-      </div>
-
-      <div className="space-y-2 border-t border-b border-black/5 py-3">
-        <DefRow label="CVE Identifier" value={f.cve_id ?? "N/A (Configuration Flaw)"} mono />
-        <DefRow label="Target Asset" value={f.asset_hostname ?? f.asset_ip} mono />
-        <DefRow label="Host IP" value={f.asset_ip} mono />
-        <DefRow label="Service Port" value={f.service_port ? String(f.service_port) : "All Ports"} mono />
-        <DefRow label="Current Status" value={f.status.toUpperCase()} mono />
-      </div>
-
-      {f.description && (
-        <div className="rounded-lg bg-black/[0.02] p-3 text-xs leading-relaxed text-ink-secondary border-l-2 border-accent-500">
-          <span className="block font-bold text-[10px] uppercase tracking-wider text-ink-muted mb-1">
-            Impact Analysis
+    <div className="space-y-4">
+      <Card className="p-5 border border-black/10 bg-white shadow-xs space-y-4">
+        <div>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-muted">
+            Target Finding Specification
           </span>
-          {f.description}
+          <h3 className="mt-1.5 text-sm font-bold leading-snug text-ink-primary">
+            {f.title}
+          </h3>
+          <div className="mt-2.5 flex items-center gap-2">
+            <SeverityBadge severity={f.severity} score={f.cvss} />
+            <span className="font-mono text-xs font-bold text-ink-secondary">CVSS {f.cvss}</span>
+          </div>
         </div>
-      )}
-    </Card>
+
+        <div className="space-y-2.5 border-t border-b border-black/10 py-3.5">
+          <DefRow label="CVE Identifier" value={f.cve_id ?? "N/A (Architecture / ACL Flaw)"} mono />
+          <DefRow label="Target Host" value={f.asset_hostname ?? f.asset_ip} mono />
+          <DefRow label="Host IP Address" value={f.asset_ip} mono />
+          <DefRow label="Exposed Port" value={f.service_port ? String(f.service_port) : "All Ingress / Egress Ports"} mono />
+          <DefRow label="Finding Status" value={f.status.toUpperCase()} mono />
+        </div>
+
+        {f.description && (
+          <div className="rounded-xl bg-black/[0.02] p-3.5 text-xs leading-relaxed text-ink-secondary border-l-3 border-accent-500 space-y-1">
+            <span className="block font-bold text-[10px] uppercase tracking-wider text-ink-muted">
+              Exposure Vector &amp; Threat Chain
+            </span>
+            <p>{f.description}</p>
+          </div>
+        )}
+      </Card>
+
+      {/* Defense Guardrails Card */}
+      <Card className="p-4 border border-emerald-500/20 bg-emerald-500/[0.04] space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-emerald-700">
+          <ShieldCheck className="h-4 w-4" />
+          <span>Output Safety Guardrails</span>
+        </div>
+        <p className="text-[11px] text-emerald-900/70 leading-relaxed">
+          Zero offensive exploit markers permitted. Playbooks strictly enforce non-destructive containment and reversible configurations.
+        </p>
+      </Card>
+    </div>
   );
 }
 
 function DefRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-2 text-xs">
-      <span className="text-ink-muted">{label}</span>
+      <span className="text-ink-muted font-medium">{label}</span>
       <span className={`font-semibold ${mono ? "font-mono text-ink-primary" : "text-ink-primary"}`}>
         {value}
       </span>
@@ -242,17 +275,7 @@ function DefRow({ label, value, mono }: { label: string; value: string; mono?: b
   );
 }
 
-function ResultView({
-  remediation,
-  onResolve,
-  onRemediating,
-  resolving,
-}: {
-  remediation: Remediation;
-  onResolve: () => void;
-  onRemediating: () => void;
-  resolving: boolean;
-}) {
+function TerminalCenterView({ remediation }: { remediation: Remediation }) {
   const [copied, setCopied] = useState(false);
   const toast = useToast();
 
@@ -260,37 +283,37 @@ function ResultView({
     try {
       await navigator.clipboard.writeText(remediation.script);
       setCopied(true);
-      toast.show("Code copied to clipboard", "success");
+      toast.show("Playbook copied to clipboard", "success");
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.show("Failed to copy", "error");
+      toast.show("Failed to copy code", "error");
     }
   };
 
   return (
     <div className="space-y-4">
       {/* Executive Summary Card */}
-      <Card className="p-5 border border-black/5 bg-white shadow-xs">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
+      <Card className="p-5 border border-black/10 bg-white shadow-xs">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-xl">
             <span className="inline-block text-[10px] font-mono font-bold uppercase tracking-wider text-accent-500 mb-1">
-              Synthesized Remediation
+              Synthesized Strategy
             </span>
-            <h2 className="font-display text-lg font-bold text-ink-primary">{remediation.title}</h2>
-            <p className="mt-1 text-xs leading-relaxed text-ink-secondary">{remediation.summary}</p>
+            <h2 className="font-display text-base lg:text-lg font-bold text-ink-primary">{remediation.title}</h2>
+            <p className="mt-1.5 text-xs leading-relaxed text-ink-secondary">{remediation.summary}</p>
             {remediation.model && (
-              <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-black/5 bg-black/[0.02] px-2.5 py-0.5 text-[11px] font-mono text-ink-muted">
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-black/[0.03] px-3 py-1 text-[11px] font-mono text-ink-muted">
                 <Cpu className="h-3 w-3 text-accent-500" />
                 Verified Model: <span className="font-bold text-ink-primary">{remediation.model}</span>
               </div>
             )}
           </div>
           {remediation.estimated_risk_reduction != null && (
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-right">
-              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-600">
+            <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 text-center min-w-[120px]">
+              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-700">
                 Risk Reduction
               </div>
-              <div className="text-lg font-mono font-extrabold text-emerald-600">
+              <div className="text-xl font-mono font-extrabold text-emerald-600 mt-0.5">
                 -{remediation.estimated_risk_reduction}%
               </div>
             </div>
@@ -299,8 +322,8 @@ function ResultView({
       </Card>
 
       {/* Terminal Code Window */}
-      <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0d100d] shadow-lg">
-        <div className="flex items-center justify-between border-b border-white/10 bg-[#161a16] px-4 py-2">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d100d] shadow-xl">
+        <div className="flex items-center justify-between border-b border-white/10 bg-[#161a16] px-4 py-2.5">
           <div className="flex items-center gap-3">
             <div className="flex gap-1.5">
               <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f56]" />
@@ -308,12 +331,12 @@ function ResultView({
               <div className="h-2.5 w-2.5 rounded-full bg-[#27c93f]" />
             </div>
             <span className="font-mono text-xs font-bold text-accent-400">
-              {remediation.kind === "ansible" ? "remediate_cve.yml" : remediation.kind === "shell" ? "harden_host.sh" : "cloud_policy.sh"}
+              {remediation.kind === "ansible" ? "remediate_exposure.yml" : remediation.kind === "shell" ? "harden_host.sh" : "cloud_policy.sh"}
             </span>
           </div>
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded-md bg-white/10 px-3 py-1 text-xs font-mono font-bold text-white hover:bg-white/20 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1 text-xs font-mono font-bold text-white hover:bg-white/20 transition-colors"
           >
             {copied ? (
               <>
@@ -329,61 +352,88 @@ function ResultView({
           </button>
         </div>
 
-        <pre className="overflow-x-auto p-4 font-mono text-[12px] leading-relaxed text-[#f2efe7] selection:bg-accent-500 selection:text-white">
+        <pre className="overflow-x-auto p-4 font-mono text-[12px] leading-relaxed text-[#f2efe7] selection:bg-accent-500 selection:text-white max-h-[460px]">
           {remediation.script}
         </pre>
       </div>
 
-      {/* Action Steps Runbook */}
-      {remediation.steps && remediation.steps.length > 0 && (
-        <Card className="p-5 border border-black/5 bg-white shadow-xs">
-          <div className="mb-3 text-[10px] font-mono font-bold uppercase tracking-wider text-ink-muted">
-            Execution Steps &amp; Validation Runbook
-          </div>
-          <div className="space-y-2">
+      {/* Proof of Grounding Accordion */}
+      {remediation.context && <AIInputInspector context={remediation.context} />}
+    </div>
+  );
+}
+
+function ExecutionSidebar({
+  remediation,
+  onResolve,
+  onRemediating,
+  resolving,
+}: {
+  remediation?: Remediation | null;
+  onResolve: () => void;
+  onRemediating: () => void;
+  resolving: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      {/* Execution Runbook */}
+      <Card className="p-5 border border-black/10 bg-white shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-black/5 pb-2">
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-muted">
+            Execution Runbook
+          </span>
+          <span className="rounded bg-black/5 px-2 py-0.5 text-[10px] font-mono font-bold text-ink-muted">
+            {remediation?.steps?.length || 0} Steps
+          </span>
+        </div>
+
+        {remediation?.steps && remediation.steps.length > 0 ? (
+          <div className="space-y-2.5">
             {remediation.steps.map((s, i) => (
-              <div key={i} className="flex items-start gap-3 rounded-lg bg-black/[0.02] p-2.5 text-xs text-ink-secondary">
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-accent-500/10 font-mono text-[10px] font-bold text-accent-500">
+              <div key={i} className="flex items-start gap-3 rounded-xl bg-black/[0.02] p-3 text-xs text-ink-secondary border border-black/5">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-accent-500/10 font-mono text-[10px] font-bold text-accent-600">
                   0{i + 1}
                 </span>
                 <span className="pt-0.5 leading-relaxed">{s}</span>
               </div>
             ))}
           </div>
-          {remediation.requires_restart && (
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600">
-              <AlertTriangle className="h-3.5 w-3.5" /> Requires a service/daemon restart after applying
-            </div>
-          )}
-        </Card>
-      )}
+        ) : (
+          <div className="p-6 text-center text-xs text-ink-muted">
+            Synthesize a fix to generate automated step-by-step validation guidance.
+          </div>
+        )}
 
-      {/* Proof of Grounding Accordion */}
-      {remediation.context && <AIInputInspector context={remediation.context} />}
+        {remediation?.requires_restart && (
+          <div className="flex items-center gap-2 rounded-xl bg-amber-500/10 p-3 text-xs font-semibold text-amber-700 border border-amber-500/20">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>Requires a daemon/service restart</span>
+          </div>
+        )}
+      </Card>
 
-      {/* Action Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-        <div className="flex flex-wrap gap-2">
-          <Button
-            loading={resolving}
-            onClick={onResolve}
-            className="bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-sm"
-          >
-            <CheckCircle2 className="h-4 w-4" /> Mark as Resolved
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={onRemediating}
-            className="border border-black/10 bg-white font-semibold text-ink-primary hover:bg-black/5"
-          >
-            Mark Remediating
-          </Button>
-        </div>
+      {/* Status Transition Action Card */}
+      <Card className="p-5 border border-black/10 bg-white shadow-xs space-y-3">
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-muted block">
+          Workflow Status Actions
+        </span>
 
-        <div className="text-[11px] font-mono text-ink-muted">
-          Drishti Defensive Engine v1.0
-        </div>
-      </div>
+        <Button
+          loading={resolving}
+          onClick={onResolve}
+          className="w-full bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-sm py-2.5 justify-center"
+        >
+          <CheckCircle2 className="h-4 w-4" /> Mark Finding Resolved
+        </Button>
+
+        <Button
+          variant="ghost"
+          onClick={onRemediating}
+          className="w-full border border-black/10 bg-white font-semibold text-ink-primary hover:bg-black/5 py-2.5 justify-center"
+        >
+          Mark in Remediating State
+        </Button>
+      </Card>
     </div>
   );
 }
@@ -391,7 +441,7 @@ function ResultView({
 function AIInputInspector({ context }: { context: Record<string, unknown> }) {
   const [open, setOpen] = useState(false);
   return (
-    <Card className="p-0 overflow-hidden border border-black/5 bg-white shadow-xs">
+    <Card className="p-0 overflow-hidden border border-black/10 bg-white shadow-xs">
       <button
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between px-4 py-3 text-xs font-semibold text-ink-secondary hover:bg-black/[0.02] transition-colors"
@@ -406,11 +456,12 @@ function AIInputInspector({ context }: { context: Record<string, unknown> }) {
         <FileCode className="h-3.5 w-3.5 text-ink-muted" />
       </button>
       {open && (
-        <pre className="max-h-72 overflow-auto border-t border-black/5 bg-[#0d100d] p-4 font-mono text-[11px] leading-relaxed text-emerald-400">
+        <pre className="max-h-72 overflow-auto border-t border-black/10 bg-[#0d100d] p-4 font-mono text-[11px] leading-relaxed text-emerald-400">
           {JSON.stringify(context, null, 2)}
         </pre>
       )}
     </Card>
   );
 }
+
 
