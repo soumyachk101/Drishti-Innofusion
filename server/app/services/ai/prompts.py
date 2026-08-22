@@ -198,20 +198,22 @@ NETWORK_SUMMARY_SCHEMA: dict = {
 }
 
 
-_BLOCK_TASK = """Task: A host on the network connected to the domain in the context, which a real
-reputation analysis rated as risky (band + score + the exact failing/warning signals are
-given). Produce a DEFENSIVE recommendation to BLOCK this one domain on the affected host.
-- "why_risky": 1-3 short bullets drawn ONLY from the provided signals (do not invent
-  threats, vendors, or facts not in the context).
-- "commands": concrete block commands, one per platform, blocking ONLY this domain:
-  - "hosts": pure runnable bash command like `echo "0.0.0.0 domain" | sudo tee -a /etc/hosts`
-  - "linux": pure runnable iptables/ufw command like `sudo iptables -A OUTPUT -p tcp -m string --string "domain" --algo bm -j DROP`
-  - "macos": pure runnable command like `echo "0.0.0.0 domain" | sudo tee -a /etc/hosts && sudo dscacheutil -flushcache`
-  - "windows": pure runnable PowerShell command like `Add-Content -Path "$env:windir\\System32\\drivers\\etc\\hosts" -Value "0.0.0.0 domain"`
-  - "dns": pure runnable command like `echo "domain" | sudo tee -a /etc/pihole/custom.list`
-  CRITICAL: Every command string MUST be 100% syntactically valid and runnable as-is in terminal. No pseudocode or inline non-command text.
-- "summary": one plain-language sentence a user can act on.
-This is purely defensive containment — never scan, exploit, or attack anything."""
+_BLOCK_TASK = """Task: A host on the network connected to the domain in the context, which reputation analysis rated as risky.
+Produce a comprehensive, production-grade DEFENSIVE remediation playbook to BLOCK and CONTAIN this domain on the affected infrastructure.
+
+Guidelines:
+- "why_risky": 1-3 concise technical reasons drawn ONLY from the provided signals and reputation verdict.
+- "summary": A clear, professional executive containment action statement tailored to the target domain and risk level.
+- "commands": Return concrete, robust, runnable containment commands for each platform:
+  - "linux": Full multi-layer Linux firewall & null-route command (e.g. `sudo ufw deny out to any proto tcp port 80,443 comment "Block <domain>" 2>/dev/null || true; echo -e "\n0.0.0.0 <domain>\n::1 <domain>" | sudo tee -a /etc/hosts`)
+  - "macos": macOS null-routing with immediate dual-stack DNS cache flush (e.g. `echo -e "\n0.0.0.0 <domain>\n::1 <domain>" | sudo tee -a /etc/hosts && sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder`)
+  - "windows": Windows PowerShell script with DNS cache wipe and Defender Firewall outbound rule (e.g. `Add-Content -Path "$env:windir\System32\drivers\etc\hosts" -Value "`n0.0.0.0 <domain>`n::1 <domain>"; Clear-DnsClientCache; try { $ips = (Resolve-DnsName -Name "<domain>" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IPAddress); if ($ips) { New-NetFirewallRule -DisplayName "Drishti Block <domain>" -Direction Outbound -Action Block -RemoteAddress $ips } } catch {}`)
+  - "pihole": DNS sinkhole command (e.g. `sudo pihole --wild <domain> 2>/dev/null || sudo pihole -b <domain>`)
+  - "router": Enterprise router packet filter command (e.g. `/ip firewall filter add chain=forward dst-address-list=<domain> action=drop comment="Drishti Block <domain>"`)
+  - "hosts": Plain cross-platform hosts file append rule
+
+CRITICAL: Replace all <domain> placeholders with the actual real domain string. Every command MUST be 100% syntactically valid and executable as-is in terminal without syntax errors.
+This is purely defensive containment."""
 
 BLOCK_SCHEMA: dict = {
     "type": "object",

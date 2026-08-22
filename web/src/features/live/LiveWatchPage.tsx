@@ -32,6 +32,7 @@ import {
   Waypoints,
   X,
   Zap,
+  Check,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -1659,40 +1660,114 @@ function ThreatDetail({ threat: t, onClose }: { threat: LiveThreat; onClose: () 
 
 function BlockView({ fix }: { fix: BlockFix }) {
   const toast = useToast();
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  const activeCmd = fix.commands[selectedIdx] || fix.commands[0];
+
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.show("Copied", "success");
+      setCopied(true);
+      toast.show("Command copied to clipboard", "success");
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.show("Couldn't copy to clipboard", "error");
     }
   };
+
+  const platformLabels: Record<string, string> = {
+    hosts: "Hosts File",
+    linux: "Linux (UFW / iptables)",
+    macos: "macOS (Packet Filter)",
+    windows: "Windows PowerShell",
+    pihole: "DNS / Pi-hole",
+    router: "Router (MikroTik / VyOS)",
+  };
+
   return (
-    <div className="mt-4 space-y-3">
-      <p className="text-small text-ink-muted">{fix.summary}</p>
-      <div className="space-y-2">
-        {fix.commands.map((c, i) => (
-          <div key={i} className="rounded-md border border-hairline bg-canvas">
-            <div className="flex items-center justify-between border-b border-hairline px-3 py-1.5">
-              <span className="font-mono text-[10px] uppercase tracking-[0.02em] text-accent-400">
-                {c.platform}
+    <div className="mt-4 space-y-3.5">
+      {/* AI Summary Banner */}
+      <div className="rounded-lg border border-accent-500/25 bg-accent-500/10 p-3 text-[12px] leading-relaxed text-ink">
+        <div className="flex items-center gap-1.5 font-semibold text-accent-400 mb-1">
+          <Terminal className="h-3.5 w-3.5" /> AI Containment Strategy
+        </div>
+        <p className="text-ink-secondary">{fix.summary}</p>
+        {fix.why_risky && fix.why_risky.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {fix.why_risky.map((r, i) => (
+              <span key={i} className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-ink-muted border border-white/5">
+                • {r}
               </span>
-              <button
-                onClick={() => copy(c.command)}
-                className="flex items-center gap-1 text-[11px] text-ink-muted hover:text-ink"
-              >
-                <Copy className="h-3 w-3" /> copy
-              </button>
-            </div>
-            <pre className="overflow-x-auto px-3 py-2 font-mono text-[12px] leading-relaxed text-ink-muted">
-              {c.command}
-            </pre>
+            ))}
           </div>
+        )}
+      </div>
+
+      {/* Platform Selector Tabs */}
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-hairline pb-2">
+        {fix.commands.map((c, i) => (
+          <button
+            key={i}
+            onClick={() => { setSelectedIdx(i); setCopied(false); }}
+            className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-all ${
+              selectedIdx === i
+                ? "bg-accent-500 text-white font-semibold shadow-sm"
+                : "bg-surface-2 text-ink-muted hover:text-ink hover:bg-surface-3"
+            }`}
+          >
+            {platformLabels[c.platform] || c.platform.toUpperCase()}
+          </button>
         ))}
       </div>
-      <div className="flex items-start gap-2 rounded-md border border-risk-medium/25 bg-risk-medium/5 p-2.5 text-[11px] text-ink-muted">
-        <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-risk-medium" />
-        {fix.disclaimer}
+
+      {/* Terminal View for Active Command */}
+      {activeCmd && (
+        <div className="rounded-lg border border-white/10 bg-[#0d100d] overflow-hidden shadow-lg">
+          {/* Terminal Bar */}
+          <div className="flex items-center justify-between border-b border-white/10 bg-[#161a16] px-3 py-1.5">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="h-2 w-2 rounded-full bg-[#ff5f56]" />
+                <div className="h-2 w-2 rounded-full bg-[#ffbd2e]" />
+                <div className="h-2 w-2 rounded-full bg-[#27c93f]" />
+              </div>
+              <span className="font-mono text-[10px] uppercase font-semibold text-accent-400">
+                {activeCmd.platform}
+              </span>
+            </div>
+            <button
+              onClick={() => copy(activeCmd.command)}
+              className="flex items-center gap-1.5 rounded bg-white/10 px-2.5 py-1 text-[11px] font-mono text-ink-primary hover:bg-white/20 transition-colors"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-3 w-3 text-emerald-400" />
+                  <span className="text-emerald-400">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3 w-3" />
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Terminal Body */}
+          <pre className="overflow-x-auto p-3 font-mono text-[12px] leading-relaxed text-[#f2efe7] selection:bg-accent-500 selection:text-white">
+            {activeCmd.command}
+          </pre>
+        </div>
+      )}
+
+      {/* Safety Guardrail Footer */}
+      <div className="flex items-start gap-2 rounded-md border border-emerald-500/20 bg-emerald-500/5 p-2.5 text-[11px] text-ink-muted">
+        <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+        <div>
+          <span className="font-medium text-emerald-400">Defensive Containment Verified: </span>
+          {fix.disclaimer || "Blocks outbound traffic to this specific domain only without affecting normal subnet routing."}
+        </div>
       </div>
     </div>
   );

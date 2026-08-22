@@ -148,6 +148,31 @@ def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
     conn_thread = threading.Thread(target=run_conn, args=(reporter, interval), daemon=True)
     conn_thread.start()
 
+    log("Starting continuous LAN device discovery sweep in background…")
+    def _bg_device_sweep():
+        time.sleep(1.0)
+        while True:
+            try:
+                candidates = resolve_subnets("auto", 1024)
+                for c in candidates:
+                    if c.get("scan") and c.get("kind") == "on-link":
+                        net = ipaddress.ip_network(c["cidr"], strict=False)
+                        devices = _scan_on_link(net)
+                        self_mac = _self_mac()
+                        if c.get("self_ip") and self_mac and not any(d.get("mac") == self_mac for d in devices):
+                            devices.append({"ip": c["self_ip"], "mac": self_mac, "hostname": reporter.source_host, "subnet": c["cidr"], "discovery": "arp"})
+                        if devices:
+                            _post_json(reporter.server, reporter.token, "/api/live/devices", {
+                                "subnet": c["cidr"], "gateway_ip": _gateway_ip(), "label": "Local LAN", "devices": devices
+                            })
+                            log(f"Synced {len(devices)} active LAN device(s) on {c['cidr']}")
+            except Exception as exc:
+                pass
+            time.sleep(25.0)
+
+    dev_thread = threading.Thread(target=_bg_device_sweep, daemon=True)
+    dev_thread.start()
+
     log("Sniffing network DNS queries (UDP port 53) from all local interfaces… (Ctrl-C to stop, needs sudo)")
 
     def on_pkt(pkt) -> None:
