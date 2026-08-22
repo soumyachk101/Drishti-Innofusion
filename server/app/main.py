@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.db.session import engine
 from app.db_init import init_db
-from app.api.v1 import health, auth, assets, graph, paths, dashboard, live, ai, scan, intel, findings, reports, urltrust, admin
+from app.api.v1 import health, auth, assets, graph, paths, dashboard, live, ai, scan, intel, findings, reports, urltrust, admin, remediation
 
 
 @asynccontextmanager
@@ -50,6 +50,7 @@ app.include_router(findings.router)
 app.include_router(reports.router)
 app.include_router(urltrust.router)
 app.include_router(admin.router)
+app.include_router(remediation.router)
 
 
 @app.get("/")

@@ -24,16 +24,3 @@ python-json-logger==2.0.7
 psutil==6.1.0
 prometheus-client==0.21.0
 dnspython==2.6.1
-beautifulsoup4==4.12.3
-lxml==5.3.0
-requests==2.32.3
-nvdlib==0.8.3
-feedparser==6.0.11
-python-dns==0.24.0
-apscheduler==3.10.4
-xmltodict==0.13.0
-opcua==0.98.17
-aiodns==3.2.0
-bcrypt==4.2.0
-cryptography==43.0.1
-pyyaml==6.0.2

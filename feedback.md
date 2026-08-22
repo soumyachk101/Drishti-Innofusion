@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 3.6.0  
+**Document Version:** 3.7.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `efda628` / Continuous Automated Audit Cycle (Iteration 16)  
+**Target Codebase Baseline:** Commit `077e0f0` / Continuous Automated Audit Cycle (Iteration 19)  
 
 ---
 
@@ -39,9 +39,9 @@ flowchart TB
 
     subgraph Server["Server Tier — FastAPI (:8000)"]
         MW["Middleware Pipeline<br/>MaxBodySize (1MB) · CORS · Structured JSON Logging"]
-        ROUTERS["14 REST Routers (/api/v1/*)"]
+        ROUTERS["15 REST Routers (/api/v1/*)"]
         DEPS["Core Security & Dependency Injection<br/>JWT HS256 · Bcrypt · Agent Hash · In-Memory TokenBucket"]
-        SERVICES["Domain Services Layer<br/>ingest · recompute · live · deepscan · netconfig · urltrust · ai · intel · hardening"]
+        SERVICES["Domain Services Layer<br/>ingest · recompute · live · deepscan · netconfig · urltrust · ai · intel · hardening · remediation"]
         ENGINE["Pure Graph Risk Engine<br/>NetworkX DiGraph · Yen's k-Shortest Paths · Dollar Impact"]
         ORM["SQLAlchemy 2 ORM (21 Entity Tables)"]
     end
@@ -69,7 +69,7 @@ flowchart TB
     SERVICES -.->|"Consent-Gated nmap -sV"| LAN
 ```
 
-### 2.1 Full REST Router Implementation Matrix
+### 2.1 Full REST Router Implementation Matrix (15 Routers)
 
 | Router Prefix | Module File | Auth Scheme | Role Scope | Key Endpoints & Features |
 |---|---|---|---|---|
@@ -78,6 +78,7 @@ flowchart TB
 | `/api/v1/admin` | `api/v1/admin.py` | Bearer JWT | Admin | Organization config, tenant user management, sample network seed, token rotation. |
 | `/api/v1/assets` | `api/v1/assets.py` | Bearer JWT | Analyst / Admin | Asset CRUD, zone assignment, risk values, criticality calibration. |
 | `/api/v1/findings`| `api/v1/findings.py`| Bearer JWT | Analyst / Admin | Finding lifecycle (`open`, `remediating`, `resolved`, `accepted`). |
+| `/api/v1/remediation`| `api/v1/remediation.py`| Bearer JWT | Analyst / Admin | Playbook generation, hardening templates, and remediation changelog. |
 | `/api/v1/graph` | `api/v1/graph.py` | Bearer JWT | Analyst / Admin | React Flow topological node/edge graph with blast radius annotations. |
 | `/api/v1/paths` | `api/v1/paths.py` | Bearer JWT | Analyst / Admin | Bounded Yen's k-shortest paths, hop details, target blast radius. |
 | `/api/v1/ai` | `api/v1/ai.py` | Bearer JWT | Analyst / Admin | AI remediation playbooks (Ansible/shell), impact narrative, risk prediction. |
@@ -102,7 +103,7 @@ A comprehensive file-by-file inspection of `server/app/`, `src/`, and `web/` ide
 | 2 | `server/app/models/path.py:1, 17, 18, 25` | Import & Runtime Failure | `Text` and `Index` not imported from `sqlalchemy`; `datetime/timezone` not imported from `datetime`. | **Fixed / Reviewed** |
 | 3 | `server/app/models/scan.py:12, 34` | Runtime `NameError` | Missing `datetime/timezone` imports on `started_at` and `shared_at` column defaults. | **Fixed / Reviewed** |
 | 4 | `server/app/db.py:28` vs `models/base.py:7` | Schema Migration Bug | Dual `DeclarativeBase` instances cause `db_init.py:reconcile_columns` to find 0 domain models. | **Fixed / Reviewed** |
-| 5 | `web/src/features/liveWatch/` | Real-Time Telemetry | Integrated LiveWatch threat event stream with dynamic severity styling. | **Positive** |
+| 5 | `server/app/main.py` | Router Assembly | Registered all 15 routers including `remediation.router`. | **Positive** |
 | 6 | `web/src/features/remediation/` | Remediation Console | Tabbed playbook management interface (`Plans`, `Actions`, `Policy`, `Templates`, `Changelog`). | **Positive** |
 | 7 | `web/src/features/findings/` | Findings Table | High-density DataGrid displaying CVE findings, CVSS scores, and status lifecycle. | **Positive** |
 | 8 | `web/src/features/paths/` | Path Data Grid | Attack path asset traversal metrics with vulnerability counts and risk scoring. | **Positive** |
@@ -314,7 +315,7 @@ flowchart TD
 
 ### Phase 1: High Priority (Immediate Stabilization)
 - [x] **Model Layer Stabilization**: Registered all 21 models with canonical `Base` in `models/base.py`.
-- [x] **14 REST Routers & Services**: Full service architecture implemented in `server/app/`.
+- [x] **15 REST Routers & Services**: Full service architecture implemented in `server/app/`.
 - [x] **Frontend Complete Pages & Features**: Implemented `Dashboard`, `AttackMap`, `Findings`, `Paths`, `LiveWatch`, `RemediationConsole`, `Report`, `SettingsPage`, `URLTrust`, `LoginPage`, `RegisterPage`.
 
 ### Phase 2: Medium Priority (Integration & Live Testing)
