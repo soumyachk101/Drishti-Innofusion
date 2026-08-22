@@ -141,7 +141,12 @@ _ACTIVE_APPS_BY_HOST: dict[str, tuple[list[str], datetime]] = {}
 def sync_active(db: Session, org_id: str, domains: list[str], source_host: str, active_apps: list[str] | None = None) -> dict:
     """Sync the active tabs and applications for a host, refreshing timestamps for open tabs."""
     if active_apps is not None:
-        _ACTIVE_APPS_BY_HOST[source_host] = (active_apps, utcnow())
+        prev_apps, prev_ts = _ACTIVE_APPS_BY_HOST.get(source_host, ([], utcnow()))
+        if (utcnow() - prev_ts).total_seconds() < 300:
+            merged = sorted(list(set(prev_apps + active_apps)))
+        else:
+            merged = active_apps
+        _ACTIVE_APPS_BY_HOST[source_host] = (merged, utcnow())
 
     cleaned_domains = [_clean_domain(d) for d in domains if d]
     updated = 0

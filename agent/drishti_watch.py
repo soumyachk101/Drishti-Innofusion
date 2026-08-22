@@ -111,9 +111,10 @@ class Reporter:
         except Exception as e:  # noqa: BLE001 — best-effort telemetry
             log(f"could not report {domain}: {e}")
 
-    def sync_active(self, domains: set[str], active_apps: list[str] | None = None) -> None:
+    def sync_active(self, domains: set[str], active_apps: list[str] | None = None, source_host: str | None = None) -> None:
         """Tell the server exactly which domains & active apps are active right now."""
-        payload = {"domains": list(domains), "source_host": self.source_host}
+        src = source_host or self.source_host
+        payload = {"domains": list(domains), "source_host": src}
         if active_apps:
             payload["active_apps"] = active_apps
         body = json.dumps(payload).encode()
@@ -132,7 +133,31 @@ class Reporter:
         except Exception:
             pass
 
-# ── mode: dns (scapy + browser watcher) ──────────────────────────────────────
+# ── mode: dns (scapy + browser watcher + mDNS service sniffer) ───────────────
+_MDNS_APP_MAP = {
+    "_spotify-connect": "Spotify",
+    "_googlecast": "Google Chrome / Cast",
+    "_airplay": "Apple AirPlay",
+    "_raop": "Apple AirPlay Audio",
+    "_companion-link": "Apple Device Sync",
+    "_smb": "Windows File Sharing",
+    "_rdp": "Remote Desktop",
+    "_ssh": "SSH Server",
+    "_http": "Web App / Server",
+    "_https": "HTTPS Web App",
+    "_ipp": "Network Printing",
+    "_printer": "Printer Service",
+    "_workstation": "Workstation Sharing",
+    "_netbios": "Windows NetBIOS",
+    "_zoom": "Zoom Meeting",
+    "_discord": "Discord",
+    "_steam": "Steam Network",
+    "_plex": "Plex Media Server",
+    "_sonos": "Sonos Audio",
+    "_homekit": "Apple HomeKit",
+}
+
+
 def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
     import threading
 
@@ -173,23 +198,38 @@ def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
     dev_thread = threading.Thread(target=_bg_device_sweep, daemon=True)
     dev_thread.start()
 
-    log("Sniffing network DNS queries (UDP port 53) from all local interfaces… (Ctrl-C to stop, needs sudo)")
+    log("Sniffing network DNS & mDNS queries (UDP 53, 5353) across LAN devices… (Ctrl-C to stop, needs sudo)")
 
     def on_pkt(pkt) -> None:
-        if not pkt.haslayer(DNSQR):
+        if not pkt.haslayer(DNSQR) and not pkt.haslayer(DNS):
             return
         try:
-            qname = pkt[DNSQR].qname.decode("utf-8", "ignore")
             src_ip = pkt[IP].src if pkt.haslayer(IP) else None
+            if not src_ip:
+                return
+
+            qname = ""
+            if pkt.haslayer(DNSQR) and pkt[DNSQR].qname:
+                qname = pkt[DNSQR].qname.decode("utf-8", "ignore").lower()
+
+            # 1. Detect mDNS broadcast applications for this specific device
+            if qname:
+                for service_key, app_name in _MDNS_APP_MAP.items():
+                    if service_key in qname:
+                        reporter.sync_active(set(), active_apps=[app_name], source_host=src_ip)
+                        log(f"Discovered Active App on {src_ip}: {app_name}")
+                        break
+
+            # 2. Extract and report website domain queries
+            dom = registrable(qname)
+            if dom:
+                reporter.report(dom, source_host=src_ip)
         except Exception:
             return
-        dom = registrable(qname)
-        if dom:
-            reporter.report(dom, source_host=src_ip)
 
     try:
-        # udp port 53 = DNS queries made on local network interfaces
-        sniff(filter="udp port 53", prn=on_pkt, store=False, promisc=False)
+        # udp port 53 / 5353 = DNS queries & mDNS service broadcasts from all LAN devices
+        sniff(filter="udp port 53 or udp port 5353", prn=on_pkt, store=False, promisc=True)
     except Exception as e:
         log(f"scapy packet sniffing encounter error: {e}. Active tab watcher is still running.")
         while True:
@@ -257,6 +297,42 @@ def run_conn(reporter: Reporter, interval: float) -> None:
                         dom = registrable(app_domain_map[app])
                         if dom:
                             domains.add(dom)
+            except Exception:
+                pass
+
+        elif platform.system() == "Windows":
+            try:
+                cmd = ["powershell", "-NoProfile", "-Command", "Get-Process | Where-Object { $_.MainWindowTitle -ne '' } | Select-Object -ExpandProperty ProcessName"]
+                res = subprocess.run(cmd, capture_output=True, text=True, timeout=3)
+                if res.returncode == 0:
+                    raw_apps = [a.strip() for a in res.stdout.splitlines() if a.strip()]
+                    active_apps_list = [
+                        a for a in raw_apps
+                        if a.lower() not in _NOISE_APPS and not a.lower().startswith("system")
+                    ]
+                    for app in active_apps_list:
+                        if app in app_domain_map:
+                            dom = registrable(app_domain_map[app])
+                            if dom:
+                                domains.add(dom)
+            except Exception:
+                pass
+
+        elif platform.system() == "Linux":
+            try:
+                cmd = ["ps", "-eo", "comm="]
+                res = subprocess.run(cmd, capture_output=True, text=True, timeout=3)
+                if res.returncode == 0:
+                    raw_apps = [a.strip() for a in res.stdout.splitlines() if a.strip()]
+                    active_apps_list = list(set([
+                        a for a in raw_apps
+                        if a.lower() in {"chrome", "firefox", "brave", "spotify", "discord", "slack", "code", "zoom", "telegram-desktop", "figma", "postman"}
+                    ]))
+                    for app in active_apps_list:
+                        if app in app_domain_map:
+                            dom = registrable(app_domain_map[app])
+                            if dom:
+                                domains.add(dom)
             except Exception:
                 pass
 

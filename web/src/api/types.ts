@@ -63,7 +63,8 @@ export interface GraphNodeData {
   online?: boolean;
   mac?: string | null;
   vendor?: string | null;
-  // active threat on this node
+  ip?: string | null;
+ // active threat on this node
   threat?: boolean;
   threat_kind?: string | null;
   threat_severity?: string | null;

@@ -21,6 +21,7 @@ class GraphNodeData(BaseModel):
     online: bool = True
     mac: str | None = None
     vendor: str | None = None
+    ip: str | None = None
     # active threat this node is part of (ARP-spoof / rogue / risky service / C2),
     # so the attack map lights up "how the attack is happening"
     threat: bool = False

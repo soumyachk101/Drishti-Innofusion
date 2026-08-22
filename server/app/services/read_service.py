@@ -166,7 +166,7 @@ def _live_device_nodes(
                             else 45.0 if t else 0.0),
                 business_value=0.0, internet_facing=bool(d.is_gateway),
                 open_findings=0, is_device=True, is_gateway=bool(d.is_gateway),
-                online=bool(d.online), mac=d.mac, vendor=d.vendor,
+                online=bool(d.online), mac=d.mac, vendor=d.vendor, ip=d.ip,
                 threat=bool(t), threat_kind=t.kind if t else None,
                 threat_severity=t.severity if t else None,
                 threat_title=t.title if t else None, mitre=t.mitre if t else None,
@@ -246,22 +246,37 @@ def build_graph(db: Session, org_id: str, focus: str | None = None) -> GraphResp
         else {}
     )
 
+    # Resolve live gateway or fallback gateway for this org
+    gateway_dev = _live_gateway(db, org_id)
+    if gateway_dev is None:
+        gateway_dev = db.scalars(
+            select(NetworkDevice).where(
+                NetworkDevice.org_id == org_id,
+                NetworkDevice.is_gateway.is_(True),
+            ).order_by(NetworkDevice.last_seen.desc())
+        ).first()
+    gateway_ip = gateway_dev.ip if gateway_dev is not None else None
+
     nodes: list[GraphNode] = []
-    # synthetic INTERNET node
+    # synthetic INTERNET / Entry Gateway node
     inet_pos = positions.get(INTERNET, {"x": 40.0, "y": 320.0})
     nodes.append(
         GraphNode(
             id=INTERNET,
             type="internet",
             data=GraphNodeData(
-                label="INTERNET",
-                asset_type="cloud",
-                zone="Internet",
+                label=f"GATEWAY ({gateway_ip})" if gateway_ip else "GATEWAY / UPLINK",
+                ip=gateway_ip,
+                mac=gateway_dev.mac if gateway_dev else None,
+                vendor=gateway_dev.vendor if gateway_dev else None,
+                asset_type="router" if gateway_ip else "cloud",
+                zone="Uplink / Perimeter",
                 criticality="low",
                 risk_score=0.0,
                 business_value=0.0,
                 internet_facing=True,
                 open_findings=0,
+                is_gateway=bool(gateway_ip),
                 in_blast_radius=(INTERNET in blast_ids) if focus else None,
             ),
             position=inet_pos,
@@ -311,6 +326,7 @@ def build_graph(db: Session, org_id: str, focus: str | None = None) -> GraphResp
                 type="asset",
                 data=GraphNodeData(
                     label=a.hostname or a.ip,
+                    ip=a.ip,
                     asset_type=a.asset_type,
                     zone=zone.name if zone else None,
                     criticality=a.criticality,

@@ -224,7 +224,8 @@
   }
   .animate-page-enter,
   .animate-toast-in,
-  .animate-card-enter {
+  .animate-card-enter,
+ .animate-blast-pulse {
     animation: none !important;
   }
 }
