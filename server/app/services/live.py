@@ -752,10 +752,29 @@ def _templated_block(domain: str, band: str, reasons: list[str]) -> dict:
         "summary": summary,
         "why_risky": why_risky,
         "commands": [
-            {"platform": "hosts", "command": f"echo \"0.0.0.0 {domain}\" | sudo tee -a /etc/hosts"},
-            {"platform": "linux", "command": f"sudo iptables -A OUTPUT -p tcp -m string --string \"{domain}\" --algo bm -j DROP"},
-            {"platform": "macos", "command": f"echo \"0.0.0.0 {domain}\" | sudo tee -a /etc/hosts && sudo dscacheutil -flushcache"},
-            {"platform": "windows", "command": f"Add-Content -Path \"$env:windir\\System32\\drivers\\etc\\hosts\" -Value \"0.0.0.0 {domain}\""},
-            {"platform": "dns", "command": f"echo \"{domain}\" | sudo tee -a /etc/pihole/custom.list"},
+            {
+                "platform": "hosts",
+                "command": f"echo -e \"\\n0.0.0.0 {domain}\\n::1 {domain}\" | sudo tee -a /etc/hosts",
+            },
+            {
+                "platform": "linux",
+                "command": f"sudo ufw deny out to any proto tcp port 80,443 comment \"Block {domain}\" 2>/dev/null || true; echo -e \"0.0.0.0 {domain}\\n::1 {domain}\" | sudo tee -a /etc/hosts",
+            },
+            {
+                "platform": "macos",
+                "command": f"echo -e \"\\n0.0.0.0 {domain}\\n::1 {domain}\" | sudo tee -a /etc/hosts && sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder",
+            },
+            {
+                "platform": "windows",
+                "command": f"Add-Content -Path \"$env:windir\\System32\\drivers\\etc\\hosts\" -Value \"`n0.0.0.0 {domain}`n::1 {domain}\"; Clear-DnsClientCache; try {{ $ips = (Resolve-DnsName -Name \"{domain}\" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty IPAddress); if ($ips) {{ New-NetFirewallRule -DisplayName \"Drishti Block {domain}\" -Direction Outbound -Action Block -RemoteAddress $ips }} }} catch {{}}",
+            },
+            {
+                "platform": "pihole",
+                "command": f"sudo pihole --wild {domain} 2>/dev/null || sudo pihole -b {domain}",
+            },
+            {
+                "platform": "router",
+                "command": f"# MikroTik RouterOS / VyOS drop rule\n/ip firewall filter add chain=forward dst-address-list={domain} action=drop comment=\"Drishti Block {domain}\"",
+            },
         ],
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, Navigate } from "react-router-dom";
 import {
   motion,
+  AnimatePresence,
   useScroll,
   useSpring,
   useTransform,
@@ -17,8 +18,6 @@ import {
   DollarSign,
   Network,
   Eye,
-  Radio,
-  FileCode,
 } from "lucide-react";
 import { useAuth } from "../../auth";
 import "./landing.css";
@@ -61,11 +60,27 @@ export default function Landing() {
 
 /* ------------------------------------------------------------- Top Status Strip */
 function TopStatusStrip() {
-  const [time, setTime] = useState(() => new Date().toUTCString().slice(17, 25));
+  const [time, setTime] = useState(() =>
+    new Date().toLocaleTimeString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
+  );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTime(new Date().toUTCString().slice(17, 25));
+      setTime(
+        new Date().toLocaleTimeString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+      );
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -79,7 +94,7 @@ function TopStatusStrip() {
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <span>STATUS: <span style={{ color: "var(--color-status-success)", fontWeight: 700 }}>OPERATIONAL</span></span>
-        <span>UTC: {time}</span>
+        <span>IST: {time} (KOLKATA)</span>
       </div>
     </div>
   );
@@ -491,68 +506,15 @@ function ScrollDrivenHorizontalPipeline() {
   const x = useTransform(scrollYProgress, [0, 1], ["0%", "-62%"]);
   const progressPercent = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
-  const stages = [
-    {
-      num: "01",
-      title: "LAN & Perimeter Ingestion",
-      tag: "INGESTION TIER",
-      icon: <Radio size={20} color="var(--color-accent)" />,
-      desc: "Edge agent collects stdlib ARP discovery, DNS configurations, and open port bindings under strict RFC1918 scope gates.",
-      cmd: "arp_scan",
-      arg: "'192.168.1.0/24'",
-      result: "14 hosts discovered",
-    },
-    {
-      num: "02",
-      title: "Directed Graph Topology",
-      tag: "NETWORKX DiGraph",
-      icon: <Network size={20} color="var(--color-accent)" />,
-      desc: "NetworkX models edge traversal difficulties, betweenness centralities, and reachable subnet distance from INTERNET roots.",
-      cmd: "DiGraph",
-      arg: "nodes=14, edges=32",
-      result: "density=0.175",
-    },
-    {
-      num: "03",
-      title: "Bounded Yen's Path Solver",
-      tag: "GRAPH ALGORITHMS",
-      icon: <Layers size={20} color="var(--color-accent)" />,
-      desc: "Computes top 5 shortest attack paths per crown jewel (max 6 hops, top 25 globally) avoiding combinatorial cycle traps.",
-      cmd: "yen_k_shortest",
-      arg: "source='INTERNET', k=5",
-      result: "optimal routes ranked",
-    },
-    {
-      num: "04",
-      title: "Deterministic $ Valuation",
-      tag: "FINANCIAL ENGINE",
-      icon: <DollarSign size={20} color="var(--color-accent)" />,
-      desc: "Mathematical risk pricing: Likelihood × Asset Value × Multiplier + Breach Base ($500K). Zero LLM pricing hallucinations.",
-      cmd: "calc_exposure",
-      arg: "likelihood=0.88, base=$500k",
-      result: "$902,900 USD",
-    },
-    {
-      num: "05",
-      title: "Defensive Playbook Synthesis",
-      tag: "AI GUARDRAILS",
-      icon: <FileCode size={20} color="var(--color-accent)" />,
-      desc: "NVIDIA NIM (Llama 3.3 70B) synthesizes Ansible, Shell, and AWS CLI scripts with strict output-side offensive marker blocks.",
-      cmd: "ansible_gen",
-      arg: "cve='CVE-2024-4321'",
-      result: "verified patch ready",
-    },
-  ];
-
   return (
     <div id="pipeline" ref={containerRef} className="hml-horizontal-scroll-section">
       {/* Pinned Sticky Window for Full Viewport */}
       <div className="hml-horizontal-sticky">
-        <div className="hml-wrap" style={{ marginBottom: "2.5rem", paddingTop: "1rem" }}>
+        <div className="hml-wrap" style={{ marginBottom: "2rem", paddingTop: "0.5rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1.25rem" }}>
             <div>
-              <div className="hml-section-tag" style={{ marginBottom: "0.5rem" }}>
-                Continuous Defensive Pipeline
+              <div className="hml-section-tag" style={{ marginBottom: "0.4rem" }}>
+                Continuous Defensive Engine
               </div>
               <h2 style={{ fontSize: "clamp(2rem, 3.2vw, 2.75rem)", fontWeight: 800, color: "#171916", margin: 0, letterSpacing: "-0.03em" }}>
                 End-to-End Threat Pipeline
@@ -561,7 +523,7 @@ function ScrollDrivenHorizontalPipeline() {
             {/* Scroll-Linked Progress Pill */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", background: "#ffffff", padding: "0.6rem 1.35rem", borderRadius: "var(--radius-pill)", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)" }}>
               <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-primary)", color: "#555951", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                Scroll Progress
+                Scrub Engine
               </span>
               <div style={{ width: "90px", height: "6px", background: "#eae5dc", borderRadius: "999px", overflow: "hidden" }}>
                 <motion.div style={{ width: progressPercent, height: "100%", background: "var(--color-accent)" }} />
@@ -570,70 +532,163 @@ function ScrollDrivenHorizontalPipeline() {
           </div>
         </div>
 
-        {/* Horizontally Scrubbed Track */}
+        {/* Horizontally Scrubbed Track with Custom Visual Cards */}
         <motion.div style={{ x }} className="hml-horizontal-track">
-          {stages.map((stage, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ y: -6 }}
-              className="hml-horizontal-card"
-              style={{
-                borderRadius: "16px",
-                padding: "2rem",
-                background: "#ffffff",
-                border: "1px solid rgba(23, 25, 22, 0.1)",
-                boxShadow: "0 10px 30px rgba(23, 25, 22, 0.05)",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                minHeight: "340px",
-              }}
-            >
+          {/* Card 01: Ingestion */}
+          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "var(--color-accent)", background: "rgba(234, 88, 12, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
+                  STAGE 01 // DISCOVERY
+                </span>
+                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>RFC1918 Private Gate</span>
+              </div>
+              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+                LAN & Perimeter Ingestion
+              </h3>
+              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
+                Edge agent performs ARP table polling, subnet broadcasts, and unauthenticated port discovery across internal assets.
+              </p>
+            </div>
+
+            {/* Visual Subnet Telemetry Box */}
+            <div style={{ background: "#0f110e", borderRadius: "12px", padding: "1rem", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#f2efe7", fontFamily: "var(--font-family-mono)", fontSize: "0.75rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", paddingBottom: "0.4rem" }}>
+                <span style={{ color: "#fb923c", fontWeight: 700 }}>SUBNET 192.168.1.0/24</span>
+                <span style={{ color: "#4ade80", fontSize: "0.7rem" }}>● 14 LIVE NODES</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>192.168.1.1 (Gateway)</span>
+                  <span style={{ color: "#a1a59c" }}>PORT 22, 443</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>192.168.1.10 (Nginx DMZ)</span>
+                  <span style={{ color: "#ff8598" }}>CVE-2024-4321</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Card 02: NetworkX Graph */}
+          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "#2563eb", background: "rgba(37, 99, 235, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
+                  STAGE 02 // TOPOLOGY
+                </span>
+                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>NetworkX DiGraph</span>
+              </div>
+              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+                Directed Graph Construction
+              </h3>
+              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
+                Translates isolated host scans into a unified directed topological graph with weighted edge traversal difficulties.
+              </p>
+            </div>
+
+            {/* Visual SVG Mini Graph */}
+            <div style={{ background: "#f8f7f4", borderRadius: "12px", padding: "1rem", border: "1px solid rgba(23, 25, 22, 0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ textAlign: "center", padding: "0.5rem", background: "#ffffff", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.1)", fontSize: "0.75rem", fontWeight: 700 }}>
+                <div style={{ color: "#e11d48", fontSize: "0.65rem" }}>ENTRY</div>
+                <span>INTERNET</span>
+              </div>
+              <span style={{ color: "var(--color-accent)", fontWeight: 800, fontSize: "1rem" }}>→</span>
+              <div style={{ textAlign: "center", padding: "0.5rem", background: "#ffffff", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.1)", fontSize: "0.75rem", fontWeight: 700 }}>
+                <div style={{ color: "#555951", fontSize: "0.65rem" }}>HOP 01</div>
+                <span>web-lb-01</span>
+              </div>
+              <span style={{ color: "var(--color-accent)", fontWeight: 800, fontSize: "1rem" }}>→</span>
+              <div style={{ textAlign: "center", padding: "0.5rem", background: "#ffffff", borderRadius: "8px", border: "1px solid rgba(234, 88, 12, 0.4)", fontSize: "0.75rem", fontWeight: 700 }}>
+                <div style={{ color: "#ea580c", fontSize: "0.65rem" }}>CROWN</div>
+                <span>db-prod-01</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Card 03: Yen's Solver */}
+          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "#d97706", background: "rgba(217, 119, 6, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
+                  STAGE 03 // SOLVER
+                </span>
+                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>Bounded Yen's K-Shortest</span>
+              </div>
+              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+                Bounded Yen's Path Solver
+              </h3>
+              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
+                Enumerates the top 5 shortest attack vectors per crown jewel (bounded at max 6 hops), avoiding exponential path explosion.
+              </p>
+            </div>
+
+            {/* Visual Path Hierarchy */}
+            <div style={{ background: "#0f110e", borderRadius: "12px", padding: "0.9rem 1rem", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#f2efe7", fontFamily: "var(--font-family-mono)", fontSize: "0.75rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
+                <span style={{ color: "#ff8598", fontWeight: 700 }}>#1 Shortest Path (88.0%)</span>
+                <span style={{ color: "#a1a59c" }}>3 Hops</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#fb923c", fontWeight: 700 }}>#2 Alternate Path (41.0%)</span>
+                <span style={{ color: "#a1a59c" }}>4 Hops</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Card 04: Valuation */}
+          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "#15803d", background: "rgba(21, 128, 61, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
+                  STAGE 04 // VALUATION
+                </span>
+                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>Deterministic ($ USD)</span>
+              </div>
+              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+                Deterministic $ Valuation
+              </h3>
+              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
+                Applies mathematical risk valuation: Likelihood × Asset Value × Multiplier + Base Cost. Zero hallucinated numbers.
+              </p>
+            </div>
+
+            {/* Visual Formula Box */}
+            <div style={{ background: "#fff5f5", borderRadius: "12px", padding: "0.9rem 1rem", border: "1px solid rgba(225, 29, 72, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                {/* Header with Number and Category */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <span style={{ fontSize: "1.35rem", fontFamily: "var(--font-family-primary)", fontWeight: 800, color: "var(--color-accent)", letterSpacing: "-0.02em" }}>
-                      {stage.num}
-                    </span>
-                    <span style={{ fontSize: "0.75rem", color: "#8b8f87", fontWeight: 600 }}>/ 05</span>
-                  </div>
-                  <span style={{ fontSize: "0.68rem", fontFamily: "var(--font-family-primary)", fontWeight: 700, letterSpacing: "0.04em", padding: "0.25rem 0.65rem", borderRadius: "var(--radius-pill)", background: "#f4f1ea", color: "#555951", border: "1px solid rgba(23, 25, 22, 0.06)" }}>
-                    {stage.tag}
-                  </span>
-                </div>
-
-                {/* Title & Icon */}
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: "10px", background: "rgba(234, 88, 12, 0.08)", border: "1px solid rgba(234, 88, 12, 0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {stage.icon}
-                  </div>
-                  <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#171916", margin: 0, letterSpacing: "-0.02em", lineHeight: 1.25 }}>
-                    {stage.title}
-                  </h3>
-                </div>
-
-                {/* Description */}
-                <p style={{ fontSize: "0.92rem", color: "#555951", lineHeight: 1.6, margin: 0 }}>
-                  {stage.desc}
-                </p>
+                <div style={{ fontSize: "0.68rem", fontFamily: "var(--font-family-mono)", color: "#e11d48", fontWeight: 700 }}>CALCULATED EXPOSURE</div>
+                <div style={{ fontSize: "1.35rem", fontWeight: 800, color: "#e11d48" }}>$902,900</div>
               </div>
-
-              {/* Polished Mini-Terminal Telemetry */}
-              <div style={{ background: "#0f110e", borderRadius: "10px", padding: "0.9rem 1.1rem", fontFamily: "var(--font-family-mono)", fontSize: "0.75rem", color: "#f2efe7", border: "1px solid rgba(255, 255, 255, 0.08)", marginTop: "1.5rem", boxShadow: "0 4px 14px rgba(0, 0, 0, 0.15)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.35rem" }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#ea580c" }} />
-                  <span style={{ color: "#a1a59c", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>TELEMETRY EXEC</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", overflow: "hidden", whiteSpace: "nowrap" }}>
-                  <span style={{ color: "#fb923c", fontWeight: 700 }}>&gt;</span>
-                  <span style={{ color: "#ffffff", fontWeight: 600 }}>{stage.cmd}</span>
-                  <span style={{ color: "#a1a59c" }}>({stage.arg})</span>
-                  <span style={{ color: "#4ade80", marginLeft: "auto", fontSize: "0.7rem", fontWeight: 600 }}>→ {stage.result}</span>
-                </div>
+              <div style={{ textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", color: "#555951" }}>
+                <div>0.88 × $500K</div>
+                <div>+ $500K Base</div>
               </div>
-            </motion.div>
-          ))}
+            </div>
+          </motion.div>
+
+          {/* Card 05: Playbooks */}
+          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "#7c3aed", background: "rgba(124, 58, 237, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
+                  STAGE 05 // REMEDIATION
+                </span>
+                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>NVIDIA NIM Guardrails</span>
+              </div>
+              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+                Defensive Playbook Synthesis
+              </h3>
+              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
+                Synthesizes contextual Ansible, Shell, or AWS CLI remediations with strict output-side offensive marker scanning.
+              </p>
+            </div>
+
+            {/* Visual Code Box */}
+            <div style={{ background: "#0f110e", borderRadius: "12px", padding: "0.9rem 1rem", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#f2efe7", fontFamily: "var(--font-family-mono)", fontSize: "0.72rem" }}>
+              <div style={{ color: "#4ade80", fontWeight: 700, marginBottom: "0.2rem" }}>✓ DEFENSIVE PLAYBOOK READY</div>
+              <div style={{ color: "#a1a59c" }}>ansible-playbook -i hosts patch-cve.yml</div>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
     </div>
@@ -796,50 +851,83 @@ function ComparisonSection() {
 /* ------------------------------------------------------------- Terminal Playbook Preview */
 function PlaybookTerminalSection() {
   const [activeTab, setActiveTab] = useState<"ansible" | "shell" | "aws">("ansible");
+  const [copied, setCopied] = useState(false);
 
-  const playbooks = {
-    ansible: `- name: Remediate PostgreSQL Privilege Escalation (CVE-2024-4321)
-  hosts: databases
-  become: yes
-  tasks:
-    - name: Patch postgresql-16 package to latest stable
-      apt:
-        name: postgresql-16
-        state: latest
-        update_cache: yes
-    - name: Enforce strict scram-sha-256 in pg_hba.conf
-      lineinfile:
-        path: /etc/postgresql/16/main/pg_hba.conf
-        regexp: '^host.*all.*all'
-        line: 'host all all 10.0.0.0/24 scram-sha-256'
-    - name: Restart PostgreSQL daemon
-      service:
-        name: postgresql
-        state: restarted`,
-    shell: `#!/usr/bin/env bash
-# Drishti Automated Perimeter Hardening Script
-set -euo pipefail
+  const files = {
+    ansible: {
+      name: "harden_cve_2024_4321.yml",
+      lang: "yaml",
+      target: "PostgreSQL Database (10.0.0.5:5432)",
+      cve: "CVE-2024-4321",
+      lines: [
+        "- name: Remediate PostgreSQL Privilege Escalation (CVE-2024-4321)",
+        "  hosts: databases",
+        "  become: yes",
+        "  tasks:",
+        "    - name: Patch postgresql-16 package to latest stable",
+        "      apt:",
+        "        name: postgresql-16",
+        "        state: latest",
+        "        update_cache: yes",
+        "    - name: Enforce strict scram-sha-256 in pg_hba.conf",
+        "      lineinfile:",
+        "        path: /etc/postgresql/16/main/pg_hba.conf",
+        "        regexp: '^host.*all.*all'",
+        "        line: 'host all all 10.0.0.0/24 scram-sha-256'",
+        "    - name: Restart PostgreSQL service",
+        "      service:",
+        "        name: postgresql",
+        "        state: restarted",
+      ],
+    },
+    shell: {
+      name: "harden_perimeter_ingress.sh",
+      lang: "bash",
+      target: "Edge Gateway (192.168.1.1)",
+      cve: "Perimeter Exposure",
+      lines: [
+        "#!/usr/bin/env bash",
+        "# Drishti Automated Perimeter Hardening Script",
+        "set -euo pipefail",
+        "",
+        "echo '[*] Applying iptables ingress rules to isolate database tier...'",
+        "iptables -A INPUT -p tcp --dport 5432 ! -s 10.0.0.0/24 -j DROP",
+        "iptables -A INPUT -p tcp --dport 22 ! -s 192.168.1.0/24 -j DROP",
+        "",
+        "# Save persistent iptables state",
+        "iptables-save > /etc/iptables/rules.v4",
+        "echo '[+] Ingress rules applied. Direct internet access blocked.'",
+      ],
+    },
+    aws: {
+      name: "aws_security_group_remediation.sh",
+      lang: "bash",
+      target: "AWS VPC Security Group (sg-0123456789abcdef0)",
+      cve: "Overly Permissive Ingress",
+      lines: [
+        "# AWS CLI Security Group Remediation for Crown Jewel DB",
+        "aws ec2 revoke-security-group-ingress \\",
+        "    --group-id sg-0123456789abcdef0 \\",
+        "    --protocol tcp \\",
+        "    --port 5432 \\",
+        "    --cidr 0.0.0.0/0",
+        "",
+        "aws ec2 authorize-security-group-ingress \\",
+        "    --group-id sg-0123456789abcdef0 \\",
+        "    --protocol tcp \\",
+        "    --port 5432 \\",
+        "    --source-security-group-id sg-0987654321fedcba0 \\",
+        "    --group-owner 123456789012",
+      ],
+    },
+  };
 
-echo "[*] Applying ingress firewall rules to isolate database tier..."
-iptables -A INPUT -p tcp --dport 5432 ! -s 10.0.0.0/24 -j DROP
-iptables -A INPUT -p tcp --dport 22 ! -s 192.168.1.0/24 -j DROP
+  const current = files[activeTab];
 
-# Save iptables state
-iptables-save > /etc/iptables/rules.v4
-echo "[+] Ingress rules applied. Direct internet access blocked."`,
-    aws: `# AWS Security Group Remediation for Crown Jewel DB
-aws ec2 revoke-security-group-ingress \\
-    --group-id sg-0123456789abcdef0 \\
-    --protocol tcp \\
-    --port 5432 \\
-    --cidr 0.0.0.0/0
-
-aws ec2 authorize-security-group-ingress \\
-    --group-id sg-0123456789abcdef0 \\
-    --protocol tcp \\
-    --port 5432 \\
-    --source-security-group-id sg-0987654321fedcba0 \\
-    --group-owner 123456789012`,
+  const handleCopy = () => {
+    navigator.clipboard.writeText(current.lines.join("\n"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -858,43 +946,203 @@ aws ec2 authorize-security-group-ingress \\
         </p>
       </motion.div>
 
+      {/* Terminal Main Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.5 }}
-        className="hml-terminal"
+        style={{
+          borderRadius: "16px",
+          background: "#0f110e",
+          border: "1px solid rgba(255, 255, 255, 0.12)",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.25)",
+          overflow: "hidden",
+        }}
       >
-        <div className="hml-terminal-bar">
-          <div className="hml-terminal-dots">
-            <div className="hml-terminal-dot"></div>
-            <div className="hml-terminal-dot"></div>
-            <div className="hml-terminal-dot"></div>
+        {/* Terminal Header Bar */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "0.85rem 1.25rem",
+            background: "#181a17",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+            flexWrap: "wrap",
+            gap: "0.75rem",
+          }}
+        >
+          {/* macOS window dots */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+            <div style={{ display: "flex", gap: "6px" }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f56" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ffbd2e" }} />
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#27c93f" }} />
+            </div>
+            <span style={{ fontSize: "0.8rem", fontFamily: "var(--font-family-mono)", color: "#a1a59c", fontWeight: 600 }}>
+              {current.name}
+            </span>
           </div>
-          <div style={{ display: "flex", gap: "1.25rem" }}>
+
+          {/* Interactive Format Switcher Tabs */}
+          <div style={{ display: "flex", gap: "0.5rem" }}>
             <button
               onClick={() => setActiveTab("ansible")}
-              style={{ background: "none", border: "none", color: activeTab === "ansible" ? "var(--color-accent)" : "#8b8f87", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}
+              style={{
+                padding: "0.35rem 0.85rem",
+                borderRadius: "var(--radius-pill)",
+                border: "none",
+                background: activeTab === "ansible" ? "var(--color-accent)" : "rgba(255, 255, 255, 0.06)",
+                color: activeTab === "ansible" ? "#ffffff" : "#a1a59c",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "0.78rem",
+                transition: "all 0.2s ease",
+              }}
             >
               Ansible Playbook
             </button>
             <button
               onClick={() => setActiveTab("shell")}
-              style={{ background: "none", border: "none", color: activeTab === "shell" ? "var(--color-accent)" : "#8b8f87", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}
+              style={{
+                padding: "0.35rem 0.85rem",
+                borderRadius: "var(--radius-pill)",
+                border: "none",
+                background: activeTab === "shell" ? "var(--color-accent)" : "rgba(255, 255, 255, 0.06)",
+                color: activeTab === "shell" ? "#ffffff" : "#a1a59c",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "0.78rem",
+                transition: "all 0.2s ease",
+              }}
             >
               Shell Script
             </button>
             <button
               onClick={() => setActiveTab("aws")}
-              style={{ background: "none", border: "none", color: activeTab === "aws" ? "var(--color-accent)" : "#8b8f87", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}
+              style={{
+                padding: "0.35rem 0.85rem",
+                borderRadius: "var(--radius-pill)",
+                border: "none",
+                background: activeTab === "aws" ? "var(--color-accent)" : "rgba(255, 255, 255, 0.06)",
+                color: activeTab === "aws" ? "#ffffff" : "#a1a59c",
+                cursor: "pointer",
+                fontWeight: 700,
+                fontSize: "0.78rem",
+                transition: "all 0.2s ease",
+              }}
             >
               AWS CLI
             </button>
           </div>
-          <span style={{ opacity: 0.6 }}>DEFENSIVE_ONLY_VERIFIED</span>
+
+          {/* Copy Button */}
+          <button
+            onClick={handleCopy}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              padding: "0.35rem 0.85rem",
+              borderRadius: "6px",
+              background: copied ? "rgba(34, 197, 94, 0.15)" : "rgba(255, 255, 255, 0.08)",
+              border: `1px solid ${copied ? "#22c55e" : "rgba(255, 255, 255, 0.12)"}`,
+              color: copied ? "#4ade80" : "#f2efe7",
+              fontSize: "0.75rem",
+              fontFamily: "var(--font-family-mono)",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            {copied ? "✓ Copied!" : "Copy Code"}
+          </button>
         </div>
-        <div className="hml-terminal-body">
-          <pre>{playbooks[activeTab]}</pre>
+
+        {/* Target Asset Meta Strip */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "0.6rem 1.5rem",
+            background: "rgba(234, 88, 12, 0.06)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+            fontSize: "0.75rem",
+            fontFamily: "var(--font-family-mono)",
+            color: "#c5c2ba",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+          }}
+        >
+          <div>
+            <span style={{ color: "#fb923c", fontWeight: 700 }}>TARGET: </span>
+            <span>{current.target}</span>
+          </div>
+          <div>
+            <span style={{ color: "#ff8598", fontWeight: 700 }}>MITIGATES: </span>
+            <span>{current.cve}</span>
+          </div>
+        </div>
+
+        {/* Code Content with Line Numbers */}
+        <div
+          style={{
+            padding: "1.5rem",
+            fontFamily: "var(--font-family-mono)",
+            fontSize: "0.86rem",
+            lineHeight: 1.7,
+            color: "#f2efe7",
+            overflowX: "auto",
+          }}
+        >
+          <table style={{ borderCollapse: "collapse", width: "100%" }}>
+            <tbody>
+              {current.lines.map((line, idx) => (
+                <tr key={idx}>
+                  <td
+                    style={{
+                      width: "35px",
+                      userSelect: "none",
+                      color: "#555951",
+                      textAlign: "right",
+                      paddingRight: "1.25rem",
+                      fontSize: "0.75rem",
+                      verticalAlign: "top",
+                    }}
+                  >
+                    {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                  </td>
+                  <td style={{ whiteSpace: "pre", color: line.startsWith("#") ? "#6b7280" : line.includes("name:") || line.includes("hosts:") ? "#fb923c" : line.includes("echo") ? "#4ade80" : "#f2efe7" }}>
+                    {line}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Verified Guardrail Bottom Bar */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "0.6rem 1.5rem",
+            background: "#141613",
+            borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+            fontSize: "0.72rem",
+            fontFamily: "var(--font-family-mono)",
+            color: "#8b8f87",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <span style={{ color: "#4ade80" }}>●</span>
+            <span>NVIDIA NIM (Llama 3.3 70B) Defensive Filter: ACTIVE</span>
+          </div>
+          <span>0 Offensive Markers · Verified Defensive Remediation</span>
         </div>
       </motion.div>
     </section>
@@ -907,20 +1155,78 @@ function FaqSection() {
 
   const faqs = [
     {
+      num: "01",
       q: "How does Drishti calculate financial dollar exposure?",
+      badge: "MATHEMATICAL ENGINE",
       a: "Drishti uses a deterministic mathematical formula: Path Impact = Likelihood × Target Asset Business Value × Asset Multiplier + Likelihood × Breach Base Cost. The total exposure sums the maximum impact per unique crown jewel across all bounded paths, ensuring no double-counting.",
+      widget: (
+        <div style={{ marginTop: "1rem", padding: "1rem", background: "rgba(234, 88, 12, 0.06)", borderRadius: "10px", border: "1px solid rgba(234, 88, 12, 0.18)", fontFamily: "var(--font-family-mono)", fontSize: "0.8rem", color: "#171916" }}>
+          <div style={{ color: "var(--color-accent)", fontWeight: 700, marginBottom: "0.3rem" }}>FORMULA SPECIFICATION:</div>
+          <code style={{ display: "block", color: "#171916", fontWeight: 600 }}>
+            Exposure = Σ max(Likelihood × Asset_Value × Multiplier + Base_Cost)
+          </code>
+          <div style={{ marginTop: "0.4rem", fontSize: "0.72rem", color: "#6b7280" }}>
+            Deterministic across runs · Zero statistical drift · Board-ready ($ USD) metrics
+          </div>
+        </div>
+      ),
     },
     {
+      num: "02",
       q: "How does Drishti ensure AI safety and prevent exploit generation?",
-      a: "All LLM requests pass through a strict output-side scanner that checks for offensive markers ('reverse shell', 'weaponize', 'exfiltrate', 'ransomware'). If an offensive pattern is detected, the completion is refused immediately. The AI is restricted to defensive remediation and explanation.",
+      badge: "NVIDIA NIM GUARDRAILS",
+      a: "All LLM completions pass through a strict output-side scanner that checks for offensive markers ('reverse shell', 'weaponize', 'exfiltrate', 'ransomware'). If an offensive pattern is detected, the completion is refused immediately. The AI is strictly restricted to defensive remediation and explanation.",
+      widget: (
+        <div style={{ marginTop: "1rem", padding: "0.85rem 1.1rem", background: "#0f110e", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.1)", fontFamily: "var(--font-family-mono)", fontSize: "0.75rem", color: "#f2efe7" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#4ade80", fontWeight: 700, marginBottom: "0.3rem" }}>
+            <span>●</span>
+            <span>SCANNER VERDICT: DEFENSIVE ONLY</span>
+          </div>
+          <div style={{ color: "#a1a59c" }}>
+            Offensive Exploit Generation Blocked · Remediation Verification: PASS (100%)
+          </div>
+        </div>
+      ),
     },
     {
+      num: "03",
       q: "Can Drishti scan arbitrary public IP addresses?",
-      a: "No. Drishti enforces strict RFC1918 private address verification and requires explicit 'consent: true' in request payloads. Scans targeting public IPs or AWS metadata endpoints are rejected with HTTP 422.",
+      badge: "SCOPE ENFORCEMENT",
+      a: "No. Drishti enforces strict RFC1918 private address verification and requires explicit 'consent: true' in request payloads. Scans targeting public IPs, AWS metadata endpoints (169.254.169.254), or unauthorized subnets are rejected with HTTP 422.",
+      widget: (
+        <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <span style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", background: "rgba(21, 128, 61, 0.1)", border: "1px solid rgba(21, 128, 61, 0.25)", color: "#15803d", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
+            ✓ 10.0.0.0/8 (RFC1918)
+          </span>
+          <span style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", background: "rgba(21, 128, 61, 0.1)", border: "1px solid rgba(21, 128, 61, 0.25)", color: "#15803d", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
+            ✓ 172.16.0.0/12 (RFC1918)
+          </span>
+          <span style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", background: "rgba(21, 128, 61, 0.1)", border: "1px solid rgba(21, 128, 61, 0.25)", color: "#15803d", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
+            ✓ 192.168.0.0/16 (RFC1918)
+          </span>
+          <span style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", background: "rgba(225, 29, 72, 0.1)", border: "1px solid rgba(225, 29, 72, 0.25)", color: "#e11d48", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
+            ✗ Public IPs Blocked (HTTP 422)
+          </span>
+        </div>
+      ),
     },
     {
+      num: "04",
       q: "What database backends are supported?",
+      badge: "STORAGE ARCHITECTURE",
       a: "Drishti supports PostgreSQL with transactional advisory locks for enterprise production, and local SQLite for development. All entity models use 36-character UUID strings for seamless portability across environments.",
+      widget: (
+        <div style={{ marginTop: "1rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
+          <div style={{ padding: "0.75rem", background: "var(--color-surface-base)", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.08)" }}>
+            <div style={{ fontSize: "0.7rem", fontFamily: "var(--font-family-mono)", fontWeight: 700, color: "var(--color-accent)" }}>ENTERPRISE PROD</div>
+            <div style={{ fontSize: "0.85rem", fontWeight: 800, color: "#171916" }}>PostgreSQL + Advisory Locks</div>
+          </div>
+          <div style={{ padding: "0.75rem", background: "var(--color-surface-base)", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.08)" }}>
+            <div style={{ fontSize: "0.7rem", fontFamily: "var(--font-family-mono)", fontWeight: 700, color: "#555951" }}>LOCAL DEV</div>
+            <div style={{ fontSize: "0.85rem", fontWeight: 800, color: "#171916" }}>SQLite (AIOSQLite Async)</div>
+          </div>
+        </div>
+      ),
     },
   ];
 
@@ -940,33 +1246,116 @@ function FaqSection() {
         </p>
       </motion.div>
 
-      <div className="hml-faq-list">
-        {faqs.map((f, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.4, delay: i * 0.08 }}
-            className="hml-faq-item"
-          >
-            <button
-              className="hml-faq-trigger"
-              onClick={() => setOpenIdx(openIdx === i ? null : i)}
+      <div className="hml-faq-list" style={{ maxWidth: "56rem", marginInline: "auto", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {faqs.map((f, i) => {
+          const isOpen = openIdx === i;
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
+              style={{
+                borderRadius: "14px",
+                background: "#ffffff",
+                border: `1px solid ${isOpen ? "rgba(234, 88, 12, 0.35)" : "rgba(23, 25, 22, 0.1)"}`,
+                boxShadow: isOpen ? "0 10px 30px rgba(234, 88, 12, 0.08)" : "0 2px 10px rgba(23, 25, 22, 0.03)",
+                overflow: "hidden",
+                transition: "border-color 0.25s ease, box-shadow 0.25s ease",
+              }}
             >
-              <span>{f.q}</span>
-              <ChevronDown
-                size={18}
+              <button
+                className="hml-faq-trigger"
+                onClick={() => setOpenIdx(isOpen ? null : i)}
                 style={{
-                  transform: openIdx === i ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 0.2s ease",
-                  color: "var(--color-accent)",
+                  width: "100%",
+                  padding: "1.25rem 1.5rem",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  gap: "1rem",
                 }}
-              />
-            </button>
-            {openIdx === i && <div className="hml-faq-content">{f.a}</div>}
-          </motion.div>
-        ))}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                  <span
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                      borderRadius: "8px",
+                      background: isOpen ? "var(--color-accent)" : "rgba(23, 25, 22, 0.06)",
+                      color: isOpen ? "#ffffff" : "#171916",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontFamily: "var(--font-family-mono)",
+                      fontSize: "0.8rem",
+                      fontWeight: 800,
+                      flexShrink: 0,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {f.num}
+                  </span>
+                  <div>
+                    <span style={{ fontSize: "1.08rem", fontWeight: 800, color: "#171916", letterSpacing: "-0.015em" }}>
+                      {f.q}
+                    </span>
+                    <span style={{ display: "block", fontSize: "0.68rem", fontFamily: "var(--font-family-mono)", color: "#8b8f87", fontWeight: 700, marginTop: "0.2rem", letterSpacing: "0.04em" }}>
+                      {f.badge}
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    background: isOpen ? "rgba(234, 88, 12, 0.1)" : "rgba(23, 25, 22, 0.04)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <ChevronDown
+                    size={16}
+                    style={{
+                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                      color: isOpen ? "var(--color-accent)" : "#555951",
+                    }}
+                  />
+                </div>
+              </button>
+
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    <div style={{ padding: "0 1.5rem 1.5rem 1.5rem", borderTop: "1px solid rgba(23, 25, 22, 0.06)", paddingTop: "1.25rem" }}>
+                      <p style={{ margin: 0, color: "#555951", fontSize: "0.95rem", lineHeight: 1.65 }}>
+                        {f.a}
+                      </p>
+                      {f.widget}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );

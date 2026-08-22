@@ -17,7 +17,7 @@ _INSECURE_JWT_SECRETS = {"change-me", ""}
 
 # per-provider default model, used when AI_MODEL is left blank
 _DEFAULT_AI_MODELS = {
-    "groq": "llama-3.1-8b-instant",
+    "groq": "openai/gpt-oss-120b",
     "nvidia": "meta/llama-3.3-70b-instruct",
     "anthropic": "claude-sonnet-5",
 }
