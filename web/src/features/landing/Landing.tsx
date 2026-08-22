@@ -1,24 +1,17 @@
-// Drishti v0.3 — public marketing landing page
-/** Hallmark redesign — genre: atmospheric · macrostructure: Map / Diagram ·
- * theme: Midnight (warm-amber dark paper, signal-orange accent) · nav: N5
- * floating pill · footer: Ft5 statement. The attack-path graph IS the page:
- * a hand-built, interactive SVG network map anchors the hero — a k=1/2/3
- * switcher re-threads Yen's k-shortest paths through the same nodes and the
- * dollar exposure recomputes from the formula shown on screen (sample
- * network, deterministic — never asserted, always derived).
- * Motion stays at three primitives: node ink-on, dash-flow on the active
- * path, CTA lift. All CSS — framer-motion is not part of this chunk.
- */
-import { ChevronDown, Menu, X } from "lucide-react";
-import {
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
+import {
+  Shield,
+  Activity,
+  ArrowRight,
+  ChevronDown,
+  Lock,
+  Layers,
+  CheckCircle2,
+  DollarSign,
+  Network,
+  Eye,
+} from "lucide-react";
 import { useAuth } from "../../auth";
 import "./landing.css";
 import "./landing-cinema.css";
@@ -26,545 +19,159 @@ import heroBg from "../../assets/hero-bg.jpg";
 
 export default function Landing() {
   const { user } = useAuth();
-  const rootRef = useReveal();
   if (user) return <Navigate to="/app" replace />;
 
   return (
-    <div className="hml" ref={rootRef}>
-      <TopStrip />
-      <Nav />
+    <div className="hml">
+      <TopStatusStrip />
+      <Navbar />
       <main>
-        <Hero />
-        <Insight />
-        <SpecSheet />
-        <Intelligence />
-        <Pipeline />
-        <Faq />
-        <CtaBand />
+        <HeroSection />
+        <InteractivePathSection />
+        <PillarsSection />
+        <ComparisonSection />
+        <PlaybookTerminalSection />
+        <FaqSection />
+        <CtaBandSection />
       </main>
-      <Footer />
+      <FooterSection />
     </div>
   );
 }
 
-/* ---------------------------------------------- scroll-reveal plumbing */
+/* ------------------------------------------------------------- Top Status Strip */
+function TopStatusStrip() {
+  const [time, setTime] = useState(() => new Date().toUTCString().slice(17, 25));
 
-/** Adds .is-in to every [data-rv] descendant the first time it scrolls
- * into view. CSS owns the actual motion (and reduced-motion opt-out). */
-function useReveal() {
-  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>("[data-rv]"));
-    if (typeof IntersectionObserver === "undefined") {
-      els.forEach((el) => el.classList.add("is-in"));
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-in");
-            io.unobserve(entry.target);
-          }
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" }
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    const timer = setInterval(() => {
+      setTime(new Date().toUTCString().slice(17, 25));
+    }, 1000);
+    return () => clearInterval(timer);
   }, []);
-  return ref;
-}
 
-/** Delay helper for staggered reveals. */
-function rv(ms = 0): { "data-rv": ""; style: CSSProperties } {
-  return { "data-rv": "", style: { "--rvd": `${ms}ms` } as CSSProperties };
-}
-
-/* ------------------------------------------------- system status strip */
-
-function TopStrip() {
-  const [utc, setUtc] = useState(() => new Date().toISOString().slice(11, 19));
-  useEffect(() => {
-    const id = setInterval(
-      () => setUtc(new Date().toISOString().slice(11, 19)),
-      1000
-    );
-    return () => clearInterval(id);
-  }, []);
   return (
-    <div className="hml-strip" aria-hidden>
-      <span>
-        DRISHTI <em>//</em> DEFENSIVE GRAPH ENGINE
-      </span>
-      <span className="hml-strip__mid">SAMPLE NETWORK · DETERMINISTIC MATH</span>
-      <span>
-        <span className="hml-strip__dot" /> UTC {utc}
-      </span>
+    <div className="hml-strip">
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <span>DRISHTI <em>//</em> DEFENSIVE GRAPH INTELLIGENCE</span>
+        <span style={{ opacity: 0.4 }}>|</span>
+        <span>ENGINE: NETWORKX 3.3 (BOUNDED YEN'S K-SHORTEST)</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <span>STATUS: <span style={{ color: "var(--color-emerald)" }}>OPERATIONAL</span></span>
+        <span>UTC: {time}</span>
+      </div>
     </div>
   );
 }
 
-/* ---------------------------------------------------------- nav (N5) */
-
-const NAV_LINKS = [
-  { href: "#product", label: "Product" },
-  { href: "#pipeline", label: "Pipeline" },
-  { href: "#pricing", label: "Pricing" },
-];
-
-function Wordmark() {
+/* ------------------------------------------------------------- Navigation Bar */
+function Navbar() {
   return (
-    <>
-      dr<em>i</em>shti
-    </>
-  );
-}
-
-function Nav() {
-  const [open, setOpen] = useState(false);
-  return (
-    <header
-      className="hml-nav"
-      onKeyDown={(e) => {
-        if (e.key === "Escape") setOpen(false);
-      }}
-    >
-      <nav className="hml-nav__pill" aria-label="Main">
-        <Link to="/" className="hml-nav__mark">
-          <Wordmark />
-        </Link>
-        <div className="hml-nav__links">
-          {NAV_LINKS.map((l) => (
-            <a key={l.href} href={l.href}>
-              {l.label}
-            </a>
-          ))}
-          <Link to="/login">Sign in</Link>
-        </div>
-        <Link to="/signup" className="hml-btn hml-btn--sm">
-          Start free
-        </Link>
-        <button
-          type="button"
-          className="hml-nav__menu-btn"
-          aria-expanded={open}
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((o) => !o)}
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-        {open && (
-          <div className="hml-nav__sheet">
-            {NAV_LINKS.map((l) => (
-              <a key={l.href} href={l.href} onClick={() => setOpen(false)}>
-                {l.label}
-              </a>
-            ))}
-            <Link to="/login" onClick={() => setOpen(false)}>
-              Sign in
-            </Link>
+    <nav className="hml-nav hml-wrap">
+      <div className="hml-nav-inner">
+        <Link to="/" className="hml-brand">
+          <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(234, 88, 12, 0.35)" }}>
+            <Shield size={16} color="#ffffff" />
           </div>
-        )}
-      </nav>
-    </header>
-  );
-}
+          <span>DR<em>I</em>SHTI</span>
+        </Link>
 
-/* ------------------------------------------------ hero — the map is the page */
+        <ul className="hml-nav-links">
+          <li><a href="#topology" className="hml-nav-link">Attack Topology</a></li>
+          <li><a href="#pillars" className="hml-nav-link">Architecture</a></li>
+          <li><a href="#comparison" className="hml-nav-link">Comparison</a></li>
+          <li><a href="#playbooks" className="hml-nav-link">Playbooks</a></li>
+          <li><a href="#faq" className="hml-nav-link">FAQ</a></li>
+        </ul>
 
-function Hero() {
-  const heroRef = useRef<HTMLElement>(null);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-
-  const handlePointerMove = (e: ReactPointerEvent<HTMLElement>) => {
-    if (!heroRef.current) return;
-    const rect = heroRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: x * 2, y: y * 2 });
-  };
-
-  const handlePointerLeave = () => {
-    setTilt({ x: 0, y: 0 });
-  };
-
-  return (
-    <section
-      className="hml-hero"
-      id="top"
-      ref={heroRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-    >
-      <div className="hml-hero__backdrop" aria-hidden>
-        <div
-          className="hml-hero__backdrop-inner"
-          style={
-            {
-              "--tilt-x": tilt.x.toFixed(3),
-              "--tilt-y": tilt.y.toFixed(3),
-            } as CSSProperties
-          }
-        >
-          <img
-            src={heroBg}
-            alt=""
-            width={1200}
-            height={675}
-            {...{ fetchpriority: "high" }}
-          />
-          {/* film grain — static noise over the footage, sits above the frame */}
-          <div className="hml-hero__grain" />
-          {/* anamorphic streak flare */}
-          <div className="hml-hero__flare" />
-          {/* full-height laser scanline that sweeps the screen */}
-          <div className="hml-hero__laser" />
-          <div className="hml-hero__hud">
-            <div className="hml-hero__reticle" />
-            <div className="hml-hero__telemetry">
-              <span>DRISHTI_CAM // 01</span>
-              <span>LAT 37.7749 · LON -122.4194</span>
-              <span>TARGET: EYE_IRIS_01</span>
-              <span>LOCK: ACTIVE (100%)</span>
-            </div>
-            <div className="hml-hero__timecode" id="hml-tc">
-              TC 00:00:00:00
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* cinematic letterbox — fixed to the viewport frame, pushes the whole
-       * composition into 2.39:1 while the hero owns the screen */}
-      <div className="hml-hero__bar hml-hero__bar--top" aria-hidden />
-      <div className="hml-hero__bar hml-hero__bar--bot" aria-hidden />
-      {/* film clapper opening — two bars achieve in from frame edges, then fade */}
-      <div className="hml-hero__clap" aria-hidden>
-        <div className="hml-hero__clap-top" />
-        <div className="hml-hero__clap-bot" />
-      </div>
-      <div className="hml-wrap">
-        <p className="hml-hero__route">
-          INTERNET → web-lb-01 → api-gw-01 → <strong>db-prod-01</strong> ={" "}
-          <strong>${heroExposure()}</strong> · sample chain, priced
-        </p>
-        <h1 className="hml-hero__title">Reachability beats CVSS.</h1>
-        <p className="hml-hero__lede">
-          Pure graph theory maps every route an attacker could take, prices the
-          blast radius in deterministic dollars, and defensive AI drafts the
-          fix.
-        </p>
-        <div className="hml-hero__actions">
-          <Link to="/signup" className="hml-btn">
-            Start free
+        <div className="hml-nav-actions">
+          <Link to="/login" className="hml-btn-ghost">
+            Sign In
           </Link>
-          <Link to="/login" className="hml-link-cta">
-            Sign in →
+          <Link to="/signup" className="hml-btn-primary">
+            Launch Console <ArrowRight size={14} />
           </Link>
         </div>
-
-        <AttackMap />
-
-        <p className="hml-hero__facts">
-          <span>$0 hallucinated math</span>
-          <span>1-file edge agent</span>
-          <span>defensive-only — maps, never attacks</span>
-        </p>
       </div>
-    </section>
+    </nav>
   );
 }
 
-/* ------------------------------------- the map — Yen's k-shortest, live */
-
-// Sample-network constants. Every dollar figure on the page is DERIVED from
-// these on screen (likelihood × asset value) — never asserted.
-const ASSET_VALUE = 150_000;
-
-type MapNode = {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  label: string;
-  sub: string;
-  i: number;
-  crown?: boolean;
-};
-
-const MAP_NODES: MapNode[] = [
-  { x: 40, y: 42, w: 150, h: 64, label: "INTERNET", sub: "entry point", i: 0 },
-  { x: 250, y: 150, w: 176, h: 64, label: "web-lb-01", sub: "DMZ · exposed", i: 2 },
-  { x: 510, y: 252, w: 176, h: 64, label: "api-gw-01", sub: "app tier", i: 4 },
-  { x: 210, y: 372, w: 176, h: 64, label: "svc-auth-02", sub: "app tier", i: 6 },
-  { x: 660, y: 84, w: 160, h: 64, label: "worker-07", sub: "batch tier", i: 6 },
-  { x: 724, y: 430, w: 196, h: 76, label: "db-prod-01", sub: "data tier · crown asset", i: 6, crown: true },
-];
-
-const NODE_SUB: Record<string, string> = Object.fromEntries(
-  MAP_NODES.map((n) => [n.label, n.sub])
-);
-
-type MapEdge = { id: string; d: string; tag: string; tx: number; ty: number; i: number };
-
-const MAP_EDGES: MapEdge[] = [
-  { id: "e1", d: "M 190 78 Q 270 92 328 148", tag: "exposure", tx: 232, ty: 66, i: 1 },
-  { id: "e2", d: "M 426 186 Q 510 210 586 250", tag: "ssrf pivot", tx: 462, ty: 178, i: 3 },
-  { id: "e3", d: "M 686 292 Q 780 330 816 428", tag: "priv-esc", tx: 748, ty: 316, i: 5 },
-  { id: "e4", d: "M 336 214 Q 310 290 298 370", tag: "default creds", tx: 196, ty: 300, i: 6 },
-  { id: "e5", d: "M 386 404 Q 560 452 722 470", tag: "token replay", tx: 520, ty: 466, i: 6 },
-  { id: "e6", d: "M 604 252 Q 660 200 736 150", tag: "lateral move", tx: 596, ty: 190, i: 6 },
-  { id: "e7", d: "M 745 148 Q 800 290 824 428", tag: "cron creds", tx: 812, ty: 262, i: 6 },
-];
-
-type KPath = {
-  k: 1 | 2 | 3;
-  name: string;
-  hops: string[];
-  tags: string[];
-  edges: string[];
-  likelihood: number;
-};
-
-const K_PATHS: KPath[] = [
-  {
-    k: 1,
-    name: "shortest",
-    hops: ["INTERNET", "web-lb-01", "api-gw-01", "db-prod-01"],
-    tags: ["exposure", "ssrf pivot", "priv-esc"],
-    edges: ["e1", "e2", "e3"],
-    likelihood: 0.72,
-  },
-  {
-    k: 2,
-    name: "alternate",
-    hops: ["INTERNET", "web-lb-01", "svc-auth-02", "db-prod-01"],
-    tags: ["exposure", "default creds", "token replay"],
-    edges: ["e1", "e4", "e5"],
-    likelihood: 0.41,
-  },
-  {
-    k: 3,
-    name: "residual",
-    hops: ["INTERNET", "web-lb-01", "api-gw-01", "worker-07", "db-prod-01"],
-    tags: ["exposure", "ssrf pivot", "lateral move", "cron creds"],
-    edges: ["e1", "e2", "e6", "e7"],
-    likelihood: 0.18,
-  },
-];
-
-function exposureOf(p: KPath) {
-  return Math.round(p.likelihood * ASSET_VALUE).toLocaleString("en-US");
-}
-
-function heroExposure() {
-  return exposureOf(K_PATHS[0]);
-}
-
-function AttackMap() {
-  const [k, setK] = useState<1 | 2 | 3>(1);
-  const [spot, setSpot] = useState<string | null>(null);
-  const [boot, setBoot] = useState(true);
-  const figRef = useRef<HTMLElement>(null);
-
-  // the ink-on reveal runs once; after it ends, drop the boot attribute so
-  // re-classing edges on a k-switch never replays the staggered delays
-  useEffect(() => {
-    const t = setTimeout(() => setBoot(false), 1100);
-    return () => clearTimeout(t);
-  }, []);
-
-  // pause the dash-flow paint work while the map is off-screen
-  useEffect(() => {
-    const fig = figRef.current;
-    if (!fig || typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver(([entry]) => {
-      fig.toggleAttribute("data-idle", !entry.isIntersecting);
-    });
-    io.observe(fig);
-    return () => io.disconnect();
-  }, []);
-
-  const path = K_PATHS[k - 1];
-  const activeEdges = new Set(path.edges);
-  const activeNodes = new Set(path.hops);
-
+/* ------------------------------------------------------------- Hero Section */
+function HeroSection() {
   return (
-    <figure
-      className="hml-map hml-grain"
-      ref={figRef}
-      {...(boot ? { "data-boot": "" } : {})}
-    >
-      <div className="hml-map__bar">
-        <span className="hml-map__bar-label">
-          Yen’s k-shortest · {path.hops.length - 1} hops · {path.name} route
-        </span>
-        <div className="hml-map__k" role="group" aria-label="Attack path rank">
-          {K_PATHS.map((p) => (
-            <button
-              key={p.k}
-              type="button"
-              aria-pressed={k === p.k}
-              className={k === p.k ? "is-on" : undefined}
-              onClick={() => setK(p.k)}
-            >
-              k={p.k}
-            </button>
-          ))}
-        </div>
+    <section className="hml-hero hml-wrap">
+      <div className="hml-pill-tag">
+        <span className="hml-pill-dot"></span>
+        <span>Graph-Theoretic Defensive Security</span>
+        <span style={{ color: "var(--color-dim)" }}>•</span>
+        <span style={{ color: "var(--color-accent)" }}>Zero-Hallucination Impact</span>
       </div>
 
-      <svg
-        viewBox="0 0 960 560"
-        role="img"
-        aria-label={`Network graph, sample assessment. Attack path k=${k}: ${path.hops.join(
-          " to "
-        )}.`}
-        className={spot ? "is-spotlit" : undefined}
-      >
-        {MAP_EDGES.map((e) => (
-          <path
-            key={e.id}
-            className={`hml-map__edge${activeEdges.has(e.id) ? " is-attack" : ""}`}
-            d={e.d}
-            style={{ "--i": e.i } as CSSProperties}
-          />
-        ))}
-        {MAP_EDGES.map((e) => (
-          <text
-            key={`${e.id}-tag`}
-            className={`hml-map__edge-tag${activeEdges.has(e.id) ? " is-on" : ""}`}
-            x={e.tx}
-            y={e.ty}
-            style={{ "--i": e.i } as CSSProperties}
-          >
-            {e.tag}
-          </text>
-        ))}
-        {MAP_NODES.map((n) => {
-          const onPath = activeNodes.has(n.label);
-          return (
-            <g
-              key={n.label}
-              className={`hml-map__node${onPath ? " hml-map__node--path" : ""}${
-                n.crown ? " hml-map__node--crown" : ""
-              }${spot === n.label ? " is-active" : ""}`}
-              style={{ "--i": n.i } as CSSProperties}
-              tabIndex={0}
-              role="img"
-              aria-label={`${n.label} — ${n.sub}`}
-              onMouseEnter={() => setSpot(n.label)}
-              onMouseLeave={() => setSpot(null)}
-              onFocus={() => setSpot(n.label)}
-              onBlur={() => setSpot(null)}
-            >
-              {n.crown && (
-                <rect
-                  className="hml-map__crown-ring"
-                  x={n.x - 6}
-                  y={n.y - 6}
-                  width={n.w + 12}
-                  height={n.h + 12}
-                  rx={12}
-                />
-              )}
-              <rect x={n.x} y={n.y} width={n.w} height={n.h} rx={8} />
-              {onPath && !n.crown && (
-                <circle
-                  className="hml-map__dot"
-                  cx={n.x + n.w - 16}
-                  cy={n.y + 16}
-                  r={3.5}
-                />
-              )}
-              <text className="hml-map__label" x={n.x + 16} y={n.y + 28}>
-                {n.label}
-              </text>
-              <text className="hml-map__sub" x={n.x + 16} y={n.y + 47}>
-                {n.sub}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+      <h1 className="hml-hero-title">
+        Autonomous Attack Surface Defense & Dollar Exposure Modeling
+      </h1>
 
-      {/* compact chain replaces the SVG below 48rem — follows the selected k */}
-      <div className="hml-chain">
-        {path.hops.map((h, idx) => (
-          <Fragment key={h}>
-            {idx > 0 && (
-              <div className="hml-chain__hop" aria-hidden>
-                ↓ {path.tags[idx - 1]}
+      <p className="hml-hero-desc">
+        Drishti models entire enterprise networks as directed graphs, enumerates multi-hop attack vectors using Yen's algorithm, and deterministically calculates financial exposure before adversaries can exploit it.
+      </p>
+
+      <div className="hml-hero-cta">
+        <Link to="/signup" className="hml-btn-accent">
+          Launch Interactive Console <ArrowRight size={16} />
+        </Link>
+        <a href="#topology" className="hml-btn-outline">
+          Explore Attack Surface Map
+        </a>
+      </div>
+
+      {/* Hero Showcase with Hero Image Blend */}
+      <div className="hml-hero-stage">
+        <div className="hml-hero-img-wrap">
+          <img src={heroBg} alt="Drishti Threat Intelligence HUD" className="hml-hero-img" />
+          <div className="hml-hero-overlay-grid"></div>
+
+          <div className="hml-hero-hud">
+            <div className="hml-hud-header">
+              <div className="hml-hud-title">
+                <Activity size={18} color="var(--color-accent)" />
+                <span style={{ fontWeight: 600 }}>LIVE TOPOLOGY AUDIT</span>
+                <span style={{ color: "var(--color-dim)" }}>/ ACME_CORP_SAMPLE</span>
               </div>
-            )}
-            <div
-              className={`hml-chain__node${
-                h === "db-prod-01" ? " hml-chain__node--crown" : ""
-              }`}
-            >
-              <span>{h}</span>
-              <span className="hml-muted">{NODE_SUB[h]}</span>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <span className="hml-hud-badge hml-hud-badge-danger">5 CHAINED ATTACK PATHS</span>
+                <span className="hml-hud-badge" style={{ background: "rgba(59,130,246,0.12)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.3)" }}>
+                  POSTGRESQL ADVISORY LOCK
+                </span>
+              </div>
             </div>
-          </Fragment>
-        ))}
-      </div>
 
-      <figcaption className="hml-map__legend">
-        <span className="hml-map__readout">
-          likelihood {path.likelihood.toFixed(2)} × $
-          {ASSET_VALUE.toLocaleString("en-US")} ={" "}
-          <strong>${exposureOf(path)}</strong> · sample network
-        </span>
-        <span>
-          <span className="swatch" aria-hidden /> active attack path
-        </span>
-        <span>
-          <span className="swatch swatch--node" aria-hidden /> asset node
-        </span>
-        <Link to="/signup" className="hml-chip-cta">
-          Load the sample network →
-        </Link>
-      </figcaption>
-    </figure>
-  );
-}
+            <div className="hml-hud-stats">
+              <div className="hml-stat-card">
+                <div className="hml-stat-label">Total Financial Exposure</div>
+                <div className="hml-stat-val hml-stat-val-danger">$902,900</div>
+                <div className="hml-stat-sub">Deterministic calculation ($ USD)</div>
+              </div>
 
-/* ------------------------------------------------------- insight ledger */
+              <div className="hml-stat-card">
+                <div className="hml-stat-label">Critical Crown Jewel</div>
+                <div className="hml-stat-val">Main DB</div>
+                <div className="hml-stat-sub">10.0.0.5 · Criticality 1.0</div>
+              </div>
 
-function Insight() {
-  return (
-    <section className="hml-insight" id="insight">
-      <div className="hml-wrap">
-        <div className="hml-insight__head" {...rv()}>
-          <h2>A medium bug on the edge beats a critical bug in the vault.</h2>
-          <p>
-            A CVSS 9.8 buried three firewalls deep and unreachable is a paper
-            tiger. A CVSS 5.3 on your exposed load balancer is the front door.
-            Drishti ranks by the path, not the number.
-          </p>
-        </div>
-        <p className="mono hml-muted hml-insight__caption" {...rv(80)}>
-          worked example · sample assessment
-        </p>
-        <div className="hml-ledger">
-          <div className="hml-ledger__col" {...rv(120)}>
-            <h3>Ranked by CVSS alone</h3>
-            <LedgerRow rank="1" host="db-vault-09" note="CVSS 9.8 · unreachable" />
-            <LedgerRow rank="2" host="web-lb-01" note="CVSS 5.3 · internet-facing" />
-            <p className="hml-ledger__verdict">
-              You patch the vault first and leave the open front door for last.
-            </p>
-          </div>
-          <div className="hml-ledger__col hml-ledger__col--right" {...rv(240)}>
-            <h3>Ranked by reachability</h3>
-            <LedgerRow rank="1" host="web-lb-01" note="1 hop from INTERNET · priced" hot />
-            <LedgerRow rank="2" host="db-vault-09" note="0 paths in · contained" />
-            <p className="hml-ledger__verdict">
-              You break the reachable chain first — the one an attacker
-              actually walks.
-            </p>
+              <div className="hml-stat-card">
+                <div className="hml-stat-label">Post-Remediation Impact</div>
+                <div className="hml-stat-val hml-stat-val-accent">$702,900</div>
+                <div className="hml-stat-sub">-$200,000 net risk reduction</div>
+              </div>
+
+              <div className="hml-stat-card">
+                <div className="hml-stat-label">Defense Guardrail</div>
+                <div className="hml-stat-val" style={{ color: "var(--color-emerald)" }}>PASS (100%)</div>
+                <div className="hml-stat-sub">Output-side offensive scanner active</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -572,57 +179,255 @@ function Insight() {
   );
 }
 
-function LedgerRow({ rank, host, note, hot }: { rank: string; host: string; note: string; hot?: boolean }) {
+/* ------------------------------------------------------------- Interactive Path Simulator */
+function InteractivePathSection() {
+  const [selectedPath, setSelectedPath] = useState(1);
+  const [remediated, setRemediated] = useState(false);
+
+  const paths = [
+    {
+      id: 1,
+      name: "Path #1: External Foothold to Crown Jewel",
+      target: "PostgreSQL Database (10.0.0.5)",
+      hops: ["INTERNET (0.0.0.0)", "Edge Firewall (192.168.1.1)", "Web Server (192.168.1.10)", "PostgreSQL Main DB (10.0.0.5)"],
+      vuln: "CVE-2024-4321 (PostgreSQL Privilege Escalation)",
+      likelihood: remediated ? 0.05 : 0.88,
+      exposure: remediated ? 250000 : 902900,
+      riskScore: remediated ? 24.5 : 94.2,
+    },
+    {
+      id: 2,
+      name: "Path #2: Customer Vault Compromise",
+      target: "Customer Data Vault (10.0.0.8)",
+      hops: ["INTERNET (0.0.0.0)", "Edge Firewall (192.168.1.1)", "API Gateway (192.168.1.50)", "Data Vault (10.0.0.8)"],
+      vuln: "CVE-2024-2141 (Apache Log4j RCE)",
+      likelihood: 0.72,
+      exposure: 750000,
+      riskScore: 86.5,
+    },
+    {
+      id: 3,
+      name: "Path #3: Internal Keycloak Auth Bypass",
+      target: "Auth Keycloak (192.168.1.15)",
+      hops: ["INTERNET (0.0.0.0)", "Edge Firewall (192.168.1.1)", "Auth Keycloak (192.168.1.15)"],
+      vuln: "CVE-2024-1188 (OpenSSH Auth Bypass)",
+      likelihood: 0.54,
+      exposure: 350000,
+      riskScore: 69.4,
+    },
+  ];
+
+  const current = paths.find((p) => p.id === selectedPath) || paths[0];
+
   return (
-    <div className={`hml-ledger__row${hot ? " hml-ledger__row--hot" : ""}`}>
-      <span className="hml-ledger__rank">{rank}</span>
-      <span className="hml-ledger__host">{host}</span>
-      <span className="hml-ledger__note">{note}</span>
-    </div>
+    <section id="topology" className="hml-section hml-wrap">
+      <div className="hml-section-header">
+        <span className="hml-section-tag">Graph Engine Demonstration</span>
+        <h2 className="hml-section-title">Bounded Yen's Shortest Path Simulator</h2>
+        <p className="hml-section-desc">
+          See how resolving a single upstream vulnerability breaks the lateral movement chain and mathematically slashes financial exposure.
+        </p>
+      </div>
+
+      <div className="hml-card" style={{ background: "var(--color-map-well)", padding: "2.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "2rem" }}>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            {paths.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setSelectedPath(p.id)}
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: "var(--radius-pill)",
+                  background: selectedPath === p.id ? "var(--color-paper-elevated)" : "transparent",
+                  border: `1px solid ${selectedPath === p.id ? "var(--color-accent)" : "var(--color-rule)"}`,
+                  color: selectedPath === p.id ? "#fff" : "var(--color-muted)",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                {p.name.split(":")[0]}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setRemediated(!remediated)}
+            style={{
+              padding: "0.5rem 1.25rem",
+              borderRadius: "var(--radius-pill)",
+              background: remediated ? "rgba(16,185,129,0.15)" : "rgba(225,29,72,0.15)",
+              border: `1px solid ${remediated ? "var(--color-emerald)" : "var(--color-crimson)"}`,
+              color: remediated ? "#34d399" : "#fb7185",
+              fontSize: "var(--text-sm)",
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            {remediated ? "✓ CVE Remediated (Risk Dropped)" : "⚡ Simulate Finding Resolution"}
+          </button>
+        </div>
+
+        <div className="hml-path-nodes">
+          {current.hops.map((hop, index) => (
+            <React.Fragment key={index}>
+              <div className={`hml-path-node ${index === 0 ? "is-entry" : index === current.hops.length - 1 ? "is-target" : ""}`}>
+                <span className="hml-node-kind">{index === 0 ? "Entry Point" : index === current.hops.length - 1 ? "Crown Jewel" : `Hop 0${index}`}</span>
+                <span className="hml-node-name">{hop}</span>
+              </div>
+              {index < current.hops.length - 1 && <span className="hml-path-arrow">→</span>}
+            </React.Fragment>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem", marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid var(--color-rule)" }}>
+          <div>
+            <div className="hml-stat-label">Exploited Vulnerability</div>
+            <div style={{ color: "#fff", fontWeight: 600, fontSize: "0.95rem" }}>{current.vuln}</div>
+          </div>
+          <div>
+            <div className="hml-stat-label">Path Traversal Likelihood</div>
+            <div style={{ color: remediated ? "var(--color-emerald)" : "#ffd54f", fontWeight: 700, fontSize: "1.25rem" }}>
+              {(current.likelihood * 100).toFixed(1)}%
+            </div>
+          </div>
+          <div>
+            <div className="hml-stat-label">Total Financial Impact</div>
+            <div style={{ color: remediated ? "var(--color-emerald)" : "#fb7185", fontWeight: 700, fontSize: "1.25rem" }}>
+              ${current.exposure.toLocaleString()}
+            </div>
+          </div>
+          <div>
+            <div className="hml-stat-label">Composite Path Risk</div>
+            <div style={{ color: remediated ? "var(--color-emerald)" : "#fb7185", fontWeight: 700, fontSize: "1.25rem" }}>
+              {current.riskScore.toFixed(1)} / 100
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-/* ------------------------------------------------------ spec sheet (F3) */
+/* ------------------------------------------------------------- Engineering Pillars */
+function PillarsSection() {
+  const pillars = [
+    {
+      icon: <Network size={20} />,
+      title: "Directed Graph Topology",
+      body: "Constructs an in-memory NetworkX DiGraph capturing entry points, DMZs, firewalls, and internal trust relationships with weighted edge traversal models.",
+    },
+    {
+      icon: <Layers size={20} />,
+      title: "Bounded Yen's Path Enumeration",
+      body: "Enumerates up to 5 shortest paths per crown jewel (bounded at max 6 hops, top 25 globally), eliminating the computational explosion of simple paths.",
+    },
+    {
+      icon: <DollarSign size={20} />,
+      title: "Deterministic Impact ($ USD)",
+      body: "Calculates real dollar risk using mathematical formulas based on asset value and breach base costs. AI never alters financial numbers.",
+    },
+    {
+      icon: <Shield size={20} />,
+      title: "Defensive-Only AI Guardrails",
+      body: "Integrated with NVIDIA NIM (Llama 3.3 70B). Employs strict output-side marker scanning to guarantee zero offensive exploit generation.",
+    },
+    {
+      icon: <Eye size={20} />,
+      title: "Real-Time Telemetry Watch",
+      body: "Edge agent detects LAN devices via ARP and flags MITRE ATT&CK threats (ARP spoofing T1557, rogue hardware T1200, risky ports T1210).",
+    },
+    {
+      icon: <Lock size={20} />,
+      title: "Zero-Latency Web Guard",
+      body: "Manifest V3 Chrome extension enforces in-browser domain trust verdicts using a transparent two-part scoring algorithm with hard risk caps.",
+    },
+  ];
 
-const SPEC_ROWS = [
-  {
-    name: "Graph reachability",
-    mech: "Yen’s k-shortest",
-    note: "Vulnerabilities scored on actual network reachability — real routes, not a flat CVE list.",
-  },
-  {
-    name: "Dollar exposure",
-    mech: "deterministic",
-    note: "Every attack path gets a verifiable figure from likelihood and asset value. Same math every run.",
-  },
-  {
-    name: "Defensive remediation",
-    mech: "Groq LLM",
-    note: "One click drafts an Ansible or CLI fix. The AI explains the math and writes the script — never invents numbers.",
-  },
-  {
-    name: "Edge filtering",
-    mech: "1-file agent",
-    note: "A single-file Python agent drops low-severity noise at the source before it reaches your workspace.",
-  },
-];
-
-function SpecSheet() {
   return (
-    <section className="hml-spec" id="product">
-      <div className="hml-wrap">
-        <h2 {...rv()}>Math over vibes.</h2>
-        <p className="hml-muted" {...rv(80)}>
-          Everything on screen is deterministically computed from your
-          network’s graph — no canned scores, no hallucinated metrics.
+    <section id="pillars" className="hml-section hml-wrap">
+      <div className="hml-section-header">
+        <span className="hml-section-tag">System Architecture</span>
+        <h2 className="hml-section-title">Six Pillars of Defensive Intelligence</h2>
+        <p className="hml-section-desc">
+          Built on mathematical rigor, graph theory, and cryptographically verified data boundaries.
         </p>
-        <table className="hml-spec__table" {...rv(160)}>
+      </div>
+
+      <div className="hml-grid-3">
+        {pillars.map((p, idx) => (
+          <div key={idx} className="hml-card">
+            <div className="hml-card-icon">{p.icon}</div>
+            <h3 className="hml-card-title">{p.title}</h3>
+            <p className="hml-card-body">{p.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------- Comparison Matrix */
+function ComparisonSection() {
+  const comparisons = [
+    {
+      dimension: "Attack Surface Representation",
+      legacy: "Flat, disconnected list of CVEs without context",
+      drishti: "Directed topological graph with multi-hop lateral movement chains",
+    },
+    {
+      dimension: "Prioritization Logic",
+      legacy: "Raw CVSS score (treats isolated internal hosts same as gateways)",
+      drishti: "Graph centrality + reachable distance from INTERNET + crown jewel value",
+    },
+    {
+      dimension: "Risk Quantification",
+      legacy: "Abstract high/medium/low ratings without financial meaning",
+      drishti: "Deterministic dollar exposure ($ USD) CISO board-ready metric",
+    },
+    {
+      dimension: "AI Integration Safety",
+      legacy: "Unconstrained prompts prone to hallucinations and exploit generation",
+      drishti: "Output-side offensive marker scanning with defensive-only verification",
+    },
+    {
+      dimension: "Scan Scope & Compliance",
+      legacy: "Blind automated port probing across arbitrary subnets",
+      drishti: "Strict RFC1918 private scope gate with explicit consent validation",
+    },
+  ];
+
+  return (
+    <section id="comparison" className="hml-section hml-wrap">
+      <div className="hml-section-header">
+        <span className="hml-section-tag">Competitive Benchmark</span>
+        <h2 className="hml-section-title">Legacy Scanners vs. Drishti Graph Defense</h2>
+        <p className="hml-section-desc">
+          Why traditional vulnerability assessment fails in modern enterprise topologies.
+        </p>
+      </div>
+
+      <div className="hml-table-wrap">
+        <table className="hml-table">
+          <thead>
+            <tr>
+              <th style={{ width: "25%" }}>Dimension</th>
+              <th style={{ width: "35%" }}>Traditional Scanners</th>
+              <th style={{ width: "40%" }}>Drishti Defensive Platform</th>
+            </tr>
+          </thead>
           <tbody>
-            {SPEC_ROWS.map((r) => (
-              <tr key={r.name}>
-                <th scope="row">{r.name}</th>
-                <td className="mech">{r.mech}</td>
-                <td className="note">{r.note}</td>
+            {comparisons.map((c, i) => (
+              <tr key={i}>
+                <td style={{ fontWeight: 600, color: "#fff" }}>{c.dimension}</td>
+                <td style={{ color: "var(--color-dim)" }}>{c.legacy}</td>
+                <td className="hml-table-winner">
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <CheckCircle2 size={16} color="#60a5fa" />
+                    <span>{c.drishti}</span>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -632,207 +437,210 @@ function SpecSheet() {
   );
 }
 
-/* -------------------------------------------------- intelligence layer */
+/* ------------------------------------------------------------- Terminal Playbook Preview */
+function PlaybookTerminalSection() {
+  const [activeTab, setActiveTab] = useState<"ansible" | "shell" | "aws">("ansible");
 
-const INTEL = [
-  {
-    title: "Executive threat narrative",
-    tag: "Groq LLM",
-    copy: "One click turns the whole assessment into a board-ready summary — systemic risks and priority actions, grounded in real findings, never invented.",
-  },
-  {
-    title: "Node hardening plan",
-    tag: "engine-grounded",
-    copy: "Per-node fixes with measured risk drops. The engine re-runs with each change applied and reports the actual reduction.",
-  },
-  {
-    title: "ML anomaly + segmentation",
-    tag: "scikit-learn",
-    copy: "IsolationForest flags outlier assets against the fleet’s profile; KMeans clusters the network into security segments labelled by mean risk.",
-  },
-  {
-    title: "Aggregated CVE intelligence",
-    tag: "real data",
-    copy: "Every open finding rolled up by CVE — CVSS, severity, and the exact hosts affected — sorted so the highest-leverage patch is always on top.",
-  },
-];
+  const playbooks = {
+    ansible: `- name: Remediate PostgreSQL Privilege Escalation (CVE-2024-4321)
+  hosts: databases
+  become: yes
+  tasks:
+    - name: Patch postgresql-16 package to latest stable
+      apt:
+        name: postgresql-16
+        state: latest
+        update_cache: yes
+    - name: Enforce strict scram-sha-256 in pg_hba.conf
+      lineinfile:
+        path: /etc/postgresql/16/main/pg_hba.conf
+        regexp: '^host.*all.*all'
+        line: 'host all all 10.0.0.0/24 scram-sha-256'
+    - name: Restart PostgreSQL daemon
+      service:
+        name: postgresql
+        state: restarted`,
+    shell: `#!/usr/bin/env bash
+# Drishti Automated Perimeter Hardening Script
+set -euo pipefail
 
-function Intelligence() {
+echo "[*] Applying ingress firewall rules to isolate database tier..."
+iptables -A INPUT -p tcp --dport 5432 ! -s 10.0.0.0/24 -j DROP
+iptables -A INPUT -p tcp --dport 22 ! -s 192.168.1.0/24 -j DROP
+
+# Save iptables state
+iptables-save > /etc/iptables/rules.v4
+echo "[✓] Ingress rules applied. Direct internet access blocked."`,
+    aws: `# AWS Security Group Remediation for Crown Jewel DB
+aws ec2 revoke-security-group-ingress \\
+    --group-id sg-0123456789abcdef0 \\
+    --protocol tcp \\
+    --port 5432 \\
+    --cidr 0.0.0.0/0
+
+aws ec2 authorize-security-group-ingress \\
+    --group-id sg-0123456789abcdef0 \\
+    --protocol tcp \\
+    --port 5432 \\
+    --source-security-group-id sg-0987654321fedcba0 \\
+    --group-owner 123456789012`,
+  };
+
   return (
-    <section className="hml-intel">
-      <div className="hml-wrap">
-        <h2 {...rv()}>Not just a graph — a full assessment report.</h2>
-        <div className="hml-intel__grid" onPointerMove={spotlightCard}>
-          {INTEL.map((it, idx) => (
-            <article
-              key={it.title}
-              className="hml-intel__card"
-              {...rv(80 + idx * 90)}
+    <section id="playbooks" className="hml-section hml-wrap">
+      <div className="hml-section-header">
+        <span className="hml-section-tag">Automated Remediation</span>
+        <h2 className="hml-section-title">Context-Aware Defensive Playbooks</h2>
+        <p className="hml-section-desc">
+          AI generates production-ready Ansible, Shell, or Cloud CLI fixes tailored to your actual hostnames and CVEs.
+        </p>
+      </div>
+
+      <div className="hml-terminal">
+        <div className="hml-terminal-bar">
+          <div className="hml-terminal-dots">
+            <div className="hml-terminal-dot"></div>
+            <div className="hml-terminal-dot"></div>
+            <div className="hml-terminal-dot"></div>
+          </div>
+          <div style={{ display: "flex", gap: "1rem" }}>
+            <button
+              onClick={() => setActiveTab("ansible")}
+              style={{ background: "none", border: "none", color: activeTab === "ansible" ? "#60a5fa" : "var(--color-dim)", cursor: "pointer", fontWeight: 600 }}
             >
-              <span className="hml-intel__idx">
-                {String(idx + 1).padStart(2, "0")}
-              </span>
-              <h3>{it.title}</h3>
-              <span className="hml-intel__tag">{it.tag}</span>
-              <p>{it.copy}</p>
-            </article>
-          ))}
+              Ansible Playbook
+            </button>
+            <button
+              onClick={() => setActiveTab("shell")}
+              style={{ background: "none", border: "none", color: activeTab === "shell" ? "#60a5fa" : "var(--color-dim)", cursor: "pointer", fontWeight: 600 }}
+            >
+              Shell Script
+            </button>
+            <button
+              onClick={() => setActiveTab("aws")}
+              style={{ background: "none", border: "none", color: activeTab === "aws" ? "#60a5fa" : "var(--color-dim)", cursor: "pointer", fontWeight: 600 }}
+            >
+              AWS CLI
+            </button>
+          </div>
+          <span style={{ opacity: 0.6 }}>DEFENSIVE_ONLY_VERIFIED</span>
+        </div>
+        <div className="hml-terminal-body">
+          <pre>{playbooks[activeTab]}</pre>
         </div>
       </div>
     </section>
   );
 }
 
-/** Feeds the CSS cursor-spotlight (--mx/--my) on the hovered intel card. */
-function spotlightCard(e: ReactPointerEvent<HTMLDivElement>) {
-  const card = (e.target as HTMLElement).closest<HTMLElement>(
-    ".hml-intel__card"
-  );
-  if (!card) return;
-  const r = card.getBoundingClientRect();
-  card.style.setProperty("--mx", `${e.clientX - r.left}px`);
-  card.style.setProperty("--my", `${e.clientY - r.top}px`);
-}
-
-/* ------------------------------------------------------- pipeline (F4) */
-
-const STAGES = [
-  {
-    n: "01",
-    title: "Collect & filter",
-    copy: "The one-file edge agent gathers host, service, and vulnerability metadata — and drops the noise before it leaves the machine.",
-  },
-  {
-    n: "02",
-    title: "Ingest & model",
-    copy: "Snapshots land in your workspace and construct a living directed graph of assets.",
-  },
-  {
-    n: "03",
-    title: "Analyze & value",
-    copy: "The risk engine computes bounded attack paths and prices each path in real dollars.",
-  },
-  {
-    n: "04",
-    title: "Visualize & fix",
-    copy: "Watch the blast radius, open the costliest path, and use defensive AI to fix it.",
-  },
-];
-
-function Pipeline() {
-  return (
-    <section className="hml-pipe" id="pipeline">
-      <div className="hml-wrap">
-        <h2 {...rv()}>From raw scan to reviewed fix.</h2>
-        <ol>
-          {STAGES.map((s, idx) => (
-            <li key={s.n} {...rv(idx * 110)}>
-              <span className="hml-pipe__n">{s.n}</span>
-              <h3>{s.title}</h3>
-              <p>{s.copy}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-/* --------------------------------------------------------------- faq */
-
-const FAQS = [
-  {
-    q: "How is this different from a vulnerability scanner?",
-    a: "A scanner hands you a flat list of CVEs sorted by CVSS. Drishti builds a directed graph of your network and scores each weakness by whether an attacker can actually reach it from the internet — then prices the blast radius in dollars.",
-  },
-  {
-    q: "Are the risk scores and dollar figures real or made up?",
-    a: "Deterministic. Node risk, path likelihood, and dollar exposure all come from one transparent formula over your graph — the same math every time. The AI explains the numbers; it never invents them.",
-  },
-  {
-    q: "Where does the AI fit — and is it safe?",
-    a: "The AI drafts defensive remediation and writes the executive summary, grounded in your real asset context. It is hard-guardrailed to refuse offensive queries.",
-  },
-];
-
-function Faq() {
+/* ------------------------------------------------------------- FAQ Section */
+function FaqSection() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
+  const faqs = [
+    {
+      q: "How does Drishti calculate financial dollar exposure?",
+      a: "Drishti uses a deterministic mathematical formula: Path Impact = Likelihood × Target Asset Business Value × Asset Multiplier + Likelihood × Breach Base Cost. The total exposure sums the maximum impact per unique crown jewel across all bounded paths, ensuring no double-counting.",
+    },
+    {
+      q: "How does Drishti ensure AI safety and prevent exploit generation?",
+      a: "All LLM requests pass through a strict output-side scanner that checks for offensive markers ('reverse shell', 'weaponize', 'exfiltrate', 'ransomware'). If an offensive pattern is detected, the completion is refused immediately. The AI is restricted to defensive remediation and explanation.",
+    },
+    {
+      q: "Can Drishti scan arbitrary public IP addresses?",
+      a: "No. Drishti enforces strict RFC1918 private address verification and requires explicit 'consent: true' in request payloads. Scans targeting public IPs or AWS metadata endpoints are rejected with HTTP 422.",
+    },
+    {
+      q: "What database backends are supported?",
+      a: "Drishti supports PostgreSQL with transactional advisory locks for enterprise production, and local SQLite for development. All entity models use 36-character UUID strings for seamless portability across environments.",
+    },
+  ];
+
   return (
-    <section className="hml-faq">
-      <div className="hml-wrap">
-        <h2 {...rv()}>Frequently asked.</h2>
-        <div className="hml-faq__list" {...rv(80)}>
-          {FAQS.map((f, idx) => {
-            const isOpen = openIdx === idx;
-            return (
-              <div
-                key={f.q}
-                className={`hml-faq__item${isOpen ? " is-open" : ""}`}
-              >
-                <button
-                  type="button"
-                  className="hml-faq__btn"
-                  onClick={() => setOpenIdx(isOpen ? null : idx)}
-                  aria-expanded={isOpen}
-                >
-                  <span>{f.q}</span>
-                  <ChevronDown className="hml-faq__chevron h-5 w-5" />
-                </button>
-                {isOpen && <div className="hml-faq__answer">{f.a}</div>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------- cta band */
-
-function CtaBand() {
-  return (
-    <section className="hml-cta" id="pricing">
-      <div className="hml-wrap">
-        <div className="hml-cta__inner hml-grain" {...rv()}>
-          <h2>Free to start.</h2>
-          <p>
-            Create a workspace, load the sample assessment or connect your own
-            network, and walk the full flow — no card, no trial clock.
-          </p>
-          <Link to="/signup" className="hml-btn">
-            Create a workspace
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* -------------------------------------------------------- footer (Ft5) */
-
-function Footer() {
-  return (
-    <footer className="hml-foot">
-      <span className="hml-foot__ghost" aria-hidden>
-        DRISHTI
-      </span>
-      <div className="hml-wrap">
-        <p className="hml-foot__statement">
-          Drishti maps and prices risk. It never <em>attacks</em>.
+    <section id="faq" className="hml-section hml-wrap">
+      <div className="hml-section-header">
+        <span className="hml-section-tag">Frequently Asked Questions</span>
+        <h2 className="hml-section-title">Everything You Need to Know</h2>
+        <p className="hml-section-desc">
+          Technical specifications, compliance boundaries, and mathematical modeling details.
         </p>
-        <div className="hml-foot__meta">
-          <span className="hml-nav__mark">
-            <Wordmark />
-          </span>
-          <span>dṛṣṭi · Sanskrit for sight</span>
-          <a href="#product">Product</a>
-          <a href="#pipeline">Pipeline</a>
-          <a href="#pricing">Pricing</a>
-          <Link to="/login">Sign in</Link>
-          <span>© 2026 Drishti</span>
+      </div>
+
+      <div className="hml-faq-list">
+        {faqs.map((f, i) => (
+          <div key={i} className="hml-faq-item">
+            <button
+              className="hml-faq-trigger"
+              onClick={() => setOpenIdx(openIdx === i ? null : i)}
+            >
+              <span>{f.q}</span>
+              <ChevronDown
+                size={18}
+                style={{
+                  transform: openIdx === i ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
+                }}
+              />
+            </button>
+            {openIdx === i && <div className="hml-faq-content">{f.a}</div>}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------- CTA Band */
+function CtaBandSection() {
+  return (
+    <section className="hml-wrap" style={{ paddingBottom: "4rem" }}>
+      <div className="hml-cta-band">
+        <div style={{ maxWidth: "38rem", marginInline: "auto" }}>
+          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: 700, marginBottom: "1rem", color: "#fff" }}>
+            Ready to Defend Your Attack Surface?
+          </h2>
+          <p style={{ color: "var(--color-muted)", fontSize: "1.1rem", marginBottom: "2rem" }}>
+            Launch the interactive security console to explore the Acme Corporation sample network or deploy the edge agent on your private LAN.
+          </p>
+          <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
+            <Link to="/signup" className="hml-btn-accent">
+              Get Started Free <ArrowRight size={16} />
+            </Link>
+            <Link to="/login" className="hml-btn-outline">
+              Sign In to Existing Tenant
+            </Link>
+          </div>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------- Footer */
+function FooterSection() {
+  return (
+    <footer className="hml-footer hml-wrap">
+      <div className="hml-footer-inner">
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <div style={{ width: 22, height: 22, borderRadius: 5, background: "linear-gradient(135deg, #3b82f6, #1e293b)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Shield size={12} color="#ffffff" />
+          </div>
+          <span style={{ fontWeight: 700, color: "#fff" }}>DRISHTI PLATFORM</span>
+          <span style={{ opacity: 0.4 }}>•</span>
+          <span>Defensive Cybersecurity Engineering</span>
+        </div>
+
+        <div className="hml-footer-links">
+          <a href="#topology">Topology</a>
+          <a href="#pillars">Architecture</a>
+          <a href="#comparison">Comparison</a>
+          <a href="#playbooks">Playbooks</a>
+          <a href="#faq">FAQ</a>
+          <Link to="/login">Sign In</Link>
+        </div>
+      </div>
+      <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.8rem", color: "var(--color-dim)" }}>
+        © 2026 Drishti Cyber Defense Systems. Bounded Yen's Shortest Path & Dollar Financial Exposure Architecture.
       </div>
     </footer>
   );

@@ -12,7 +12,6 @@ is_sqlite = settings.database_url.startswith("sqlite")
 if is_sqlite:
  engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
  SessionLocal = sessionmaker(bind=engine, class_=Session, autoflush=False, autocommit=False)
-
  async_engine = create_async_engine(
  "sqlite+aiosqlite:///./drishti.db",
  connect_args={"check_same_thread": False},
