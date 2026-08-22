@@ -1,6 +1,15 @@
 .DS_Store
+.env
+.env.local
+.env.*.local
+*.log
 .pheromone/
 .claude/
 .gemini/
+.code-review-graph/
 __pycache__/
 *.pyc
+node_modules/
+dist/
+build/
+drishti.db
