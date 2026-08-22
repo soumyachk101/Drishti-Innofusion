@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 3.1.0  
+**Document Version:** 3.2.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `04f5372` / Continuous Full-Stack Delivery Cycle (Iteration 6)  
+**Target Codebase Baseline:** Full-Stack Repository Implementation (`server/`, `src/`, `web/`)  
 
 ---
 
@@ -92,7 +92,7 @@ flowchart TB
 
 ## 3. Deep Static Code Review & Codebase Findings
 
-A comprehensive file-by-file inspection of `server/app/`, `src/api/`, `src/components/`, and `src/pages/` identified the following key findings:
+A comprehensive file-by-file inspection of `server/app/`, `src/api/`, `src/components/`, `src/pages/`, and `web/` identified the following key findings:
 
 ### 3.1 Static Code Defects & Architectural Matrix
 
@@ -102,10 +102,11 @@ A comprehensive file-by-file inspection of `server/app/`, `src/api/`, `src/compo
 | 2 | `server/app/models/path.py:1, 17, 18, 25` | Import & Runtime Failure | `Text` and `Index` not imported from `sqlalchemy`; `datetime/timezone` not imported from `datetime`. | **Fixed / Reviewed** |
 | 3 | `server/app/models/scan.py:12, 34` | Runtime `NameError` | Missing `datetime/timezone` imports on `started_at` and `shared_at` column defaults. | **Fixed / Reviewed** |
 | 4 | `server/app/db.py:28` vs `models/base.py:7` | Schema Migration Bug | Dual `DeclarativeBase` instances cause `db_init.py:reconcile_columns` to find 0 domain models. | **Fixed / Reviewed** |
-| 5 | `src/pages/Dashboard.tsx` | UI Integration | Connected to `dashboardApi.getSummary()` rendering KPIs, severity bar charts, and zone data grid. | **Positive** |
-| 6 | `src/pages/Assets.tsx` | Asset Explorer | Integrated `DataGrid` with service and finding inspection modals. | **Positive** |
-| 7 | `src/components/Layout.tsx` | AppShell Navigation | Responsive MUI drawer with dark theme, navigation items, and auth logout action. | **Positive** |
-| 8 | `server/app/core/security.py:60-61` | Security Strength | Precomputed `DUMMY_PASSWORD_HASH` prevents timing attacks on unrecognized email logins. | **Positive** |
+| 5 | `src/App.tsx` | Route Assembly | Fully mounted router linking `/login`, `/dashboard`, `/assets`, `/paths`, `/live`, `/urltrust`, `/reports`, and `/admin`. | **Positive** |
+| 6 | `src/components/Sidebar.tsx` | Navigation Component | Modular sidebar drawer supporting responsive overlay on mobile and permanent rail on desktop. | **Positive** |
+| 7 | `src/pages/Reports.tsx` | Intelligence Reporting | Severity distribution bar chart with CVE detail table and CVSS metrics. | **Positive** |
+| 8 | `src/pages/URLTrust.tsx` | Domain Trust Console | Live domain analyzer with trust scores, threat indicators, category chips, and recommendations. | **Positive** |
+| 9 | `src/pages/Admin.tsx` | Tenant Administration | User management table with Add User dialog and role assignment. | **Positive** |
 
 ---
 
@@ -313,7 +314,7 @@ flowchart TD
 ### Phase 1: High Priority (Immediate Stabilization)
 - [x] **Model Layer Stabilization**: Registered all 21 models with canonical `Base` in `models/base.py`.
 - [x] **14 REST Routers & Services**: Full service architecture implemented in `server/app/`.
-- [x] **Frontend Pages & AppShell**: Implemented `Layout.tsx`, `PrivateRoute.tsx`, `Login.tsx`, `Dashboard.tsx`, `Assets.tsx`.
+- [x] **Frontend Complete Pages & AppShell**: Implemented `App.tsx`, `Layout.tsx`, `Sidebar.tsx`, `PrivateRoute.tsx`, `Login.tsx`, `Dashboard.tsx`, `Assets.tsx`, `Paths.tsx`, `Live.tsx`, `Reports.tsx`, `URLTrust.tsx`, `Admin.tsx`.
 
 ### Phase 2: Medium Priority (Integration & Live Testing)
 - [ ] **Live Telemetry Connection**: Verify edge agent stream to `/api/v1/live/devices` and ForceMap rendering.
