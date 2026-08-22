@@ -1,21 +1,16 @@
 import sqlalchemy as sa
 from sqlalchemy import inspect
-from sqlalchemy.orm import DeclarativeBase
 
 from app.db import Base, engine
 
 
 def reconcile_columns(engine):
- """Additive schema migration: add missing columns only."""
  inspector = inspect(engine)
  existing_tables = set(inspector.get_table_names())
-
- # Map table name -> list of Column objects from models
- model_tables: dict[str, list] = {}
+ model_tables = {}
  for cls in Base.__subclasses__():
  table = cls.__table__
  model_tables[table.name] = list(table.columns)
-
  for table_name, model_cols in model_tables.items():
  if table_name not in existing_tables:
  continue
@@ -33,15 +28,12 @@ def reconcile_columns(engine):
  default = f"DEFAULT {default_val}"
  try:
  with engine.connect() as conn:
- conn.execute(sa.text(
- f"ALTER TABLE {table_name} ADD COLUMN {col.name} {col_type} {nullable} {default}"
- ))
+ conn.execute(sa.text(f"ALTER TABLE {table_name} ADD COLUMN {col.name} {col_type} {nullable} {default}"))
  conn.commit()
  except Exception:
- pass # column may have been added concurrently
+ pass
 
 
 def init_db():
- """Create all tables and reconcile schema."""
  Base.metadata.create_all(bind=engine)
  reconcile_columns(engine)

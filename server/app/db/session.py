@@ -12,3 +12,6 @@ def get_db() -> Generator[Session, None, None]:
  db = SessionLocal()
  yield db
  db.close()
+
+
+__all__ = ["get_db"]

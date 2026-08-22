@@ -1,5 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, Navigate } from "react-router-dom";
+import {
+  motion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import {
   Shield,
   Activity,
@@ -11,6 +17,8 @@ import {
   DollarSign,
   Network,
   Eye,
+  Radio,
+  FileCode,
 } from "lucide-react";
 import { useAuth } from "../../auth";
 import "./landing.css";
@@ -19,15 +27,27 @@ import heroBg from "../../assets/hero-bg.jpg";
 
 export default function Landing() {
   const { user } = useAuth();
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 24,
+    restDelta: 0.001,
+  });
+
   if (user) return <Navigate to="/app" replace />;
 
   return (
     <div className="hml">
+      {/* 1. SCROLL PROGRESS — Fixed at top with spring smoothing */}
+      <motion.div className="hml-scroll-progress-bar" style={{ scaleX }} />
+
       <TopStatusStrip />
       <Navbar />
       <main>
-        <HeroSection />
+        <HeroSection scrollYProgress={scrollYProgress} />
         <InteractivePathSection />
+        {/* 2, 3, 4, 5. TRUE SCROLL-DRIVEN HORIZONTAL SCROLL & PIN ANIMATION */}
+        <ScrollDrivenHorizontalPipeline />
         <PillarsSection />
         <ComparisonSection />
         <PlaybookTerminalSection />
@@ -68,17 +88,36 @@ function TopStatusStrip() {
 /* ------------------------------------------------------------- Navigation Bar */
 function Navbar() {
   return (
-    <nav className="hml-nav hml-wrap">
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="hml-nav hml-wrap"
+    >
       <div className="hml-nav-inner">
         <Link to="/" className="hml-brand">
-          <div style={{ width: 28, height: 28, borderRadius: 6, background: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(234, 88, 12, 0.35)" }}>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 6,
+              background: "var(--color-accent)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(234, 88, 12, 0.35)",
+            }}
+          >
             <Shield size={16} color="#ffffff" />
-          </div>
+          </motion.div>
           <span>DR<em>I</em>SHTI</span>
         </Link>
 
         <ul className="hml-nav-links">
           <li><a href="#topology" className="hml-nav-link">Attack Topology</a></li>
+          <li><a href="#pipeline" className="hml-nav-link">Pipeline</a></li>
           <li><a href="#pillars" className="hml-nav-link">Architecture</a></li>
           <li><a href="#comparison" className="hml-nav-link">Comparison</a></li>
           <li><a href="#playbooks" className="hml-nav-link">Playbooks</a></li>
@@ -89,48 +128,86 @@ function Navbar() {
           <Link to="/login" className="hml-btn-ghost">
             Sign In
           </Link>
-          <Link to="/signup" className="hml-btn-primary">
-            Launch Console <ArrowRight size={14} />
-          </Link>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Link to="/signup" className="hml-btn-primary">
+              Launch Console <ArrowRight size={14} />
+            </Link>
+          </motion.div>
         </div>
       </div>
-    </nav>
+    </motion.header>
   );
 }
 
-/* ------------------------------------------------------------- Hero Section */
-function HeroSection() {
+/* ------------------------------------------------------------- 6. PARALLAX Hero Section */
+function HeroSection({ scrollYProgress }: { scrollYProgress: any }) {
+  const heroImageY = useTransform(scrollYProgress, [0, 0.3], [0, 80]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.05]);
+
   return (
     <section className="hml-hero hml-wrap">
-      <div className="hml-pill-tag">
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="hml-pill-tag"
+      >
         <span className="hml-pill-dot"></span>
         <span>Graph-Theoretic Defensive Security</span>
         <span style={{ color: "var(--color-text-muted)" }}>•</span>
         <span style={{ color: "var(--color-accent)", fontWeight: 700 }}>Zero-Hallucination Impact</span>
-      </div>
+      </motion.div>
 
-      <h1 className="hml-hero-title">
+      <motion.h1
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="hml-hero-title"
+      >
         Autonomous Attack Surface Defense & Dollar Exposure Modeling
-      </h1>
+      </motion.h1>
 
-      <p className="hml-hero-desc">
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="hml-hero-desc"
+      >
         Drishti models entire enterprise networks as directed graphs, enumerates multi-hop attack vectors using Yen's algorithm, and deterministically calculates financial exposure before adversaries can exploit it.
-      </p>
+      </motion.p>
 
-      <div className="hml-hero-cta">
-        <Link to="/signup" className="hml-btn-accent">
-          Launch Interactive Console <ArrowRight size={16} />
-        </Link>
-        <a href="#topology" className="hml-btn-outline">
-          Explore Attack Surface Map
-        </a>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+        className="hml-hero-cta"
+      >
+        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+          <Link to="/signup" className="hml-btn-accent">
+            Launch Interactive Console <ArrowRight size={16} />
+          </Link>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <a href="#topology" className="hml-btn-outline">
+            Explore Attack Surface Map
+          </a>
+        </motion.div>
+      </motion.div>
 
-      {/* Hero Showcase with Hero Image Blend */}
-      <div className="hml-hero-stage">
+      {/* Hero Showcase with Parallax Image Blend */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.45 }}
+        className="hml-hero-stage"
+      >
         <div className="hml-hero-img-wrap">
-          <img src={heroBg} alt="Drishti Threat Intelligence HUD" className="hml-hero-img" />
-          <div className="hml-hero-overlay-grid"></div>
+          <motion.img
+            src={heroBg}
+            alt="Drishti Threat Intelligence HUD"
+            className="hml-hero-img"
+            style={{ y: heroImageY, scale: heroScale }}
+          />
 
           <div className="hml-hero-hud">
             <div className="hml-hud-header">
@@ -148,33 +225,33 @@ function HeroSection() {
             </div>
 
             <div className="hml-hud-stats">
-              <div className="hml-stat-card">
+              <motion.div whileHover={{ y: -3 }} className="hml-stat-card">
                 <div className="hml-stat-label">Total Financial Exposure</div>
                 <div className="hml-stat-val hml-stat-val-danger">$902,900</div>
                 <div className="hml-stat-sub">Deterministic calculation ($ USD)</div>
-              </div>
+              </motion.div>
 
-              <div className="hml-stat-card">
+              <motion.div whileHover={{ y: -3 }} className="hml-stat-card">
                 <div className="hml-stat-label">Critical Crown Jewel</div>
                 <div className="hml-stat-val">Main DB</div>
                 <div className="hml-stat-sub">10.0.0.5 · Criticality 1.0</div>
-              </div>
+              </motion.div>
 
-              <div className="hml-stat-card">
+              <motion.div whileHover={{ y: -3 }} className="hml-stat-card">
                 <div className="hml-stat-label">Post-Remediation Impact</div>
                 <div className="hml-stat-val hml-stat-val-accent">$702,900</div>
                 <div className="hml-stat-sub">-$200,000 net risk reduction</div>
-              </div>
+              </motion.div>
 
-              <div className="hml-stat-card">
+              <motion.div whileHover={{ y: -3 }} className="hml-stat-card">
                 <div className="hml-stat-label">Defense Guardrail</div>
                 <div className="hml-stat-val" style={{ color: "#4ade80" }}>PASS (100%)</div>
                 <div className="hml-stat-sub">Output-side offensive scanner active</div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -238,21 +315,36 @@ function InteractivePathSection() {
 
   return (
     <section id="topology" className="hml-section hml-wrap">
-      <div className="hml-section-header">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="hml-section-header"
+      >
         <span className="hml-section-tag">Graph Engine Demonstration</span>
         <h2 className="hml-section-title">Bounded Yen's Shortest Path Simulator</h2>
         <p className="hml-section-desc">
           See how resolving a single upstream vulnerability breaks the lateral movement chain and mathematically slashes financial exposure.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="hml-card" style={{ background: "var(--color-surface-raised)", padding: "clamp(1.5rem, 3vw, 2.5rem)", boxShadow: "var(--shadow-lift)" }}>
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6 }}
+        className="hml-card"
+        style={{ background: "var(--color-surface-raised)", padding: "clamp(1.5rem, 3vw, 2.5rem)", boxShadow: "var(--shadow-lift)" }}
+      >
         {/* Top Controls Bar */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "2.25rem" }}>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             {paths.map((p) => (
-              <button
+              <motion.button
                 key={p.id}
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 0 }}
                 onClick={() => setSelectedPath(p.id)}
                 style={{
                   display: "inline-flex",
@@ -267,7 +359,7 @@ function InteractivePathSection() {
                   fontWeight: 700,
                   cursor: "pointer",
                   boxShadow: selectedPath === p.id ? "0 4px 12px rgba(23, 25, 22, 0.2)" : "0 1px 3px rgba(23, 25, 22, 0.05)",
-                  transition: "all 0.2s ease",
+                  transition: "background 0.2s ease, color 0.2s ease",
                 }}
               >
                 {selectedPath === p.id && (
@@ -275,11 +367,13 @@ function InteractivePathSection() {
                 )}
                 <span>{p.name}</span>
                 <span style={{ fontSize: "0.75rem", opacity: selectedPath === p.id ? 0.7 : 0.5, fontWeight: 500 }}>({p.subtitle})</span>
-              </button>
+              </motion.button>
             ))}
           </div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setRemediated(!remediated)}
             style={{
               display: "inline-flex",
@@ -304,14 +398,17 @@ function InteractivePathSection() {
             ) : (
               <span>Simulate Finding Resolution</span>
             )}
-          </button>
+          </motion.button>
         </div>
 
         {/* Nodes Diagram */}
         <div className="hml-path-nodes" style={{ background: "var(--color-surface-base)", padding: "1.5rem", borderRadius: "var(--radius-card)", border: "1px solid rgba(23, 25, 22, 0.08)" }}>
           {current.hops.map((hop, index) => (
             <React.Fragment key={index}>
-              <div
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: index * 0.08 }}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -334,7 +431,7 @@ function InteractivePathSection() {
                 <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#171916" }}>
                   {hop.name}
                 </span>
-              </div>
+              </motion.div>
               {index < current.hops.length - 1 && (
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingInline: "0.25rem" }}>
                   <ArrowRight size={18} color="var(--color-accent)" />
@@ -377,8 +474,169 @@ function InteractivePathSection() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
+  );
+}
+
+/* ------------------------------------------------------------- 2, 3, 4, 5. SCROLL-DRIVEN HORIZONTAL SCROLL & PIN */
+function ScrollDrivenHorizontalPipeline() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Vertical scroll scrubs horizontal movement from 0% to -62%
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-62%"]);
+  const progressPercent = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
+  const stages = [
+    {
+      num: "01",
+      title: "LAN & Perimeter Ingestion",
+      tag: "INGESTION TIER",
+      icon: <Radio size={20} color="var(--color-accent)" />,
+      desc: "Edge agent collects stdlib ARP discovery, DNS configurations, and open port bindings under strict RFC1918 scope gates.",
+      cmd: "arp_scan",
+      arg: "'192.168.1.0/24'",
+      result: "14 hosts discovered",
+    },
+    {
+      num: "02",
+      title: "Directed Graph Topology",
+      tag: "NETWORKX DiGraph",
+      icon: <Network size={20} color="var(--color-accent)" />,
+      desc: "NetworkX models edge traversal difficulties, betweenness centralities, and reachable subnet distance from INTERNET roots.",
+      cmd: "DiGraph",
+      arg: "nodes=14, edges=32",
+      result: "density=0.175",
+    },
+    {
+      num: "03",
+      title: "Bounded Yen's Path Solver",
+      tag: "GRAPH ALGORITHMS",
+      icon: <Layers size={20} color="var(--color-accent)" />,
+      desc: "Computes top 5 shortest attack paths per crown jewel (max 6 hops, top 25 globally) avoiding combinatorial cycle traps.",
+      cmd: "yen_k_shortest",
+      arg: "source='INTERNET', k=5",
+      result: "optimal routes ranked",
+    },
+    {
+      num: "04",
+      title: "Deterministic $ Valuation",
+      tag: "FINANCIAL ENGINE",
+      icon: <DollarSign size={20} color="var(--color-accent)" />,
+      desc: "Mathematical risk pricing: Likelihood × Asset Value × Multiplier + Breach Base ($500K). Zero LLM pricing hallucinations.",
+      cmd: "calc_exposure",
+      arg: "likelihood=0.88, base=$500k",
+      result: "$902,900 USD",
+    },
+    {
+      num: "05",
+      title: "Defensive Playbook Synthesis",
+      tag: "AI GUARDRAILS",
+      icon: <FileCode size={20} color="var(--color-accent)" />,
+      desc: "NVIDIA NIM (Llama 3.3 70B) synthesizes Ansible, Shell, and AWS CLI scripts with strict output-side offensive marker blocks.",
+      cmd: "ansible_gen",
+      arg: "cve='CVE-2024-4321'",
+      result: "verified patch ready",
+    },
+  ];
+
+  return (
+    <div id="pipeline" ref={containerRef} className="hml-horizontal-scroll-section">
+      {/* Pinned Sticky Window for Full Viewport */}
+      <div className="hml-horizontal-sticky">
+        <div className="hml-wrap" style={{ marginBottom: "2.5rem", paddingTop: "1rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1.25rem" }}>
+            <div>
+              <div className="hml-section-tag" style={{ marginBottom: "0.5rem" }}>
+                Continuous Defensive Pipeline
+              </div>
+              <h2 style={{ fontSize: "clamp(2rem, 3.2vw, 2.75rem)", fontWeight: 800, color: "#171916", margin: 0, letterSpacing: "-0.03em" }}>
+                End-to-End Threat Pipeline
+              </h2>
+            </div>
+            {/* Scroll-Linked Progress Pill */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", background: "#ffffff", padding: "0.6rem 1.35rem", borderRadius: "var(--radius-pill)", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)" }}>
+              <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-primary)", color: "#555951", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                Scroll Progress
+              </span>
+              <div style={{ width: "90px", height: "6px", background: "#eae5dc", borderRadius: "999px", overflow: "hidden" }}>
+                <motion.div style={{ width: progressPercent, height: "100%", background: "var(--color-accent)" }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Horizontally Scrubbed Track */}
+        <motion.div style={{ x }} className="hml-horizontal-track">
+          {stages.map((stage, idx) => (
+            <motion.div
+              key={idx}
+              whileHover={{ y: -6 }}
+              className="hml-horizontal-card"
+              style={{
+                borderRadius: "16px",
+                padding: "2rem",
+                background: "#ffffff",
+                border: "1px solid rgba(23, 25, 22, 0.1)",
+                boxShadow: "0 10px 30px rgba(23, 25, 22, 0.05)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                minHeight: "340px",
+              }}
+            >
+              <div>
+                {/* Header with Number and Category */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "1.35rem", fontFamily: "var(--font-family-primary)", fontWeight: 800, color: "var(--color-accent)", letterSpacing: "-0.02em" }}>
+                      {stage.num}
+                    </span>
+                    <span style={{ fontSize: "0.75rem", color: "#8b8f87", fontWeight: 600 }}>/ 05</span>
+                  </div>
+                  <span style={{ fontSize: "0.68rem", fontFamily: "var(--font-family-primary)", fontWeight: 700, letterSpacing: "0.04em", padding: "0.25rem 0.65rem", borderRadius: "var(--radius-pill)", background: "#f4f1ea", color: "#555951", border: "1px solid rgba(23, 25, 22, 0.06)" }}>
+                    {stage.tag}
+                  </span>
+                </div>
+
+                {/* Title & Icon */}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.85rem" }}>
+                  <div style={{ width: 38, height: 38, borderRadius: "10px", background: "rgba(234, 88, 12, 0.08)", border: "1px solid rgba(234, 88, 12, 0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {stage.icon}
+                  </div>
+                  <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#171916", margin: 0, letterSpacing: "-0.02em", lineHeight: 1.25 }}>
+                    {stage.title}
+                  </h3>
+                </div>
+
+                {/* Description */}
+                <p style={{ fontSize: "0.92rem", color: "#555951", lineHeight: 1.6, margin: 0 }}>
+                  {stage.desc}
+                </p>
+              </div>
+
+              {/* Polished Mini-Terminal Telemetry */}
+              <div style={{ background: "#0f110e", borderRadius: "10px", padding: "0.9rem 1.1rem", fontFamily: "var(--font-family-mono)", fontSize: "0.75rem", color: "#f2efe7", border: "1px solid rgba(255, 255, 255, 0.08)", marginTop: "1.5rem", boxShadow: "0 4px 14px rgba(0, 0, 0, 0.15)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.35rem" }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#ea580c" }} />
+                  <span style={{ color: "#a1a59c", fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>TELEMETRY EXEC</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", overflow: "hidden", whiteSpace: "nowrap" }}>
+                  <span style={{ color: "#fb923c", fontWeight: 700 }}>&gt;</span>
+                  <span style={{ color: "#ffffff", fontWeight: 600 }}>{stage.cmd}</span>
+                  <span style={{ color: "#a1a59c" }}>({stage.arg})</span>
+                  <span style={{ color: "#4ade80", marginLeft: "auto", fontSize: "0.7rem", fontWeight: 600 }}>→ {stage.result}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </div>
   );
 }
 
@@ -419,21 +677,35 @@ function PillarsSection() {
 
   return (
     <section id="pillars" className="hml-section hml-wrap">
-      <div className="hml-section-header">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="hml-section-header"
+      >
         <span className="hml-section-tag">System Architecture</span>
         <h2 className="hml-section-title">Six Pillars of Defensive Intelligence</h2>
         <p className="hml-section-desc">
           Built on mathematical rigor, graph theory, and cryptographically verified data boundaries.
         </p>
-      </div>
+      </motion.div>
 
       <div className="hml-grid-3">
         {pillars.map((p, idx) => (
-          <div key={idx} className="hml-card">
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.4, delay: idx * 0.08 }}
+            whileHover={{ y: -4, scale: 1.01 }}
+            className="hml-card"
+          >
             <div className="hml-card-icon">{p.icon}</div>
             <h3 className="hml-card-title">{p.title}</h3>
             <p className="hml-card-body">{p.body}</p>
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>
@@ -472,15 +744,27 @@ function ComparisonSection() {
 
   return (
     <section id="comparison" className="hml-section hml-wrap">
-      <div className="hml-section-header">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="hml-section-header"
+      >
         <span className="hml-section-tag">Competitive Benchmark</span>
         <h2 className="hml-section-title">Legacy Scanners vs. Drishti Graph Defense</h2>
         <p className="hml-section-desc">
           Why traditional vulnerability assessment fails in modern enterprise topologies.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="hml-table-wrap">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="hml-table-wrap"
+      >
         <table className="hml-table">
           <thead>
             <tr>
@@ -504,7 +788,7 @@ function ComparisonSection() {
             ))}
           </tbody>
         </table>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -560,15 +844,27 @@ aws ec2 authorize-security-group-ingress \\
 
   return (
     <section id="playbooks" className="hml-section hml-wrap">
-      <div className="hml-section-header">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="hml-section-header"
+      >
         <span className="hml-section-tag">Automated Remediation</span>
         <h2 className="hml-section-title">Context-Aware Defensive Playbooks</h2>
         <p className="hml-section-desc">
           AI generates production-ready Ansible, Shell, or Cloud CLI fixes tailored to your actual hostnames and CVEs.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="hml-terminal">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="hml-terminal"
+      >
         <div className="hml-terminal-bar">
           <div className="hml-terminal-dots">
             <div className="hml-terminal-dot"></div>
@@ -600,7 +896,7 @@ aws ec2 authorize-security-group-ingress \\
         <div className="hml-terminal-body">
           <pre>{playbooks[activeTab]}</pre>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -630,17 +926,30 @@ function FaqSection() {
 
   return (
     <section id="faq" className="hml-section hml-wrap">
-      <div className="hml-section-header">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="hml-section-header"
+      >
         <span className="hml-section-tag">Frequently Asked Questions</span>
         <h2 className="hml-section-title">Everything You Need to Know</h2>
         <p className="hml-section-desc">
           Technical specifications, compliance boundaries, and mathematical modeling details.
         </p>
-      </div>
+      </motion.div>
 
       <div className="hml-faq-list">
         {faqs.map((f, i) => (
-          <div key={i} className="hml-faq-item">
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.4, delay: i * 0.08 }}
+            className="hml-faq-item"
+          >
             <button
               className="hml-faq-trigger"
               onClick={() => setOpenIdx(openIdx === i ? null : i)}
@@ -656,7 +965,7 @@ function FaqSection() {
               />
             </button>
             {openIdx === i && <div className="hml-faq-content">{f.a}</div>}
-          </div>
+          </motion.div>
         ))}
       </div>
     </section>
@@ -667,7 +976,13 @@ function FaqSection() {
 function CtaBandSection() {
   return (
     <section className="hml-wrap" style={{ paddingBottom: "4rem" }}>
-      <div className="hml-cta-band">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98, y: 20 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.5 }}
+        className="hml-cta-band"
+      >
         <div style={{ maxWidth: "42rem", marginInline: "auto" }}>
           <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: 800, marginBottom: "1rem", color: "var(--color-text-primary)" }}>
             Ready to Defend Your Attack Surface?
@@ -676,15 +991,19 @@ function CtaBandSection() {
             Launch the interactive security console to explore the Acme Corporation sample network or deploy the edge agent on your private LAN.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
-            <Link to="/signup" className="hml-btn-accent">
-              Get Started Free <ArrowRight size={16} />
-            </Link>
-            <Link to="/login" className="hml-btn-outline">
-              Sign In to Existing Tenant
-            </Link>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link to="/signup" className="hml-btn-accent">
+                Get Started Free <ArrowRight size={16} />
+              </Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link to="/login" className="hml-btn-outline">
+                Sign In to Existing Tenant
+              </Link>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -705,6 +1024,7 @@ function FooterSection() {
 
         <div className="hml-footer-links">
           <a href="#topology">Topology</a>
+          <a href="#pipeline">Pipeline</a>
           <a href="#pillars">Architecture</a>
           <a href="#comparison">Comparison</a>
           <a href="#playbooks">Playbooks</a>

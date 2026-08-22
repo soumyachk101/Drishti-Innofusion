@@ -27,6 +27,3 @@ AsyncSessionLocal = async_sessionmaker(async_engine, expire_on_commit=False, cla
 
 class Base(DeclarativeBase):
  pass
-
-
-__all__ = ["Base", "engine", "SessionLocal", "AsyncSessionLocal"]

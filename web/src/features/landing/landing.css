@@ -8,13 +8,26 @@ html, body {
 .hml {
   min-height: 100dvh;
   background-color: var(--color-surface-base);
-  /* Completely smooth background - zero grid lines */
   background-image: none;
   color: var(--color-text-primary);
   font-family: var(--font-family-primary);
   font-size: var(--font-size-2xl);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* 1. Global Scroll Progress Indicator */
+.hml-scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--color-accent);
+  transform-origin: 0%;
+  z-index: 1000;
+  box-shadow: 0 0 12px rgba(234, 88, 12, 0.5);
 }
 
 .hml ::selection {
@@ -29,7 +42,7 @@ html, body {
 }
 
 .hml-wrap {
-  max-width: 74rem;
+  max-width: 76rem;
   margin-inline: auto;
   padding-inline: clamp(var(--space-4), 4vw, var(--space-9));
 }
@@ -277,10 +290,10 @@ html, body {
   margin-bottom: var(--space-10);
 }
 
-/* Hero Showcase Card with Embedded Hero Image */
+/* Hero Showcase Card with Parallax Depth */
 .hml-hero-stage {
   position: relative;
-  max-width: 72rem;
+  max-width: 74rem;
   margin-inline: auto;
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border-default);
@@ -292,7 +305,7 @@ html, body {
 .hml-hero-img-wrap {
   position: relative;
   width: 100%;
-  min-height: 480px;
+  min-height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -302,90 +315,106 @@ html, body {
 
 .hml-hero-img {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -15% -5%;
+  width: 110%;
+  height: 130%;
   object-fit: cover;
   opacity: 0.68;
   filter: contrast(1.15) brightness(0.85);
+  pointer-events: none;
 }
 
 .hml-hero-hud {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: var(--space-6);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: 1.5rem;
 }
 
 .hml-hud-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: 1rem;
 }
 
 .hml-hud-title {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-lg);
-  color: var(--color-text-secondary);
+  gap: 0.6rem;
+  font-family: var(--font-family-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
 }
 
 .hml-hud-badge {
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-family-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .hml-hud-badge-danger {
-  background: rgba(225, 29, 72, 0.25);
-  color: #ff8598;
-  border: 1px solid rgba(225, 29, 72, 0.5);
+  background: rgba(225, 29, 72, 0.2);
+  color: #fda4af;
+  border: 1px solid rgba(225, 29, 72, 0.45);
 }
 
 .hml-hud-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
 .hml-stat-card {
-  padding: var(--space-4);
-  background: rgba(15, 17, 14, 0.82);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-card);
+  padding: 1.25rem 1.5rem;
+  background: rgba(18, 20, 17, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   text-align: left;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.hml-stat-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .hml-stat-label {
-  font-size: var(--font-size-sm);
-  color: #c5c2ba;
-  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+  color: #a1a59c;
+  font-family: var(--font-family-primary);
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--space-1);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
 }
 
 .hml-stat-val {
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-4xl);
+  font-size: 1.85rem;
   font-weight: 800;
+  letter-spacing: -0.02em;
+  font-feature-settings: "tnum";
   color: #ffffff;
+  line-height: 1.2;
 }
 
 .hml-stat-val-danger {
-  color: #ff8598;
+  color: #fb7185;
 }
 
 .hml-stat-val-accent {
@@ -393,62 +422,54 @@ html, body {
 }
 
 .hml-stat-sub {
-  font-size: var(--font-size-sm);
+  font-size: 0.8rem;
   color: #8b8f87;
-  margin-top: var(--space-1);
+  margin-top: 0.4rem;
+  font-weight: 500;
 }
 
-/* Interactive Path Diagram */
-.hml-path-nodes {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  overflow-x: auto;
-  padding-block: var(--space-2);
+/* 2. TRUE SCROLL-DRIVEN HORIZONTAL SCROLL & PIN ANIMATION */
+.hml-horizontal-scroll-section {
+  position: relative;
+  height: 260vh; /* Vertical scroll track */
 }
 
-.hml-path-node {
+.hml-horizontal-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: var(--space-3) var(--space-4);
+  justify-content: center;
+  overflow: hidden;
+  background: var(--color-surface-base);
+}
+
+.hml-horizontal-track {
+  display: flex;
+  gap: 2rem;
+  padding-left: clamp(2rem, 8vw, 8rem);
+  width: max-content;
+  will-change: transform;
+}
+
+.hml-horizontal-card {
+  flex: 0 0 380px;
+  padding: 2.25rem;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-card);
-  min-width: 140px;
-  text-align: center;
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-lift);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 320px;
+  transition: transform var(--motion-duration-instant) var(--motion-ease), border-color var(--motion-duration-instant) var(--motion-ease);
 }
 
-.hml-path-node.is-entry {
-  border-color: rgba(225, 29, 72, 0.3);
-  background: #fff5f6;
-}
-
-.hml-path-node.is-target {
+.hml-horizontal-card:hover {
+  transform: translateY(-6px);
   border-color: rgba(234, 88, 12, 0.4);
-  background: #fff8f5;
-}
-
-.hml-node-kind {
-  font-size: var(--font-size-xs);
-  font-family: var(--font-family-mono);
-  color: var(--color-text-inverse);
-  text-transform: uppercase;
-}
-
-.hml-node-name {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-top: var(--space-1);
-}
-
-.hml-path-arrow {
-  color: var(--color-accent);
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
 }
 
 /* Section Header */
@@ -711,7 +732,9 @@ html, body {
 @media (max-width: 768px) {
   .hml-nav-links { display: none; }
   .hml-hud-header { flex-direction: column; align-items: flex-start; }
-  .hml-path-nodes { flex-direction: column; align-items: stretch; }
-  .hml-path-arrow { transform: rotate(90deg); margin-block: var(--space-1); align-self: center; }
   .hml-footer-inner { flex-direction: column; align-items: flex-start; }
+  .hml-horizontal-scroll-section { height: auto; }
+  .hml-horizontal-sticky { position: static; height: auto; padding-block: 2rem; }
+  .hml-horizontal-track { flex-direction: column; padding-inline: 1rem; }
+  .hml-horizontal-card { width: 100%; flex: 1 1 auto; }
 }

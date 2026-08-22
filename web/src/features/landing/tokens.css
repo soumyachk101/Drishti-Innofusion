@@ -1,16 +1,15 @@
-/* Drishti Token-Driven UI Foundations — Smooth Warm Alabaster Canvas with Prompt Palette */
+/* Drishti Token-Driven UI Foundations — Warm Alabaster & Ember Orange Smooth Palette */
 .hml {
   /* Surfaces */
   --color-surface-base: #f4f1ea;        /* Smooth warm alabaster canvas */
   --color-surface-raised: #ffffff;      /* Pure white smooth cards */
   --color-surface-elevated: #eae5dc;    /* Elevated surface badge */
   --color-surface-dark: #0f110e;        /* Dark terminal & HUD container */
-  --color-surface-base-dark: #000000;   /* Pure black base */
   
-  /* Text & Ink Tokens (Exact Prompt Mappings) */
+  /* Text & Ink Tokens */
   --color-text-primary: #171916;        /* Deep charcoal ink */
   --color-text-secondary: #f2efe7;      /* Warm alabaster text for dark surfaces */
-  --color-text-tertiary: #221f1a;       /* Dark neutral accent / bold borders */
+  --color-text-tertiary: #221f1a;       /* Dark neutral accent */
   --color-text-inverse: #555951;        /* Medium grey/olive descriptor text */
   --color-text-muted: #6b7280;          /* Secondary reading muted text */
   --color-text-light: #ffffff;          /* Crisp white */
@@ -42,7 +41,7 @@
   --font-family-primary: "Manrope", sans-serif;
   --font-family-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
 
-  /* Typography Scale from Prompt */
+  /* Typography Scale */
   --font-size-xs: 9px;
   --font-size-sm: 10px;
   --font-size-md: 11px;
@@ -53,7 +52,7 @@
   --font-size-4xl: 32px;
   --font-size-display: clamp(32px, 5.2vw + 12px, 56px);
 
-  /* Spacing Scale from Prompt */
+  /* Spacing Scale */
   --space-1: 4px;
   --space-2: 9px;
   --space-3: 12px;
@@ -74,7 +73,7 @@
   --motion-duration-instant: 200ms;
   --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Shadows (Smooth & Silky) */
+  /* Shadows */
   --shadow-sm: 0 1px 3px rgba(23, 25, 22, 0.04);
   --shadow-card: 0 4px 20px rgba(23, 25, 22, 0.05);
   --shadow-lift: 0 16px 36px rgba(23, 25, 22, 0.08);
