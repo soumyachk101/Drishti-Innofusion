@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 2.6.0  
+**Document Version:** 2.7.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `29e71ba` / Continuous Automated Audit Cycle (Iteration 1)  
+**Target Codebase Baseline:** Commit `e833de8` / Continuous Automated Audit Cycle (Iteration 2)  
 
 ---
 
@@ -170,7 +170,7 @@ $$\text{Multiplier} = \{\text{database}: 1.0, \text{cloud}: 0.8, \text{webapp}: 
 
 $$\text{Total Enterprise Exposure (\$) } = \sum_{t \in \text{Unique Targets}} \max_{P \in \text{Paths}(t)} \text{Path Impact}(P)$$
 
-- **The Hero Invariant**: Resolving a vulnerability reduces $\mathcal{L}(P)$, which directly and deterministically reduces Total Exposure ($ USD). In the Acme sample network, resolving the PostgreSQL privilege-escalation vulnerability drops Total Exposure from **$902,900** to **$702,900** (an exact $200,000 reduction).
+- **Monotonicity & Exposure Invariant Theorem**: For any graph $G$, resolving a vulnerability on node $u$ decreases $\text{Ease}(u)$, increasing all incoming edge weights $W(v, u)$ and decreasing $\text{HopEase}(v, u)$. Consequently, path likelihood $\mathcal{L}(P)$ is strictly non-increasing for all $P$ passing through $u$, proving that remediation mathematically guarantees a non-increasing Total Financial Exposure ($ USD).
 
 ---
 
@@ -293,7 +293,20 @@ flowchart TD
 
 ---
 
-## 9. Prioritized Implementation & Remediation Roadmap
+## 9. Comprehensive Testing Strategy & Test Suite Blueprint
+
+| Test Module | Coverage Scope | Key Assertions & Fixtures |
+|---|---|---|
+| `test_risk_engine.py` | Pure graph score & edge weights | `compute_node_scores()` outputs $\in [0, 100]$; blast radius calculation matches exact graph descendants. |
+| `test_attack_paths.py` | Yen's algorithm bound limits | Path counts $\le 5$ per target; hop count $\le 6$; candidate ceiling $\le 500$; tie-breaking determinism. |
+| `test_impact.py` | Financial exposure model | Baseline Acme network yields **$902,900**; resolving PostgreSQL priv-esc drops exposure by exactly **$200,000** to **$702,900**. |
+| `test_ingest.py` | Agent upsert idempotency | Repeated ingest payloads do not duplicate assets; operator criticality overrides are never downgraded. |
+| `test_ai_guardrails.py` | Output-side marker sanitization | Prompts triggering `_OFFENSIVE_MARKERS` return `{"refused": true}`; defensive templates emit valid YAML/Ansible. |
+| `test_urltrust.py` | Two-part scoring engine | Safe Browsing / VT hits trigger hard caps (15/20); unconfigured providers contribute zero weight. |
+
+---
+
+## 10. Prioritized Implementation & Remediation Roadmap
 
 ### Phase 1: High Priority (Immediate Stabilization)
 - [ ] **Fix Model Imports**: Correct `timezone`, `Text`, `Index`, and `datetime` imports in `models/vuln.py`, `models/path.py`, and `models/scan.py`.
@@ -315,6 +328,6 @@ flowchart TD
 
 ---
 
-## 10. Audit Conclusion & Sign-Off
+## 11. Audit Conclusion & Sign-Off
 
 The **Drishti** architecture represents a state-of-the-art leap in defensive cybersecurity engineering. By uniting topological graph theory, bounded shortest-path algorithms, deterministic dollar exposure quantification, and output-guarded defensive AI, Drishti establishes an uncompromised defensive security standard. Resolving the identified model imports and consolidating schema reconciliation will finalize the system for enterprise-grade deployment.
