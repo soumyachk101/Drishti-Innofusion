@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 2.7.0  
+**Document Version:** 2.8.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `e833de8` / Continuous Automated Audit Cycle (Iteration 2)  
+**Target Codebase Baseline:** Commit `8c0c11d` / Continuous Automated Audit Cycle (Iteration 3)  
 
 ---
 
@@ -231,7 +231,7 @@ flowchart TD
 
 ## 6. Security Model, Defensive Posture & Cryptographic Integrity
 
-### 6.1 Cryptographic Guarantees
+### 6.1 Cryptographic Guarantees & Multi-Tenancy
 1. **Timing-Safe Login Mechanism**:
    - `core/security.py` precomputes `DUMMY_PASSWORD_HASH = hash_password(secrets.token_urlsafe(32))`.
    - When an unregistered email is queried, the system performs a dummy bcrypt check against `DUMMY_PASSWORD_HASH`. Response latencies remain statistically indistinguishable between valid and invalid user queries, neutralizing username enumeration attacks.
@@ -241,6 +241,8 @@ flowchart TD
    - User entities maintain an integer `token_version`. Resetting a password or revoking sessions increments `token_version`, instantly invalidating all outstanding JWTs without requiring a database token blacklist.
 4. **Zero-Knowledge Agent Authentication**:
    - Edge agents authenticate using `drishti_<urlsafe-base64>` tokens. The raw token is returned exactly once during generation. Only the SHA256 digest is stored in the database.
+5. **Strict Multi-Tenant Isolation**:
+   - Ingestion payloads carry `org_slug` which is cross-referenced against the authenticated agent's `org_id` in database. Mismatched tenant payloads are rejected with HTTP 403 Forbidden.
 
 ### 6.2 Defensive AI Guardrails
 - **Strict Output-Side Marker Scanning**: Rather than fragile input prompt filtering, all LLM completions are scanned against explicit offensive markers:
