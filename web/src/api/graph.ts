@@ -1,6 +1,8 @@
 import api from '../lib/apiClient';
 
-export async function fetchGraph(orgId: string, criticality: string = 'all') {
- const res = await api.get('/graph', { params: { org_id: orgId, criticality } });
- return res.data;
+export async function fetchGraph(orgId?: string, criticality: string = 'all') {
+  const params: Record<string, string> = { criticality };
+  if (orgId) params.org_id = orgId;
+  const res = await api.get('/graph', { params });
+  return res.data;
 }
