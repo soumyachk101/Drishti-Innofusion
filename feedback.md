@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 2.5.0  
+**Document Version:** 2.6.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `c905de0` / Full Specification & Deep-Dive Architecture Audit  
+**Target Codebase Baseline:** Commit `29e71ba` / Continuous Automated Audit Cycle (Iteration 1)  
 
 ---
 
@@ -205,9 +205,27 @@ $$\text{Total Enterprise Exposure (\$) } = \sum_{t \in \text{Unique Targets}} \m
 - **Background Dispatcher**: 30-second polling daemon querying for unacknowledged `critical` findings or active `arp_spoof` / `rogue_device` threats.
 - **Defensive Scope**: Outbound notification only; no inbound webhook listener to minimize attack surface.
 
-### 5.7 ML Anomaly & Hardening Simulator
-- **IsolationForest & KMeans (`services/intel.py`)**: Unsupervised anomaly detection flagging abnormal host connectivity and clustering assets into topological risk bands.
-- **Quantified Hardening Projections (`services/hardening.py`)**: Simulates PATCH, VLAN isolation, and firewall containment actions, returning measured percentage risk reduction projections per asset.
+### 5.7 Live Threat Detection Engine & MITRE ATT&CK Mapping
+
+```mermaid
+flowchart TD
+    Obs["Live Network Observations (ARP / L3 / Domains)"] --> Engine["detect_threats() Pure Engine"]
+    Engine --> T1["ARP Spoofing (T1557)"]
+    Engine --> T2["Rogue Device (T1200)"]
+    Engine --> T3["Risky Service (T1210)"]
+    Engine --> T4["Malicious Domain (T1071)"]
+    T1 --> Alert["Telegram Dispatcher & React Flow Attack Map"]
+    T2 --> Alert
+    T3 --> Alert
+    T4 --> Alert
+```
+
+| Threat Type | Signature & Heuristic | Severity | MITRE ATT&CK Reference |
+|---|---|---|---|
+| `arp_spoof` | Single IP mapped to $\ge 2$ distinct MAC addresses within active window. | Critical | **T1557** — Adversary-in-the-Middle |
+| `rogue_device` | Unrecognized device first observed $\le 10$ minutes ago on private subnet. | High | **T1200** — Hardware Additions |
+| `risky_service` | Asset exposing insecure legacy ports (21, 23, 139, 445, 3389, 5900) or active CVEs. | High | **T1210** — Exploitation of Remote Services |
+| `malicious_domain` | Outbound DNS/HTTP request to domain flagged as `High Risk` or `Caution`. | High | **T1071** — Application Layer Protocol (C2) |
 
 ---
 
