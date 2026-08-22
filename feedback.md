@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 3.8.0  
+**Document Version:** 3.9.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `d0545be` / Continuous Automated Audit Cycle (Iteration 21)  
+**Target Codebase Baseline:** Commit `5f497c1` / Continuous Automated Audit Cycle (Iteration 23)  
 
 ---
 
