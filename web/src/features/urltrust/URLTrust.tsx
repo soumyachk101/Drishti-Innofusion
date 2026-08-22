@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Paper, TextField, Button, Alert } from '@mui/material';
-import api from '../lib/apiClient';
+import api from '../../lib/apiClient';
 
 export default function URLTrust() {
  const [url, setUrl] = useState('');
