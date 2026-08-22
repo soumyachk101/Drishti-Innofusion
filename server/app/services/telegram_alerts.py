@@ -52,27 +52,48 @@ def _send_telegram(bot_token: str, chat_id: str, text: str) -> None:
         logger.error("telegram send failed: %s", exc)
 
 
+def _ist_timestamp(dt: datetime | None = None) -> str:
+    """Format datetime in Indian Standard Time (Asia/Kolkata, UTC+5:30)."""
+    if dt is None:
+        dt = datetime.now(timezone.utc)
+    elif dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    try:
+        from zoneinfo import ZoneInfo
+        ist_dt = dt.astimezone(ZoneInfo("Asia/Kolkata"))
+    except Exception:
+        ist_dt = dt.astimezone(timezone(timedelta(hours=5, minutes=30)))
+    return ist_dt.strftime("%d-%b-%Y %I:%M:%S %p IST")
+
+
 def _format_finding_alert(f) -> str:
     sev = f.vulnerability.severity.upper() if f.vulnerability and f.vulnerability.severity else "HIGH"
     title = f.vulnerability.title if f.vulnerability else "Unknown vulnerability"
     asset = f.asset.hostname if f.asset and f.asset.hostname else (f.asset.ip if f.asset else f.asset_id[:8])
     cve = f.vulnerability.cve_id if f.vulnerability and f.vulnerability.cve_id else "N/A"
+    detected_time = _ist_timestamp(getattr(f, "detected_at", None))
     return (
-        f"\U0001f6a8 *[{sev}] {title}*\n"
+        f"🚨 *[DRISHTI ALERT — {sev}]*\n"
+        f"*{title}*\n\n"
         f"• *Asset:* `{asset}`\n"
         f"• *CVE:* `{cve}`\n"
-        f"• *Status:* `{f.status}`"
+        f"• *Status:* `{f.status}`\n"
+        f"• *Time:* `{detected_time}`\n\n"
+        f"🛡️ _Drishti Cyber Threat Intelligence_"
     )
 
 
 def _format_threat_alert(t) -> str:
-    emoji = "\U0001f6a8"
+    emoji = "🚨" if t.severity in ("critical", "high") else "⚠️"
     kind = t.kind.replace("_", " ").title()
+    alert_time = _ist_timestamp(getattr(t, "last_seen", None))
     return (
-        f"{emoji} *[{t.severity.upper()}] {kind}*\n"
-        f"{t.title}\n"
-        f"{t.detail}\n"
-        f"MITRE: {t.mitre or 'N/A'}"
+        f"{emoji} *[DRISHTI NETWORK THREAT — {t.severity.upper()}]*\n"
+        f"*{kind}: {t.title}*\n\n"
+        f"• *Detail:* {t.detail}\n"
+        f"• *MITRE ATT&CK:* `{t.mitre or 'N/A'}`\n"
+        f"• *Time:* `{alert_time}`\n\n"
+        f"🛡️ _Drishti Live Watcher_"
     )
 
 
