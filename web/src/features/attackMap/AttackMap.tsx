@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
+import { Box, Typography, Select, MenuItem, FormControl, InputLabel, Chip, Paper } from '@mui/material';
 import { fetchGraph } from '../../api/graph';
 
 interface AssetNode {

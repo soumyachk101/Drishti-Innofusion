@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
  AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon,
- ListItemText, Box, useMediaQuery, useTheme, IconButton,
+ ListItemText, Box, useMediaQuery, useTheme, IconButton, ListItemButton,
 } from '@mui/material';
 import {
  Dashboard as DashboardIcon,
@@ -16,7 +16,7 @@ import {
  Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const DRAWER_WIDTH = 260;
 
@@ -77,8 +77,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
  <Box sx={{ overflow: 'auto' }}>
  <List>
  {NAV_ITEMS.map((item) => (
- <ListItem
- button
+ <ListItemButton
  key={item.path}
  selected={location.pathname === item.path}
  onClick={() => { navigate(item.path); if (mobile) setOpen(false); }}
@@ -90,14 +89,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
  {item.icon}
  </ListItemIcon>
  <ListItemText primary={item.label} />
- </ListItem>
+ </ListItemButton>
  ))}
  </List>
  <Box sx={{ px: 2, mt: 2 }}>
- <ListItem button onClick={handleLogout}>
+ <ListItemButton onClick={handleLogout}>
  <ListItemIcon><SettingsIcon sx={{ color: 'grey.400' }} /></ListItemIcon>
  <ListItemText primary="Logout" />
- </ListItem>
+ </ListItemButton>
  </Box>
  </Box>
  </Drawer>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Paper, Button, Grid } from '@mui/material';
 import { Download as DownloadIcon, PictureAsPdf as PdfIcon } from '@mui/icons-material';
-import api from '../lib/apiClient';
+import api from '../../lib/apiClient';
 
 export default function Report() {
  const generate = async () => {

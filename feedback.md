@@ -1,10 +1,10 @@
 # Drishti — Comprehensive Architecture & Code Review Report
 
-**Document Version:** 3.9.0  
+**Document Version:** 4.0.0  
 **Audit Date:** August 22, 2026  
 **Auditor / Reviewer:** Antigravity AI Code Review & Security Analysis Engine  
 **Repository:** [soumyachk101/Drishti-Innofusion](https://github.com/soumyachk101/Drishti-Innofusion)  
-**Target Codebase Baseline:** Commit `5f497c1` / Continuous Automated Audit Cycle (Iteration 23)  
+**Target Codebase Baseline:** Commit `e9ceeba` / Continuous Automated Audit Cycle (Iteration 25)  
 
 ---
 
@@ -103,12 +103,12 @@ A comprehensive file-by-file inspection of `server/app/`, `src/`, and `web/` ide
 | 2 | `server/app/models/path.py:1, 17, 18, 25` | Import & Runtime Failure | `Text` and `Index` not imported from `sqlalchemy`; `datetime/timezone` not imported from `datetime`. | **Fixed / Reviewed** |
 | 3 | `server/app/models/scan.py:12, 34` | Runtime `NameError` | Missing `datetime/timezone` imports on `started_at` and `shared_at` column defaults. | **Fixed / Reviewed** |
 | 4 | `server/app/db.py:28` vs `models/base.py:7` | Schema Migration Bug | Dual `DeclarativeBase` instances cause `db_init.py:reconcile_columns` to find 0 domain models. | **Fixed / Reviewed** |
-| 5 | `server/app/main.py` | Router Assembly | Registered all 15 routers including `remediation.router`. | **Positive** |
-| 6 | `web/src/features/remediation/` | Remediation Console | Tabbed playbook management interface (`Plans`, `Actions`, `Policy`, `Templates`, `Changelog`). | **Positive** |
-| 7 | `web/src/features/findings/` | Findings Table | High-density DataGrid displaying CVE findings, CVSS scores, and status lifecycle. | **Positive** |
-| 8 | `web/src/features/paths/` | Path Data Grid | Attack path asset traversal metrics with vulnerability counts and risk scoring. | **Positive** |
-| 9 | `web/src/features/attackMap/` | Interactive DAG | React Flow 11 topology visualizer with organization and criticality filtering. | **Positive** |
-| 10 | `web/src/features/report/` | Intel & Reports | Executive compliance reports with CVE risk spreads. | **Positive** |
+| 5 | `web/src/contexts/AuthContext.tsx` | Clean Client Integration | Refactored with `apiClient` Axios wrapper and persistent user serialization. | **Positive** |
+| 6 | `web/src/components/Layout.tsx` | Modular Import Resolution | Clean relative path resolution to `../contexts/AuthContext`. | **Positive** |
+| 7 | `web/src/features/remediation/` | Remediation Console | Tabbed playbook management interface (`Plans`, `Actions`, `Policy`, `Templates`, `Changelog`). | **Positive** |
+| 8 | `web/src/features/findings/` | Findings Table | High-density DataGrid displaying CVE findings, CVSS scores, and status lifecycle. | **Positive** |
+| 9 | `web/src/features/paths/` | Path Data Grid | Attack path asset traversal metrics with vulnerability counts and risk scoring. | **Positive** |
+| 10 | `web/src/features/attackMap/` | Interactive DAG | React Flow 11 topology visualizer with organization and criticality filtering. | **Positive** |
 
 ---
 
