@@ -25,7 +25,7 @@ export function RiskBarChart({ data }: { data: { type: string; risk: number }[] 
  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
  <XAxis dataKey="type" tick={{ fill: '#9ca3af' }} />
  <YAxis tick={{ fill: '#9ca3af' }} />
- <Tooltip contentStyle={{ bgcolor: '#111827' }} />
+ <Tooltip />
  <Bar dataKey="risk" fill="#00e676" />
  </BarChart>
  </ResponsiveContainer>
@@ -39,7 +39,7 @@ export function TrendLineChart({ data }: { data: { date: string; score: number }
  <CartesianGrid strokeDasharray="3 3" stroke="#333" />
  <XAxis dataKey="date" tick={{ fill: '#9ca3af' }} />
  <YAxis tick={{ fill: '#9ca3af' }} />
- <Tooltip contentStyle={{ bgcolor: '#111827' }} />
+ <Tooltip />
  <Line type="monotone" dataKey="score" stroke="#00e676" strokeWidth={2} />
  </LineChart>
  </ResponsiveContainer>
