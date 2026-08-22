@@ -39,3 +39,9 @@ def reconcile_columns(engine):
  conn.commit()
  except Exception:
  pass # column may have been added concurrently
+
+
+def init_db():
+ """Create all tables and reconcile schema."""
+ Base.metadata.create_all(bind=engine)
+ reconcile_columns(engine)

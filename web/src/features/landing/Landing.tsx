@@ -54,11 +54,11 @@ function TopStatusStrip() {
     <div className="hml-strip">
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <span>DRISHTI <em>//</em> DEFENSIVE GRAPH INTELLIGENCE</span>
-        <span style={{ opacity: 0.4 }}>|</span>
+        <span style={{ opacity: 0.3 }}>|</span>
         <span>ENGINE: NETWORKX 3.3 (BOUNDED YEN'S K-SHORTEST)</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        <span>STATUS: <span style={{ color: "var(--color-emerald)" }}>OPERATIONAL</span></span>
+        <span>STATUS: <span style={{ color: "var(--color-status-success)", fontWeight: 700 }}>OPERATIONAL</span></span>
         <span>UTC: {time}</span>
       </div>
     </div>
@@ -105,8 +105,8 @@ function HeroSection() {
       <div className="hml-pill-tag">
         <span className="hml-pill-dot"></span>
         <span>Graph-Theoretic Defensive Security</span>
-        <span style={{ color: "var(--color-dim)" }}>•</span>
-        <span style={{ color: "var(--color-accent)" }}>Zero-Hallucination Impact</span>
+        <span style={{ color: "var(--color-text-muted)" }}>•</span>
+        <span style={{ color: "var(--color-accent)", fontWeight: 700 }}>Zero-Hallucination Impact</span>
       </div>
 
       <h1 className="hml-hero-title">
@@ -136,12 +136,12 @@ function HeroSection() {
             <div className="hml-hud-header">
               <div className="hml-hud-title">
                 <Activity size={18} color="var(--color-accent)" />
-                <span style={{ fontWeight: 600 }}>LIVE TOPOLOGY AUDIT</span>
-                <span style={{ color: "var(--color-dim)" }}>/ ACME_CORP_SAMPLE</span>
+                <span style={{ fontWeight: 700 }}>LIVE TOPOLOGY AUDIT</span>
+                <span style={{ color: "#8b8f87" }}>/ ACME_CORP_SAMPLE</span>
               </div>
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 <span className="hml-hud-badge hml-hud-badge-danger">5 CHAINED ATTACK PATHS</span>
-                <span className="hml-hud-badge" style={{ background: "rgba(59,130,246,0.12)", color: "#60a5fa", border: "1px solid rgba(59,130,246,0.3)" }}>
+                <span className="hml-hud-badge" style={{ background: "rgba(234, 88, 12, 0.2)", color: "#fb923c", border: "1px solid rgba(234, 88, 12, 0.4)" }}>
                   POSTGRESQL ADVISORY LOCK
                 </span>
               </div>
@@ -168,7 +168,7 @@ function HeroSection() {
 
               <div className="hml-stat-card">
                 <div className="hml-stat-label">Defense Guardrail</div>
-                <div className="hml-stat-val" style={{ color: "var(--color-emerald)" }}>PASS (100%)</div>
+                <div className="hml-stat-val" style={{ color: "#4ade80" }}>PASS (100%)</div>
                 <div className="hml-stat-sub">Output-side offensive scanner active</div>
               </div>
             </div>
@@ -187,9 +187,15 @@ function InteractivePathSection() {
   const paths = [
     {
       id: 1,
-      name: "Path #1: External Foothold to Crown Jewel",
+      name: "Path #1",
+      subtitle: "Foothold to Main DB",
       target: "PostgreSQL Database (10.0.0.5)",
-      hops: ["INTERNET (0.0.0.0)", "Edge Firewall (192.168.1.1)", "Web Server (192.168.1.10)", "PostgreSQL Main DB (10.0.0.5)"],
+      hops: [
+        { label: "Entry Point", name: "INTERNET", ip: "0.0.0.0", type: "entry" },
+        { label: "Hop 01", name: "Edge Firewall", ip: "192.168.1.1", type: "fw" },
+        { label: "Hop 02", name: "Web Server", ip: "192.168.1.10", type: "srv" },
+        { label: "Crown Jewel", name: "PostgreSQL DB", ip: "10.0.0.5", type: "target" },
+      ],
       vuln: "CVE-2024-4321 (PostgreSQL Privilege Escalation)",
       likelihood: remediated ? 0.05 : 0.88,
       exposure: remediated ? 250000 : 902900,
@@ -197,9 +203,15 @@ function InteractivePathSection() {
     },
     {
       id: 2,
-      name: "Path #2: Customer Vault Compromise",
+      name: "Path #2",
+      subtitle: "Customer Vault Compromise",
       target: "Customer Data Vault (10.0.0.8)",
-      hops: ["INTERNET (0.0.0.0)", "Edge Firewall (192.168.1.1)", "API Gateway (192.168.1.50)", "Data Vault (10.0.0.8)"],
+      hops: [
+        { label: "Entry Point", name: "INTERNET", ip: "0.0.0.0", type: "entry" },
+        { label: "Hop 01", name: "Edge Firewall", ip: "192.168.1.1", type: "fw" },
+        { label: "Hop 02", name: "API Gateway", ip: "192.168.1.50", type: "srv" },
+        { label: "Crown Jewel", name: "Data Vault", ip: "10.0.0.8", type: "target" },
+      ],
       vuln: "CVE-2024-2141 (Apache Log4j RCE)",
       likelihood: 0.72,
       exposure: 750000,
@@ -207,9 +219,14 @@ function InteractivePathSection() {
     },
     {
       id: 3,
-      name: "Path #3: Internal Keycloak Auth Bypass",
+      name: "Path #3",
+      subtitle: "Keycloak Auth Bypass",
       target: "Auth Keycloak (192.168.1.15)",
-      hops: ["INTERNET (0.0.0.0)", "Edge Firewall (192.168.1.1)", "Auth Keycloak (192.168.1.15)"],
+      hops: [
+        { label: "Entry Point", name: "INTERNET", ip: "0.0.0.0", type: "entry" },
+        { label: "Hop 01", name: "Edge Firewall", ip: "192.168.1.1", type: "fw" },
+        { label: "Crown Jewel", name: "Auth Keycloak", ip: "192.168.1.15", type: "target" },
+      ],
       vuln: "CVE-2024-1188 (OpenSSH Auth Bypass)",
       likelihood: 0.54,
       exposure: 350000,
@@ -229,25 +246,35 @@ function InteractivePathSection() {
         </p>
       </div>
 
-      <div className="hml-card" style={{ background: "var(--color-map-well)", padding: "2.5rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "2rem" }}>
+      <div className="hml-card" style={{ background: "var(--color-surface-raised)", padding: "clamp(1.5rem, 3vw, 2.5rem)", boxShadow: "var(--shadow-lift)" }}>
+        {/* Top Controls Bar */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "2.25rem" }}>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
             {paths.map((p) => (
               <button
                 key={p.id}
                 onClick={() => setSelectedPath(p.id)}
                 style={{
-                  padding: "0.5rem 1rem",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.6rem 1.25rem",
                   borderRadius: "var(--radius-pill)",
-                  background: selectedPath === p.id ? "var(--color-paper-elevated)" : "transparent",
-                  border: `1px solid ${selectedPath === p.id ? "var(--color-accent)" : "var(--color-rule)"}`,
-                  color: selectedPath === p.id ? "#fff" : "var(--color-muted)",
-                  fontSize: "var(--text-sm)",
-                  fontWeight: 600,
+                  background: selectedPath === p.id ? "#171916" : "#ffffff",
+                  border: `1px solid ${selectedPath === p.id ? "#171916" : "rgba(23, 25, 22, 0.15)"}`,
+                  color: selectedPath === p.id ? "#ffffff" : "#171916",
+                  fontSize: "0.95rem",
+                  fontWeight: 700,
                   cursor: "pointer",
+                  boxShadow: selectedPath === p.id ? "0 4px 12px rgba(23, 25, 22, 0.2)" : "0 1px 3px rgba(23, 25, 22, 0.05)",
+                  transition: "all 0.2s ease",
                 }}
               >
-                {p.name.split(":")[0]}
+                {selectedPath === p.id && (
+                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--color-accent)" }} />
+                )}
+                <span>{p.name}</span>
+                <span style={{ fontSize: "0.75rem", opacity: selectedPath === p.id ? 0.7 : 0.5, fontWeight: 500 }}>({p.subtitle})</span>
               </button>
             ))}
           </div>
@@ -255,52 +282,97 @@ function InteractivePathSection() {
           <button
             onClick={() => setRemediated(!remediated)}
             style={{
-              padding: "0.5rem 1.25rem",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.65rem 1.4rem",
               borderRadius: "var(--radius-pill)",
-              background: remediated ? "rgba(16,185,129,0.15)" : "rgba(225,29,72,0.15)",
-              border: `1px solid ${remediated ? "var(--color-emerald)" : "var(--color-crimson)"}`,
-              color: remediated ? "#34d399" : "#fb7185",
-              fontSize: "var(--text-sm)",
-              fontWeight: 600,
+              background: remediated ? "rgba(21, 128, 61, 0.1)" : "rgba(234, 88, 12, 0.1)",
+              border: `1px solid ${remediated ? "#15803d" : "#ea580c"}`,
+              color: remediated ? "#15803d" : "#ea580c",
+              fontSize: "0.95rem",
+              fontWeight: 700,
               cursor: "pointer",
+              transition: "all 0.2s ease",
             }}
           >
-            {remediated ? "✓ CVE Remediated (Risk Dropped)" : "⚡ Simulate Finding Resolution"}
+            {remediated ? (
+              <>
+                <CheckCircle2 size={16} />
+                <span>CVE Remediated (Risk Dropped)</span>
+              </>
+            ) : (
+              <span>Simulate Finding Resolution</span>
+            )}
           </button>
         </div>
 
-        <div className="hml-path-nodes">
+        {/* Nodes Diagram */}
+        <div className="hml-path-nodes" style={{ background: "var(--color-surface-base)", padding: "1.5rem", borderRadius: "var(--radius-card)", border: "1px solid rgba(23, 25, 22, 0.08)" }}>
           {current.hops.map((hop, index) => (
             <React.Fragment key={index}>
-              <div className={`hml-path-node ${index === 0 ? "is-entry" : index === current.hops.length - 1 ? "is-target" : ""}`}>
-                <span className="hml-node-kind">{index === 0 ? "Entry Point" : index === current.hops.length - 1 ? "Crown Jewel" : `Hop 0${index}`}</span>
-                <span className="hml-node-name">{hop}</span>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  padding: "1rem 1.25rem",
+                  background: hop.type === "entry" ? "#fff5f5" : hop.type === "target" ? "#fff8f5" : "#ffffff",
+                  border: `1px solid ${hop.type === "entry" ? "rgba(225, 29, 72, 0.3)" : hop.type === "target" ? "rgba(234, 88, 12, 0.4)" : "rgba(23, 25, 22, 0.1)"}`,
+                  borderRadius: "10px",
+                  minWidth: "155px",
+                  boxShadow: "0 2px 8px rgba(23, 25, 22, 0.04)",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.35rem" }}>
+                  <span style={{ fontSize: "0.65rem", fontFamily: "var(--font-family-mono)", fontWeight: 700, textTransform: "uppercase", color: hop.type === "entry" ? "#e11d48" : hop.type === "target" ? "#ea580c" : "#555951" }}>
+                    {hop.label}
+                  </span>
+                  <span style={{ fontSize: "0.65rem", fontFamily: "var(--font-family-mono)", color: "#8b8f87" }}>
+                    {hop.ip}
+                  </span>
+                </div>
+                <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#171916" }}>
+                  {hop.name}
+                </span>
               </div>
-              {index < current.hops.length - 1 && <span className="hml-path-arrow">→</span>}
+              {index < current.hops.length - 1 && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", paddingInline: "0.25rem" }}>
+                  <ArrowRight size={18} color="var(--color-accent)" />
+                </div>
+              )}
             </React.Fragment>
           ))}
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem", marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid var(--color-rule)" }}>
-          <div>
-            <div className="hml-stat-label">Exploited Vulnerability</div>
-            <div style={{ color: "#fff", fontWeight: 600, fontSize: "0.95rem" }}>{current.vuln}</div>
+        {/* Metrics Grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem", marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid var(--color-border-subtle)" }}>
+          <div style={{ padding: "1rem", background: "var(--color-surface-base)", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.06)" }}>
+            <div style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", color: "#555951", textTransform: "uppercase", fontWeight: 700, marginBottom: "0.25rem" }}>
+              Exploited Vulnerability
+            </div>
+            <div style={{ color: "#171916", fontWeight: 800, fontSize: "0.95rem" }}>{current.vuln}</div>
           </div>
-          <div>
-            <div className="hml-stat-label">Path Traversal Likelihood</div>
-            <div style={{ color: remediated ? "var(--color-emerald)" : "#ffd54f", fontWeight: 700, fontSize: "1.25rem" }}>
+          <div style={{ padding: "1rem", background: "var(--color-surface-base)", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.06)" }}>
+            <div style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", color: "#555951", textTransform: "uppercase", fontWeight: 700, marginBottom: "0.25rem" }}>
+              Traversal Likelihood
+            </div>
+            <div style={{ color: remediated ? "#15803d" : "#ea580c", fontWeight: 800, fontSize: "1.35rem" }}>
               {(current.likelihood * 100).toFixed(1)}%
             </div>
           </div>
-          <div>
-            <div className="hml-stat-label">Total Financial Impact</div>
-            <div style={{ color: remediated ? "var(--color-emerald)" : "#fb7185", fontWeight: 700, fontSize: "1.25rem" }}>
+          <div style={{ padding: "1rem", background: "var(--color-surface-base)", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.06)" }}>
+            <div style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", color: "#555951", textTransform: "uppercase", fontWeight: 700, marginBottom: "0.25rem" }}>
+              Total Financial Impact
+            </div>
+            <div style={{ color: remediated ? "#15803d" : "#e11d48", fontWeight: 800, fontSize: "1.35rem" }}>
               ${current.exposure.toLocaleString()}
             </div>
           </div>
-          <div>
-            <div className="hml-stat-label">Composite Path Risk</div>
-            <div style={{ color: remediated ? "var(--color-emerald)" : "#fb7185", fontWeight: 700, fontSize: "1.25rem" }}>
+          <div style={{ padding: "1rem", background: "var(--color-surface-base)", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.06)" }}>
+            <div style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", color: "#555951", textTransform: "uppercase", fontWeight: 700, marginBottom: "0.25rem" }}>
+              Composite Path Risk
+            </div>
+            <div style={{ color: remediated ? "#15803d" : "#e11d48", fontWeight: 800, fontSize: "1.35rem" }}>
               {current.riskScore.toFixed(1)} / 100
             </div>
           </div>
@@ -420,11 +492,11 @@ function ComparisonSection() {
           <tbody>
             {comparisons.map((c, i) => (
               <tr key={i}>
-                <td style={{ fontWeight: 600, color: "#fff" }}>{c.dimension}</td>
-                <td style={{ color: "var(--color-dim)" }}>{c.legacy}</td>
+                <td style={{ fontWeight: 700, color: "var(--color-text-primary)" }}>{c.dimension}</td>
+                <td style={{ color: "var(--color-text-muted)" }}>{c.legacy}</td>
                 <td className="hml-table-winner">
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <CheckCircle2 size={16} color="#60a5fa" />
+                    <CheckCircle2 size={16} color="var(--color-accent)" />
                     <span>{c.drishti}</span>
                   </div>
                 </td>
@@ -470,7 +542,7 @@ iptables -A INPUT -p tcp --dport 22 ! -s 192.168.1.0/24 -j DROP
 
 # Save iptables state
 iptables-save > /etc/iptables/rules.v4
-echo "[✓] Ingress rules applied. Direct internet access blocked."`,
+echo "[+] Ingress rules applied. Direct internet access blocked."`,
     aws: `# AWS Security Group Remediation for Crown Jewel DB
 aws ec2 revoke-security-group-ingress \\
     --group-id sg-0123456789abcdef0 \\
@@ -503,22 +575,22 @@ aws ec2 authorize-security-group-ingress \\
             <div className="hml-terminal-dot"></div>
             <div className="hml-terminal-dot"></div>
           </div>
-          <div style={{ display: "flex", gap: "1rem" }}>
+          <div style={{ display: "flex", gap: "1.25rem" }}>
             <button
               onClick={() => setActiveTab("ansible")}
-              style={{ background: "none", border: "none", color: activeTab === "ansible" ? "#60a5fa" : "var(--color-dim)", cursor: "pointer", fontWeight: 600 }}
+              style={{ background: "none", border: "none", color: activeTab === "ansible" ? "var(--color-accent)" : "#8b8f87", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}
             >
               Ansible Playbook
             </button>
             <button
               onClick={() => setActiveTab("shell")}
-              style={{ background: "none", border: "none", color: activeTab === "shell" ? "#60a5fa" : "var(--color-dim)", cursor: "pointer", fontWeight: 600 }}
+              style={{ background: "none", border: "none", color: activeTab === "shell" ? "var(--color-accent)" : "#8b8f87", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}
             >
               Shell Script
             </button>
             <button
               onClick={() => setActiveTab("aws")}
-              style={{ background: "none", border: "none", color: activeTab === "aws" ? "#60a5fa" : "var(--color-dim)", cursor: "pointer", fontWeight: 600 }}
+              style={{ background: "none", border: "none", color: activeTab === "aws" ? "var(--color-accent)" : "#8b8f87", cursor: "pointer", fontWeight: 700, fontSize: "0.85rem" }}
             >
               AWS CLI
             </button>
@@ -579,6 +651,7 @@ function FaqSection() {
                 style={{
                   transform: openIdx === i ? "rotate(180deg)" : "rotate(0deg)",
                   transition: "transform 0.2s ease",
+                  color: "var(--color-accent)",
                 }}
               />
             </button>
@@ -595,11 +668,11 @@ function CtaBandSection() {
   return (
     <section className="hml-wrap" style={{ paddingBottom: "4rem" }}>
       <div className="hml-cta-band">
-        <div style={{ maxWidth: "38rem", marginInline: "auto" }}>
-          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: 700, marginBottom: "1rem", color: "#fff" }}>
+        <div style={{ maxWidth: "42rem", marginInline: "auto" }}>
+          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: 800, marginBottom: "1rem", color: "var(--color-text-primary)" }}>
             Ready to Defend Your Attack Surface?
           </h2>
-          <p style={{ color: "var(--color-muted)", fontSize: "1.1rem", marginBottom: "2rem" }}>
+          <p style={{ color: "var(--color-text-muted)", fontSize: "1.1rem", marginBottom: "2rem" }}>
             Launch the interactive security console to explore the Acme Corporation sample network or deploy the edge agent on your private LAN.
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
@@ -622,12 +695,12 @@ function FooterSection() {
     <footer className="hml-footer hml-wrap">
       <div className="hml-footer-inner">
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div style={{ width: 22, height: 22, borderRadius: 5, background: "linear-gradient(135deg, #3b82f6, #1e293b)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 22, height: 22, borderRadius: 5, background: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Shield size={12} color="#ffffff" />
           </div>
-          <span style={{ fontWeight: 700, color: "#fff" }}>DRISHTI PLATFORM</span>
-          <span style={{ opacity: 0.4 }}>•</span>
-          <span>Defensive Cybersecurity Engineering</span>
+          <span style={{ fontWeight: 800, color: "var(--color-text-primary)", letterSpacing: "-0.01em" }}>DRISHTI PLATFORM</span>
+          <span style={{ color: "var(--color-border-hover)" }}>•</span>
+          <span style={{ color: "var(--color-text-muted)" }}>Defensive Cybersecurity Engineering</span>
         </div>
 
         <div className="hml-footer-links">
@@ -639,7 +712,7 @@ function FooterSection() {
           <Link to="/login">Sign In</Link>
         </div>
       </div>
-      <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.8rem", color: "var(--color-dim)" }}>
+      <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.85rem", color: "var(--color-text-muted)" }}>
         © 2026 Drishti Cyber Defense Systems. Bounded Yen's Shortest Path & Dollar Financial Exposure Architecture.
       </div>
     </footer>

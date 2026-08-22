@@ -29,17 +29,4 @@ class Base(DeclarativeBase):
  pass
 
 
-def get_db() -> Session:
- db = SessionLocal()
- try:
- yield db
- finally:
- db.close()
-
-
-async def get_async_db() -> AsyncSession:
- async with AsyncSessionLocal() as session:
- yield session
-
-
-__all__ = ["Base", "engine", "SessionLocal", "AsyncSessionLocal", "get_db", "get_async_db"]
+__all__ = ["Base", "engine", "SessionLocal", "AsyncSessionLocal"]
