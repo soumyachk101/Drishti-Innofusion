@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Drishti — UI/UX Design System & Guidelines</title>
+  <style>
+    
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+  
+
+    :root {
+      --primary: #0f172a;
+      --primary-accent: #2563eb;
+      --primary-light: #3b82f6;
+      --secondary: #1e293b;
+      --brand-teal: #0d9488;
+      --brand-purple: #6366f1;
+      --brand-rose: #e11d48;
+      --brand-amber: #d97706;
+      --brand-emerald: #059669;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --border-light: #f1f5f9;
+      --bg-card: #f8fafc;
+      --bg-dark: #090d16;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--text-main);
+      background-color: #ffffff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 20mm 15mm 20mm 15mm;
+    }
+
+    /* Cover Page */
+    .cover-page {
+      page-break-after: always;
+      min-height: 245mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24mm 16mm 16mm 16mm;
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+      color: #ffffff;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+
+    .cover-page::before {
+      content: "";
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(99, 102, 241, 0.05) 60%, transparent 80%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cover-page::after {
+      content: "";
+      position: absolute;
+      bottom: -80px;
+      left: -80px;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(13, 148, 136, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cover-top {
+      position: relative;
+      z-index: 2;
+    }
+
+    .cover-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .brand-logo-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-logo-icon svg {
+      width: 30px;
+      height: 30px;
+      fill: #ffffff;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    .cover-middle {
+      position: relative;
+      z-index: 2;
+      margin: 25px 0;
+    }
+
+    .cover-doc-title {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 14px;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .cover-doc-subtitle {
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #94a3b8;
+      max-width: 620px;
+      margin-bottom: 24px;
+    }
+
+    .cover-tag-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .cover-tag {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+    }
+
+    .cover-bottom {
+      position: relative;
+      z-index: 2;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 18px;
+    }
+
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .meta-col-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .meta-col-val {
+      font-size: 12px;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+
+    .cover-confidential-bar {
+      margin-top: 16px;
+      background: rgba(225, 29, 72, 0.15);
+      border-left: 3px solid #e11d48;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #fda4af;
+      letter-spacing: 0.5px;
+    }
+
+    /* Content Typography & Structure */
+    .content-wrapper {
+      padding-top: 10px;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--primary);
+      font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif;
+      font-weight: 700;
+      line-height: 1.3;
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-top: 36px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2 {
+      font-size: 17px;
+      margin-top: 30px;
+      margin-bottom: 12px;
+      padding-left: 12px;
+      border-left: 4px solid var(--primary-accent);
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    h3 {
+      font-size: 14.5px;
+      margin-top: 20px;
+      margin-bottom: 8px;
+      color: var(--secondary);
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    h4 {
+      font-size: 13px;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      text-align: justify;
+      color: var(--text-main);
+    }
+
+    ul, ol {
+      margin-top: 4px;
+      margin-bottom: 14px;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 5px;
+      line-height: 1.55;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--border-color);
+      margin: 24px 0;
+    }
+
+    strong {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    a {
+      color: var(--primary-accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Code & Terminal styling */
+    .code-card {
+      margin: 16px 0;
+      border-radius: 8px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .code-header {
+      background: #161b22;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .code-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .code-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .code-lang {
+      font-size: 10px;
+      font-weight: 700;
+      color: #8b949e;
+      letter-spacing: 1px;
+      font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    }
+
+    pre.hljs {
+      padding: 12px 16px;
+      overflow-x: auto;
+      background: transparent;
+      margin: 0;
+    }
+
+    code {
+      font-family: 'Fira Code', 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 11.5px;
+    }
+
+    p code, li code, td code {
+      font-size: 11px;
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* Diagram Card */
+    .diagram-card {
+      margin: 20px 0;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      overflow: hidden;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      text-align: center;
+    }
+
+    .diagram-header {
+      background: #f8fafc;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .diagram-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .diagram-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-left: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .mermaid {
+      padding: 18px 12px;
+      display: flex;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    /* Styled Tables */
+    .table-container {
+      margin: 16px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .styled-table thead tr {
+      background: linear-gradient(90deg, #0f172a, #1e293b);
+      color: #ffffff;
+    }
+
+    .styled-table th {
+      padding: 10px 12px;
+      font-weight: 700;
+      text-align: left;
+      font-size: 11.5px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .styled-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: top;
+    }
+
+    .styled-table tbody tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    .styled-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .badge-get { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .badge-post { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-put { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-delete { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .badge-patch { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+
+    .badge-critical { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
+    .badge-high { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+    .badge-medium { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+    .badge-low { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+    .badge-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    /* Callout Boxes */
+    .callout {
+      margin: 16px 0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-accent);
+      background: var(--bg-card);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .callout-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .callout-body {
+      font-size: 12.5px;
+      color: var(--text-main);
+    }
+
+    .callout-body p {
+      margin-bottom: 6px;
+    }
+    .callout-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .callout-info {
+      border-left-color: var(--primary-accent);
+      background: #eff6ff;
+    }
+    .callout-info .callout-title { color: var(--primary-accent); }
+
+    .callout-warning {
+      border-left-color: var(--brand-amber);
+      background: #fffbeb;
+    }
+    .callout-warning .callout-title { color: var(--brand-amber); }
+
+    .callout-guardrail {
+      border-left-color: var(--brand-rose);
+      background: #fff1f2;
+    }
+    .callout-guardrail .callout-title { color: var(--brand-rose); }
+
+    .callout-tip {
+      border-left-color: var(--brand-emerald);
+      background: #f0fdf4;
+    }
+    .callout-tip .callout-title { color: var(--brand-emerald); }
+
+    .callout-meta {
+      border-left-color: var(--brand-purple);
+      background: #f5f3ff;
+    }
+    .callout-meta .callout-title { color: var(--brand-purple); }
+
+    /* Highlight.js GitHub Dark Styles */
+    .hljs-keyword, .hljs-selector-tag, .hljs-subst { color: #ff7b72; font-weight: 600; }
+    .hljs-string, .hljs-title, .hljs-section, .hljs-attribute, .hljs-literal, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-addition { color: #a5d6ff; }
+    .hljs-comment, .hljs-quote, .hljs-deletion, .hljs-meta { color: #8b949e; font-style: italic; }
+    .hljs-number, .hljs-regexp, .hljs-link { color: #79c0ff; }
+    .hljs-variable, .hljs-symbol, .hljs-bullet { color: #d2a8ff; }
+    .hljs-built_in, .hljs-class .hljs-title { color: #ffa657; }
+    .hljs { color: #c9d1d9; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral',
+      securityLevel: 'loose',
+      fontFamily: 'Plus Jakarta Sans, Inter, sans-serif',
+      fontSize: 12,
+      themeVariables: {
+        primaryColor: '#e0f2fe',
+        primaryTextColor: '#0369a1',
+        primaryBorderColor: '#0284c7',
+        lineColor: '#64748b',
+        secondaryColor: '#f1f5f9',
+        tertiaryColor: '#ffffff'
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <!-- Cover Page -->
+  <div class="cover-page">
+    <div class="cover-top">
+      <div class="cover-brand">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 2.18l7 3.89v4.93c0 4.54-3.14 8.79-7 9.94-3.86-1.15-7-5.4-7-9.94V8.07l7-3.89zM11 7h2v6h-2zm0 8h2v2h-2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">DRISHTI</div>
+        </div>
+      </div>
+      <div class="brand-pill">ENTERPRISE TECHNICAL SPECIFICATION</div>
+    </div>
+
+    <div class="cover-middle">
+      <h1 class="cover-doc-title">Drishti — UI/UX Design System & Guidelines</h1>
+      <div class="cover-doc-subtitle">Defensive Cybersecurity Platform — Complete Architecture & Reference Manual</div>
+      <div class="cover-tag-grid">
+        <span class="cover-tag">🛡️ Graph-Powered Attack Paths</span>
+        <span class="cover-tag">⚡ Live Watch Agent</span>
+        <span class="cover-tag">💰 Dollar Risk Quantifier</span>
+        <span class="cover-tag">🤖 AI Remediation Guardrails</span>
+        <span class="cover-tag">🌐 URL Trust Scoring</span>
+      </div>
+    </div>
+
+    <div class="cover-bottom">
+      <div class="cover-meta-grid">
+        <div>
+          <div class="meta-col-label">Platform Version</div>
+          <div class="meta-col-val">v0.2 Enterprise Edition</div>
+        </div>
+        <div>
+          <div class="meta-col-label">Release Date</div>
+          <div class="meta-col-val">August 2026</div>
+        </div>
+        <div>
+          <div class="meta-col-label">Architecture Tier</div>
+          <div class="meta-col-val">Full-Stack Multi-Tenant</div>
+        </div>
+      </div>
+      <div class="cover-confidential-bar">
+        🔒 RESTRICTED // INTERNAL ARCHITECTURE & TECHNICAL SPECIFICATION // FOR AUTHORIZED USE ONLY
+      </div>
+    </div>
+  </div>
+
+  <!-- Document Body Content -->
+  <div class="content-wrapper">
+    <h1>Drishti — UX &amp; UI Pattern Catalog</h1>
+<p><em>Reverse-engineered from the implemented frontend. Every screen, data contract, interaction
+pattern, visual language, and component layout — mapped from <code>web/src/</code>.</em></p>
+<p><em>Last updated: 2026-08-17 — verified against source code.</em></p>
+<hr>
+<h2>1. Screen catalog (frontend routing)</h2>
+<div class="diagram-card"><div class="diagram-header"><span class="diagram-dot dot-red"></span><span class="diagram-dot dot-yellow"></span><span class="diagram-dot dot-green"></span><span class="diagram-title">System Architecture Flow</span></div><div class="mermaid">flowchart TB
+ guard["<RequireAuth>"] --> route
+
+ subgraph route["Protected routes (lazy)"]
+ dash["/ dashboard<br/>dashboard + hero stat cards<br/>zone breakdown + severity charts"]
+ gmap["/ attack-map<br/>React Flow graph + sidebar"]
+ lwatch["/ live-watch<br/>force graph + device panel"]
+ paths["/ paths<br/>PathSummary table + PathDetail + blast-radius"]
+ find["/ findings<br/>finding rows + Patch/Fix actions"]
+ assets["/ assets<br/>Asset rows + AssetDetail panel"]
+ remed["/ remediation<br/>RemediationOut per finding<br/>Run / Configure / next-step"]
+ report["/ report<br/>hardening + CVE tables + AI summary"]
+ url["/ url-analyzer<br/>URL input + score gauge + history"]
+ settings["/ settings<br/>agent mode + agent log + network map toggle"]
+ demo["/ demo<br/>demo attack controls"]
+ end
+
+ route --> shell</div></div><p><strong>Code-split chunks</strong> (3 public/app boundaries):</p>
+<ol>
+<li>Landing/auth (separate lazy chunk) — never loads React Flow / Recharts</li>
+<li>ProtectedApp (lazy-loaded) — only fetched after auth</li>
+<li>Routes — each route is a lazy-loaded component</li>
+</ol>
+<hr>
+<h2>2. Visual language &amp; theming</h2>
+<h3>Light / dark mode</h3>
+<ul>
+<li>CSS custom properties on <code>:root</code>; redefined under <code>@media (prefers-color-scheme: dark)</code></li>
+<li>Three states: explicit <code>data-theme=&quot;dark&quot;</code>, explicit <code>data-theme=&quot;light&quot;</code>, system default (prefers-color-scheme)</li>
+<li>All colors use token references — never hard-coded values</li>
+</ul>
+<h3>Color system (token names)</h3>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Token</th><th>Purpose</th></tr></thead>
+        <tbody><tr><td><code>--bg-primary</code> / <code>--bg-secondary</code></td><td>Page, card, elevated</td></tr><tr><td><code>--text-primary</code> / <code>--text-secondary</code></td><td>Headings, body</td></tr><tr><td><code>--accent-primary</code></td><td>Interactive elements</td></tr><tr><td><code>--border</code></td><td>Dividers</td></tr><tr><td><code>--shadow</code></td><td>Card elevation</td></tr></tbody>
+      </table>
+    </div>
+  <h3>Typography</h3>
+<ul>
+<li>System font stack (not imported web fonts)</li>
+<li>Three sizes used: <code>text-2xl</code> (section), <code>text-xl</code> (sub-section), <code>text-sm</code> (table/compact)</li>
+<li>Weights: 400, 500, 600, 700</li>
+</ul>
+<h3>Motion</h3>
+<ul>
+<li><strong>Framer Motion</strong> (imported as <code>motion</code> / <code>AnimatePresence</code> / <code>LayoutGroup</code>)</li>
+<li>Shared layout animations between graph / panel / sub-panel</li>
+<li>Entrance: <code>initial={{ opacity: 0, y: 8 }}</code> → <code>animate={{ opacity: 1, y: 0 }}</code></li>
+<li>Exit: <code>exit={{ opacity: 0 }}</code> with <code>transition={{ duration: 0.15 }}</code></li>
+<li>Corner duration: <code>0.15–0.3s</code> (never long)</li>
+<li>List stagger: <code>staggerChildren</code> with <code>staggerDelay: 0.05</code> for card grids</li>
+</ul>
+<h3>Panels</h3>
+<ul>
+<li>Left: <strong>Graph panel</strong> — wider (controls + subject panel)</li>
+<li>Right: <strong>Scope panel</strong> — narrower (context + status + filters)</li>
+<li>On the homepage (solo, no right panel): click a node → detail expands inline</li>
+<li>Sub-panel behavior: <code>// --- entry mode ---</code>, <code>// --- detail mode ---</code>, <code>// --- entity mode ---</code> — each is a conditionally rendered <code>&lt;section&gt;</code> swapping the right panel content</li>
+<li>Network detail is <strong>never</strong> collapsible — it always fills the panel</li>
+</ul>
+<hr>
+<h2>3. Error boundaries</h2>
+<div class="diagram-card"><div class="diagram-header"><span class="diagram-dot dot-red"></span><span class="diagram-dot dot-yellow"></span><span class="diagram-dot dot-green"></span><span class="diagram-title">System Architecture Flow</span></div><div class="mermaid">flowchart TB
+ app["App"] --> eb1["ErrorBoundary<br/>(top-level)"]
+ eb1 --> shell["Shell"]
+ shell --> eb2["ErrorBoundary<br/>(Attack Map)<br/>isolated"]
+ eb2 --> am["Attack Map<br/>(React Flow)"]
+ shell --> sw["Live Watch"]
+ shell --> other["Other panels"]</div></div><ul>
+<li><strong>Top-level boundary</strong>: catches everything, replaces the app with a recovery message</li>
+<li><strong>Attack Map boundary</strong>: isolated from the rest — if React Flow throws, other panels continue</li>
+<li>No per-panel boundaries on panels (a panel failure renders the panel area, not the whole app)</li>
+</ul>
+<hr>
+<h2>4. Motion catalog (by screen)</h2>
+<h3>Attack Map (React Flow)</h3>
+<ul>
+<li>Nodes fade in from center</li>
+<li>Selected node: handles show on demand + slight scale</li>
+<li>Hover: elevation change (shadow shift) rather than size change</li>
+<li>Edge highlights: <code>onTopPath</code> animated via React Flow&#39;s built-in <code>animated</code> prop</li>
+<li>Offline device overlay: colored dot opacity transition</li>
+</ul>
+<h3>Dashboard</h3>
+<ul>
+<li>Stat cards: each is a <code>motion.div</code> in a <code>StaggerContainer</code></li>
+<li>Zone summary: accordion-style expand (see Accordion)</li>
+</ul>
+<h3>Live Watch (force graph)</h3>
+<ul>
+<li>Nodes repopulate gradually (<code>onLoad</code> callback in useForceEffect)</li>
+<li>Particle effect on threat nodes (red pulse — CSS animation)</li>
+<li>Demo attack injects trigger a re-render with label overlays</li>
+</ul>
+<h3>Remediation Console</h3>
+<ul>
+<li>Remediation card: <code>LayoutGroup</code> for shared layout (card ←→ detail)</li>
+<li>Expand/collapse: AnimatePresence for enter/exit</li>
+<li>Copy-to-clipboard: hover reveal of copy icon + click feedback</li>
+<li>Fix now: full-screen error view with retry/skip actions + details</li>
+</ul>
+<hr>
+<h2>5. Accordion (domain Accordion primitive)</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>State</th><th>Behavior</th></tr></thead>
+        <tbody><tr><td>Closed</td><td>Title + risk badge + count</td></tr><tr><td>Closed + hover</td><td>Subtle background lift</td></tr><tr><td>Open</td><td>Content area mounts; flow animation</td></tr><tr><td>Open + click another</td><td>Previous closes (single-open), not toggle</td></tr></tbody>
+      </table>
+    </div>
+  <p>Used by: Dashboard zone breakdown, Attack Paths summary, Network threats panel.</p>
+<hr>
+<h2>6. Keyboard &amp; navigation</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Shortcut</th><th>Screen</th><th>Action</th></tr></thead>
+        <tbody><tr><td><code>Escape</code></td><td>All</td><td>Close modal/panel</td></tr><tr><td><code>Enter</code></td><td>Dashboard/Report</td><td>Scroll to section</td></tr><tr><td><code>Tab</code></td><td>All</td><td>Standard tab order</td></tr><tr><td><code>Ctrl/Cmd + K</code></td><td>Dashboard</td><td>Global search (planned)</td></tr></tbody>
+      </table>
+    </div>
+  <p>Focus ring: visible, custom branded color (not browser default).</p>
+<hr>
+<h2>7. Hover and click guidelines</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Pattern</th><th>Implementation</th></tr></thead>
+        <tbody><tr><td>Table row hover</td><td><code>bg-primary</code> highlight (subtle)</td></tr><tr><td>Button hover</td><td>bg-color shift + shadow elevation</td></tr><tr><td>Clickable card</td><td>cursor pointer + subtle shadow change on hover</td></tr><tr><td>Copy-to-clipboard</td><td>Hover reveals icon; click triggers toast; also shows a &quot;Copied!&quot; toast after click</td></tr><tr><td>Interactive edge</td><td>React Flow hover highlights connected nodes (debounced)</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>8. Copy patterns</h2>
+<h3>Confirmation</h3>
+
+    <div class="callout callout-info">
+      <div class="callout-header">
+        <span class="callout-icon">ℹ️</span>
+        <span class="callout-title">NOTE</span>
+      </div>
+      <div class="callout-body"><p>&quot;Are you sure? This will [description].&quot;</p>
+</div>
+    </div>
+  <h3>Error recovery</h3>
+
+    <div class="callout callout-info">
+      <div class="callout-header">
+        <span class="callout-icon">ℹ️</span>
+        <span class="callout-title">NOTE</span>
+      </div>
+      <div class="callout-body"><p>&quot;We couldn&#39;t [action]. [Specific reason]. Try [recovery step] or contact support.&quot;</p>
+</div>
+    </div>
+  <h3>Empty states</h3>
+
+    <div class="callout callout-info">
+      <div class="callout-header">
+        <span class="callout-icon">ℹ️</span>
+        <span class="callout-title">NOTE</span>
+      </div>
+      <div class="callout-body"><p>&quot;No [items] yet. [CTA description].&quot;</p>
+</div>
+    </div>
+  <h3>AI disclaimer (always shown)</h3>
+
+    <div class="callout callout-info">
+      <div class="callout-header">
+        <span class="callout-icon">ℹ️</span>
+        <span class="callout-title">NOTE</span>
+      </div>
+      <div class="callout-body"><p>&quot;Outputs are AI-generated. Validate in your environment. This is advisory guidance, not a definitive fix.&quot;</p>
+</div>
+    </div>
+  <h3>Token issuance (agent)</h3>
+
+    <div class="callout callout-info">
+      <div class="callout-header">
+        <span class="callout-icon">ℹ️</span>
+        <span class="callout-title">NOTE</span>
+      </div>
+      <div class="callout-body"><p>&quot;Your agent token has been generated. Copy it now — it will not be shown again.&quot;</p>
+</div>
+    </div>
+  <hr>
+<h2>9. Toasts</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Type</th><th>Color</th><th>Icon</th><th>Use case</th></tr></thead>
+        <tbody><tr><td>Success</td><td>Green (theme-token)</td><td>Check</td><td>Copy, generate, save</td></tr><tr><td>Warning</td><td>Amber (theme-token)</td><td>Triangle</td><td>Deep scan unavailable, auto-resolve</td></tr><tr><td>Error</td><td>Red (theme-token)</td><td>Cross</td><td>AI failure, network error</td></tr><tr><td>Info</td><td>Blue (theme-token)</td><td>Info</td><td>Recompute triggered</td></tr></tbody>
+      </table>
+    </div>
+  <p>Duration: 4s auto-dismiss. Stack up to 3; older ones are replaced. Not interruptive for the system — the user dismisses explicitly if needed before timeout.</p>
+<hr>
+<h2>10. Form patterns</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Pattern</th><th>Validation</th><th>Error display</th></tr></thead>
+        <tbody><tr><td>Auth forms</td><td>Email format + password min 8 chars</td><td>Inline, beneath each field</td></tr><tr><td>URL analyze</td><td>URL format + reachable host</td><td>Inline beneath input</td></tr><tr><td>Deep scan</td><td>IP/CIDR + consent checkbox</td><td>Inline beneath each control</td></tr><tr><td>Settings toggle</td><td>Boolean switch</td><td>Immediate state update (no save button)</td></tr><tr><td>Asset edit</td><td>Title + optional fields</td><td>Inline, beneath each field</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>11. Loading states</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Component</th><th>Loading state</th></tr></thead>
+        <tbody><tr><td>Graph</td><td>Skeleton placeholder + spinner in node area</td></tr><tr><td>Dashboard</td><td>Skeleton cards (animated shimmer)</td></tr><tr><td>Tables</td><td>Row skeleton (4-5 rows)</td></tr><tr><td>AI remediation</td><td>Skeleton card (2-3 lines)</td></tr><tr><td>Deep scan</td><td>Full-screen modal with progress bar + nmap output streaming</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>12. Theme-aware patterns</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Concern</th><th>Approach</th></tr></thead>
+        <tbody><tr><td>Graphs</td><td>Colors adapt via token refs — no hard-coded node/edge colors</td></tr><tr><td>Severity colors</td><td>CSS custom properties or themed classes</td></tr><tr><td>Threat pulse</td><td>CSS animation (red) — works in both themes</td></tr><tr><td>Edge thickness</td><td>React Flow <code>style={{ strokeWidth }}</code> — theme-independent</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>13. Component inventory (key UI components)</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Component</th><th>Location</th><th>Purpose</th></tr></thead>
+        <tbody><tr><td><code>Shell</code></td><td><code>web/src/features/dashboard/components/Shell.tsx</code></td><td>Top-level nav + page layout</td></tr><tr><td><code>ErrorBoundary</code></td><td><code>web/src/components/ErrorBoundary.tsx</code></td><td>Catches render errors</td></tr><tr><td><code>AcmeLogo</code></td><td><code>web/src/components/acme-logo.tsx</code></td><td>SVG logo</td></tr><tr><td><code>StatusBar</code></td><td>Live Watch</td><td>Device count, online/offline</td></tr><tr><td><code>GraphCanvas</code></td><td>Attack Map</td><td>React Flow wrapper</td></tr><tr><td><code>ForceGraph</code></td><td>Live Watch</td><td>Force-directed layout</td></tr><tr><td><code>ThemeToggle</code></td><td>Settings</td><td>Light/dark mode switcher</td></tr><tr><td><code>ToastContainer</code></td><td>App level</td><td>Toast stack</td></tr><tr><td><code>TokenCopy</code></td><td>Remediation</td><td>Copy-to-clipboard</td></tr><tr><td><code>RecomputeButton</code></td><td>Shell</td><td>Trigger full recompute</td></tr><tr><td><code>ZoneBadge</code></td><td>Tables</td><td>Criticality/zone colored badge</td></tr><tr><td><code>RiskScoreGauge</code></td><td>Dashboards</td><td>Semi-circular gauge (risk score)</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>14. State management (client-side)</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Concern</th><th>Library</th><th>Scope</th></tr></thead>
+        <tbody><tr><td>Server state (API)</td><td>TanStack Query</td><td>All <code>api/</code> calls, cached by query key</td></tr><tr><td>Graph focus</td><td>Zustand (<code>graphStore.ts</code>)</td><td>Selected node, zoom, pan</td></tr><tr><td>Toasts</td><td>Zustand</td><td>Notification stack</td></tr><tr><td>Theme</td><td>CSS custom properties + context</td><td>Light/dark/system</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>15. Map type annotations (density reference)</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Type</th><th>Example</th><th>Enforce level</th></tr></thead>
+        <tbody><tr><td>page_id</td><td><code>&#39;/attack-map&#39;</code></td><td>allow — route string</td></tr><tr><td>field_id</td><td><code>&#39;risk_score&#39;</code></td><td>allow — data key</td></tr><tr><td>token_id</td><td><code>&#39;drishti_&lt;base64&gt;&#39;</code></td><td>allow — agent token</td></tr><tr><td>safe_html</td><td>`description</td><td>title`</td></tr><tr><td>state_hash</td><td><code>sha256(bytes).hex()[:16]</code></td><td>allow — collision-resistant</td></tr><tr><td>url</td><td><code>&#39;https://nvd.nist.gov/…&#39;</code></td><td>allow — fetched externally</td></tr></tbody>
+      </table>
+    </div>
+  
+  </div>
+
+</body>
+</html>

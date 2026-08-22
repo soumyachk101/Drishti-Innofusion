@@ -1,0 +1,6 @@
+.DS_Store
+.pheromone/
+.claude/
+.gemini/
+__pycache__/
+*.pyc

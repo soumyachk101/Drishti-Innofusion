@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Drishti — Data Model & Schema Specification</title>
+  <style>
+    
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+  
+
+    :root {
+      --primary: #0f172a;
+      --primary-accent: #2563eb;
+      --primary-light: #3b82f6;
+      --secondary: #1e293b;
+      --brand-teal: #0d9488;
+      --brand-purple: #6366f1;
+      --brand-rose: #e11d48;
+      --brand-amber: #d97706;
+      --brand-emerald: #059669;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --border-light: #f1f5f9;
+      --bg-card: #f8fafc;
+      --bg-dark: #090d16;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--text-main);
+      background-color: #ffffff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 20mm 15mm 20mm 15mm;
+    }
+
+    /* Cover Page */
+    .cover-page {
+      page-break-after: always;
+      min-height: 245mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24mm 16mm 16mm 16mm;
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+      color: #ffffff;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+
+    .cover-page::before {
+      content: "";
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(99, 102, 241, 0.05) 60%, transparent 80%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cover-page::after {
+      content: "";
+      position: absolute;
+      bottom: -80px;
+      left: -80px;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(13, 148, 136, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .cover-top {
+      position: relative;
+      z-index: 2;
+    }
+
+    .cover-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .brand-logo-icon {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    }
+
+    .brand-logo-icon svg {
+      width: 30px;
+      height: 30px;
+      fill: #ffffff;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+
+    .cover-middle {
+      position: relative;
+      z-index: 2;
+      margin: 25px 0;
+    }
+
+    .cover-doc-title {
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 14px;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+
+    .cover-doc-subtitle {
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: #94a3b8;
+      max-width: 620px;
+      margin-bottom: 24px;
+    }
+
+    .cover-tag-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .cover-tag {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+    }
+
+    .cover-bottom {
+      position: relative;
+      z-index: 2;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 18px;
+    }
+
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .meta-col-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .meta-col-val {
+      font-size: 12px;
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+
+    .cover-confidential-bar {
+      margin-top: 16px;
+      background: rgba(225, 29, 72, 0.15);
+      border-left: 3px solid #e11d48;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #fda4af;
+      letter-spacing: 0.5px;
+    }
+
+    /* Content Typography & Structure */
+    .content-wrapper {
+      padding-top: 10px;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--primary);
+      font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif;
+      font-weight: 700;
+      line-height: 1.3;
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-top: 36px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2 {
+      font-size: 17px;
+      margin-top: 30px;
+      margin-bottom: 12px;
+      padding-left: 12px;
+      border-left: 4px solid var(--primary-accent);
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    h3 {
+      font-size: 14.5px;
+      margin-top: 20px;
+      margin-bottom: 8px;
+      color: var(--secondary);
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    h4 {
+      font-size: 13px;
+      margin-top: 14px;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      text-align: justify;
+      color: var(--text-main);
+    }
+
+    ul, ol {
+      margin-top: 4px;
+      margin-bottom: 14px;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 5px;
+      line-height: 1.55;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--border-color);
+      margin: 24px 0;
+    }
+
+    strong {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    a {
+      color: var(--primary-accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Code & Terminal styling */
+    .code-card {
+      margin: 16px 0;
+      border-radius: 8px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .code-header {
+      background: #161b22;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .code-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .code-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .code-lang {
+      font-size: 10px;
+      font-weight: 700;
+      color: #8b949e;
+      letter-spacing: 1px;
+      font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    }
+
+    pre.hljs {
+      padding: 12px 16px;
+      overflow-x: auto;
+      background: transparent;
+      margin: 0;
+    }
+
+    code {
+      font-family: 'Fira Code', 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 11.5px;
+    }
+
+    p code, li code, td code {
+      font-size: 11px;
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* Diagram Card */
+    .diagram-card {
+      margin: 20px 0;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      overflow: hidden;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      text-align: center;
+    }
+
+    .diagram-header {
+      background: #f8fafc;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .diagram-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .diagram-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-left: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .mermaid {
+      padding: 18px 12px;
+      display: flex;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .mermaid svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    /* Styled Tables */
+    .table-container {
+      margin: 16px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .styled-table thead tr {
+      background: linear-gradient(90deg, #0f172a, #1e293b);
+      color: #ffffff;
+    }
+
+    .styled-table th {
+      padding: 10px 12px;
+      font-weight: 700;
+      text-align: left;
+      font-size: 11.5px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .styled-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: top;
+    }
+
+    .styled-table tbody tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    .styled-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .badge-get { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .badge-post { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-put { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-delete { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .badge-patch { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+
+    .badge-critical { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
+    .badge-high { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+    .badge-medium { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+    .badge-low { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+    .badge-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    /* Callout Boxes */
+    .callout {
+      margin: 16px 0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-accent);
+      background: var(--bg-card);
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .callout-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .callout-body {
+      font-size: 12.5px;
+      color: var(--text-main);
+    }
+
+    .callout-body p {
+      margin-bottom: 6px;
+    }
+    .callout-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .callout-info {
+      border-left-color: var(--primary-accent);
+      background: #eff6ff;
+    }
+    .callout-info .callout-title { color: var(--primary-accent); }
+
+    .callout-warning {
+      border-left-color: var(--brand-amber);
+      background: #fffbeb;
+    }
+    .callout-warning .callout-title { color: var(--brand-amber); }
+
+    .callout-guardrail {
+      border-left-color: var(--brand-rose);
+      background: #fff1f2;
+    }
+    .callout-guardrail .callout-title { color: var(--brand-rose); }
+
+    .callout-tip {
+      border-left-color: var(--brand-emerald);
+      background: #f0fdf4;
+    }
+    .callout-tip .callout-title { color: var(--brand-emerald); }
+
+    .callout-meta {
+      border-left-color: var(--brand-purple);
+      background: #f5f3ff;
+    }
+    .callout-meta .callout-title { color: var(--brand-purple); }
+
+    /* Highlight.js GitHub Dark Styles */
+    .hljs-keyword, .hljs-selector-tag, .hljs-subst { color: #ff7b72; font-weight: 600; }
+    .hljs-string, .hljs-title, .hljs-section, .hljs-attribute, .hljs-literal, .hljs-template-tag, .hljs-template-variable, .hljs-type, .hljs-addition { color: #a5d6ff; }
+    .hljs-comment, .hljs-quote, .hljs-deletion, .hljs-meta { color: #8b949e; font-style: italic; }
+    .hljs-number, .hljs-regexp, .hljs-link { color: #79c0ff; }
+    .hljs-variable, .hljs-symbol, .hljs-bullet { color: #d2a8ff; }
+    .hljs-built_in, .hljs-class .hljs-title { color: #ffa657; }
+    .hljs { color: #c9d1d9; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral',
+      securityLevel: 'loose',
+      fontFamily: 'Plus Jakarta Sans, Inter, sans-serif',
+      fontSize: 12,
+      themeVariables: {
+        primaryColor: '#e0f2fe',
+        primaryTextColor: '#0369a1',
+        primaryBorderColor: '#0284c7',
+        lineColor: '#64748b',
+        secondaryColor: '#f1f5f9',
+        tertiaryColor: '#ffffff'
+      }
+    });
+  </script>
+</head>
+<body>
+
+  <!-- Cover Page -->
+  <div class="cover-page">
+    <div class="cover-top">
+      <div class="cover-brand">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 2.18l7 3.89v4.93c0 4.54-3.14 8.79-7 9.94-3.86-1.15-7-5.4-7-9.94V8.07l7-3.89zM11 7h2v6h-2zm0 8h2v2h-2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">DRISHTI</div>
+        </div>
+      </div>
+      <div class="brand-pill">ENTERPRISE TECHNICAL SPECIFICATION</div>
+    </div>
+
+    <div class="cover-middle">
+      <h1 class="cover-doc-title">Drishti — Data Model & Schema Specification</h1>
+      <div class="cover-doc-subtitle">Defensive Cybersecurity Platform — Complete Architecture & Reference Manual</div>
+      <div class="cover-tag-grid">
+        <span class="cover-tag">🛡️ Graph-Powered Attack Paths</span>
+        <span class="cover-tag">⚡ Live Watch Agent</span>
+        <span class="cover-tag">💰 Dollar Risk Quantifier</span>
+        <span class="cover-tag">🤖 AI Remediation Guardrails</span>
+        <span class="cover-tag">🌐 URL Trust Scoring</span>
+      </div>
+    </div>
+
+    <div class="cover-bottom">
+      <div class="cover-meta-grid">
+        <div>
+          <div class="meta-col-label">Platform Version</div>
+          <div class="meta-col-val">v0.2 Enterprise Edition</div>
+        </div>
+        <div>
+          <div class="meta-col-label">Release Date</div>
+          <div class="meta-col-val">August 2026</div>
+        </div>
+        <div>
+          <div class="meta-col-label">Architecture Tier</div>
+          <div class="meta-col-val">Full-Stack Multi-Tenant</div>
+        </div>
+      </div>
+      <div class="cover-confidential-bar">
+        🔒 RESTRICTED // INTERNAL ARCHITECTURE & TECHNICAL SPECIFICATION // FOR AUTHORIZED USE ONLY
+      </div>
+    </div>
+  </div>
+
+  <!-- Document Body Content -->
+  <div class="content-wrapper">
+    <h1>Drishti — Data Model</h1>
+<p><em>Reverse-engineered from the implemented codebase. All 21 SQLAlchemy tables, their columns, relationships, constraints, and how they relate to each other.</em></p>
+<p><em>Last updated: 2026-08-17 — verified against source code.</em></p>
+<hr>
+<h2>1. Entity relationship overview</h2>
+<div class="diagram-card"><div class="diagram-header"><span class="diagram-dot dot-red"></span><span class="diagram-dot dot-yellow"></span><span class="diagram-dot dot-green"></span><span class="diagram-title">System Architecture Flow</span></div><div class="mermaid">erDiagram
+ ORG ||--o{ USER : "has"
+ ORG ||--o{ ASSET : "owns"
+ ORG ||--o{ SCAN : "has"
+ ORG ||--o{ AUTO_SCAN_CONFIG : "configures"
+ ORG ||--o{ AGENT_TOKEN : "has"
+ USER ||--o{ AI_REQUEST : "makes"
+ USER ||--o{ REFRESH_TOKEN : "has"
+ USER ||--o{ AI_REMEDIATION : "reviews"
+ USER ||--o{ TOKEN_BUCKET : "rate-limited by"
+ ASSET ||--o{ SERVICE : "has"
+ ASSET ||--o{ FINDING : "has"
+ ASSET ||--o{ CONNECTION : "has"
+ ASSET ||--o{ DEEP_SCAN_RESULT : "produces"
+ ASSET ||--o{ NODE_HARDENING : "recommends"
+ FINDING ||--o{ AI_REMEDIATION : "triggers"
+ AI_REQUEST ||--o{ AI_REMEDIATION : "generates"
+ SCAN ||--o{ SERVICE : "discovers"
+ SCAN ||--o{ FINDING : "discovers"
+ NETWORK_DEVICE ||--o{ LIVE_OBSERVATION : "generates"
+ NETWORK_DEVICE }o--o{ LIVE_THREAT : "involved in"
+ NETWORK_DEVICE }o--o{ NETWORK_THREAT : "involved in"
+ LIVE_OBSERVATION ||--o{ URL_ANALYSIS_RESULT : "triggers"
+ URL_ANALYSIS_RESULT ||--o{ URL_ANALYSIS_HISTORY : "recorded in"
+ URL_ANALYSIS_RESULT ||--o{ LIVE_THREAT : "generates"
+ NETWORK_THREAT ||--o{ DEEP_SCAN_RESULT : "associated with"</div></div><hr>
+<h2>2. Table reference (alphabetical)</h2>
+<h3>AutoScanConfig</h3>
+<p>Auto-scan schedule for an org. One row per org.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>enabled</td><td>Boolean</td><td>No</td><td>Default False</td></tr><tr><td>interval_seconds</td><td>Integer</td><td>No</td><td>Default 600 (10 min)</td></tr><tr><td>scan_subnet</td><td>Boolean</td><td>No</td><td>Default False — scans only self device if False</td></tr><tr><td>last_run_at</td><td>DateTime</td><td>Yes</td><td>ISO8601 text</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>Created in UTC</td></tr><tr><td>updated_at</td><td>DateTime</td><td>No</td><td>Updated in UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique constraint: <code>(org_id)</code> (one config per org).</p>
+<h3>AgentToken</h3>
+<p>Hashed agent credentials for the edge agent.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>token_hash</td><td>String (sha256 hex)</td><td>No</td><td>SHA256 of plaintext token</td></tr><tr><td>status</td><td>String</td><td>No</td><td><code>active</code> / <code>revoked</code></td></tr><tr><td>last_seen_at</td><td>DateTime</td><td>Yes</td><td>Updated on each authenticated call</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Index: <code>(org_id, status)</code>.</p>
+<p><strong>Security</strong>: Plaintext token is returned once at issuance, never stored. Rotation creates a new row with a new hash and revokes the old one.</p>
+<h3>AIRequest</h3>
+<p>Audit log of every AI call.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>user_id</td><td>String</td><td>No</td><td>FK → User.id</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>endpoint</td><td>String</td><td>No</td><td><code>remediate</code>, <code>impact</code>, <code>predict</code>, <code>network-summary</code>, <code>block</code></td></tr><tr><td>request_payload</td><td>JSON</td><td>No</td><td>Input</td></tr><tr><td>response_payload</td><td>JSON</td><td>Yes</td><td>Output (nullable if error)</td></tr><tr><td>is_mock</td><td>Boolean</td><td>No</td><td>True when AI_MOCK=1</td></tr><tr><td>model</td><td>String</td><td>Yes</td><td>Model identifier used</td></tr><tr><td>error</td><td>String</td><td>Yes</td><td>Error message if failed</td></tr><tr><td>latency_ms</td><td>Float</td><td>No</td><td>Round-trip time</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>AI_Remediation (AI_Remediation model, AI_REMEDIATION table)</h3>
+<p>Generated or requested fix for a finding.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>finding_id</td><td>String</td><td>No</td><td>FK → Finding.id</td></tr><tr><td>user_id</td><td>String</td><td>No</td><td>FK → User.id</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>kind</td><td>String</td><td>No</td><td><code>ansible</code>, <code>shell</code>, <code>cloud_cli</code>, <code>manual</code></td></tr><tr><td>title</td><td>String</td><td>No</td><td>Remediation title</td></tr><tr><td>summary</td><td>String</td><td>Yes</td><td>Markdown summary</td></tr><tr><td>script</td><td>String</td><td>Yes</td><td>Fix script / commands</td></tr><tr><td>steps</td><td>JSON</td><td>Yes</td><td>Array of step objects</td></tr><tr><td>estimated_risk_reduction</td><td>Float</td><td>Yes</td><td>0-1</td></tr><tr><td>requires_restart</td><td>Boolean</td><td>Yes</td><td>Whether a restart is needed</td></tr><tr><td>reviewed</td><td>Boolean</td><td>No</td><td>Human-in-the-loop flag</td></tr><tr><td>disclaimer</td><td>String</td><td>Yes</td><td>AI disclaimer text</td></tr><tr><td>model</td><td>String</td><td>Yes</td><td>Model identifier used</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>Asset (Asset model, ASSET table)</h3>
+<p>A host/device in the org&#39;s attack surface.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>ip</td><td>String (45)</td><td>No</td><td>IPv4 or IPv6</td></tr><tr><td>hostname</td><td>String (253)</td><td>No</td><td></td></tr><tr><td>os</td><td>String</td><td>Yes</td><td>OS string</td></tr><tr><td>asset_type</td><td>String</td><td>No</td><td><code>webapp</code>, <code>server</code>, <code>database</code>, <code>firewall</code>, <code>device</code>, <code>unknown</code></td></tr><tr><td>zone</td><td>String</td><td>No</td><td><code>dmz</code>, <code>internal</code>, <code>cloud</code>, <code>crown_jewel</code>, <code>unknown</code></td></tr><tr><td>criticality</td><td>String</td><td>No</td><td><code><span class="badge badge-critical">CRITICAL</span></code>, <code><span class="badge badge-high">HIGH</span></code>, <code><span class="badge badge-medium">MEDIUM</span></code>, <code><span class="badge badge-low">LOW</span></code></td></tr><tr><td>internet_facing</td><td>Boolean</td><td>No</td><td>True for DMZ assets (auto-set)</td></tr><tr><td>base_value_usd</td><td>Float</td><td>No</td><td>Default: <code>BREACH_COST_BASE</code> (500,000)</td></tr><tr><td>is_crown_jewel</td><td>Boolean</td><td>No</td><td>Computed (score ≥ 70 or criticality = <span class="badge badge-critical">CRITICAL</span> in crown_jewel zone)</td></tr><tr><td>risk_score</td><td>Float</td><td>No</td><td>0-100, recomputed</td></tr><tr><td>blast_radius_count</td><td>Integer</td><td>No</td><td>Count of downstream nodes</td></tr><tr><td>downstream_value_usd</td><td>Float</td><td>No</td><td>Sum of downstream base_value_usd</td></tr><tr><td>last_scanned_at</td><td>DateTime</td><td>Yes</td><td>Last deep-scan</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr><tr><td>updated_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique constraint: <code>(org_id, ip)</code>. Fallback lookup: <code>(org_id, hostname)</code> if IP collision.</p>
+<h3>Connection</h3>
+<p>Directed edge between two assets.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>from_asset_id</td><td>String</td><td>No</td><td>FK → Asset.id</td></tr><tr><td>to_asset_id</td><td>String</td><td>No</td><td>FK → Asset.id</td></tr><tr><td>relation</td><td>String</td><td>No</td><td><code>network</code>, <code>admin</code>, <code>trust</code>, <code>exposure</code></td></tr><tr><td>via_service</td><td>String</td><td>Yes</td><td>Service name</td></tr><tr><td>via_cve</td><td>String</td><td>Yes</td><td>CVE ID</td></tr><tr><td>evidence</td><td>String</td><td>Yes</td><td>Raw evidence text</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>DeepScanResult</h3>
+<p>Result of a deep-scan run on a specific asset.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>asset_id</td><td>String</td><td>No</td><td>FK → Asset.id</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>command</td><td>JSON</td><td>No</td><td>nmap command used</td></tr><tr><td>duration_ms</td><td>Integer</td><td>No</td><td>Scan duration</td></tr><tr><td>nmap_output</td><td>String</td><td>Yes</td><td>Full nmap output (truncated)</td></tr><tr><td>ports</td><td>JSON</td><td>No</td><td><code>[{port, protocol, service, version}]</code></td></tr><tr><td>cves</td><td>JSON</td><td>No</td><td><code>[{cve_id, title, cvss, severity}]</code></td></tr><tr><td>error</td><td>String</td><td>Yes</td><td>Error message if failed</td></tr><tr><td>available</td><td>Boolean</td><td>No</td><td><code>False</code> if scan/lookup failed</td></tr><tr><td>unavailable_reason</td><td>String</td><td>Yes</td><td>Why scan failed</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>Finding</h3>
+<p>A vulnerability found on an asset.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>asset_id</td><td>String</td><td>No</td><td>FK → Asset.id</td></tr><tr><td>scan_id</td><td>String</td><td>Yes</td><td>FK → Scan.id (nullable for agent-injected findings)</td></tr><tr><td>vulnerability_id</td><td>String</td><td>Yes</td><td>FK → Vulnerability.id (nullable)</td></tr><tr><td>cve_id</td><td>String</td><td>Yes</td><td>CVE ID</td></tr><tr><td>title</td><td>String</td><td>No</td><td>Finding title</td></tr><tr><td>description</td><td>String</td><td>Yes</td><td>Detailed description</td></tr><tr><td>severity</td><td>String</td><td>No</td><td><code><span class="badge badge-critical">CRITICAL</span></code>, <code><span class="badge badge-high">HIGH</span></code>, <code><span class="badge badge-medium">MEDIUM</span></code>, <code><span class="badge badge-low">LOW</span></code>, <code>unknown</code></td></tr><tr><td>cvss</td><td>Float</td><td>Yes</td><td>CVSS score</td></tr><tr><td>exploitability</td><td>Float</td><td>Yes</td><td>0-1</td></tr><tr><td>port</td><td>Integer</td><td>Yes</td><td>Service port</td></tr><tr><td>service_name</td><td>String</td><td>Yes</td><td>Service name</td></tr><tr><td>status</td><td>String</td><td>No</td><td><code>open</code>, <code>remediating</code>, <code>resolved</code>, <code>accepted</code></td></tr><tr><td>resolved_at</td><td>DateTime</td><td>Yes</td><td>UTC</td></tr><tr><td>accepted_until</td><td>DateTime</td><td>Yes</td><td>UTC (time-bounded risk acceptance)</td></tr><tr><td>auto_resolved</td><td>Boolean</td><td>No</td><td>True if auto-resolved (stale from agent)</td></tr><tr><td>accepted_at</td><td>DateTime</td><td>Yes</td><td>UTC</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr><tr><td>updated_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>LiveObservation</h3>
+<p>A domain observed by an agent or user.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>source</td><td>String</td><td>No</td><td><code>agent</code> or <code>extension</code></td></tr><tr><td>device_ip</td><td>String</td><td>Yes</td><td>IP of the observing device</td></tr><tr><td>domain</td><td>String</td><td>No</td><td>Observed domain (cleaned)</td></tr><tr><td>context</td><td>String</td><td>Yes</td><td>URL or app name</td></tr><tr><td>device_id</td><td>String</td><td>Yes</td><td>FK → NetworkDevice.id</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique: <code>(org_id, device_id, domain)</code>.</p>
+<h3>LiveThreat</h3>
+<p>A threat detected by the live threat engine.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>kind</td><td>String</td><td>No</td><td><code>arp_spoof</code>, <code>rogue</code>, <code>risky_service</code>, <code>malicious_domain</code></td></tr><tr><td>severity</td><td>String</td><td>No</td><td><code><span class="badge badge-critical">CRITICAL</span></code>, <code><span class="badge badge-high">HIGH</span></code>, <code><span class="badge badge-medium">MEDIUM</span></code>, <code><span class="badge badge-low">LOW</span></code>, <code>unknown</code></td></tr><tr><td>title</td><td>String</td><td>No</td><td>Threat title</td></tr><tr><td>detail</td><td>String</td><td>Yes</td><td>Detailed description</td></tr><tr><td>device_ip</td><td>String</td><td>Yes</td><td>Affected device IP</td></tr><tr><td>device_mac</td><td>String</td><td>Yes</td><td>Affected device MAC</td></tr><tr><td>evidence</td><td>JSON</td><td>No</td><td>Evidence array</td></tr><tr><td>recommendation</td><td>String</td><td>Yes</td><td>Mitigation guidance</td></tr><tr><td>mitre</td><td>String</td><td>Yes</td><td>MITRE technique ID</td></tr><tr><td>demo_label</td><td>String</td><td>Yes</td><td><code>DEMO-ATTACK</code> if injected</td></tr><tr><td>cleared</td><td>Boolean</td><td>No</td><td>True if user cleared it</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>NetworkDevice</h3>
+<p>A device discovered by the edge agent.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>ip</td><td>String</td><td>No</td><td>Device IP</td></tr><tr><td>mac</td><td>String</td><td>Yes</td><td>MAC address (nullable for off-link/L3 devices)</td></tr><tr><td>hostname</td><td>String</td><td>Yes</td><td>DNS hostname</td></tr><tr><td>vendor</td><td>String</td><td>Yes</td><td>MAC vendor (OUI lookup)</td></tr><tr><td>subnet</td><td>String</td><td>No</td><td>Subnet CIDR</td></tr><tr><td>is_self</td><td>Boolean</td><td>No</td><td>True for the agent&#39;s own host</td></tr><tr><td>is_gateway</td><td>Boolean</td><td>No</td><td>True for the gateway</td></tr><tr><td>online</td><td>Boolean</td><td>No</td><td>Online status</td></tr><tr><td>last_seen</td><td>DateTime</td><td>Yes</td><td>UTC</td></tr><tr><td>scanned</td><td>Boolean</td><td>No</td><td>True if deep-scanned</td></tr><tr><td>vuln_count</td><td>Integer</td><td>Yes</td><td>Count of open findings</td></tr><tr><td>worst_severity</td><td>String</td><td>Yes</td><td>Worst open finding severity</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr><tr><td>updated_at</td><td>DateTime</td><td>Yes</td><td>UTC (stamped on each agent heartbeat)</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique: <code>(org_id, mac)</code> for MAC-present devices; <code>(org_id, subnet, ip)</code> for null-MAC devices.</p>
+<h3>NetworkThreat</h3>
+<p>A threat detected at the network level (from Netconfig/autoscan).</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>kind</td><td>String</td><td>No</td><td><code>risky_service</code>, <code>malicious_domain</code>, <code>arp_spoof</code>, <code>rogue</code></td></tr><tr><td>severity</td><td>String</td><td>No</td><td></td></tr><tr><td>title</td><td>String</td><td>No</td><td></td></tr><tr><td>detail</td><td>String</td><td>Yes</td><td></td></tr><tr><td>device_ip</td><td>String</td><td>Yes</td><td></td></tr><tr><td>device_mac</td><td>String</td><td>Yes</td><td></td></tr><tr><td>evidence</td><td>JSON</td><td>No</td><td></td></tr><tr><td>recommendation</td><td>String</td><td>Yes</td><td></td></tr><tr><td>mitre</td><td>String</td><td>Yes</td><td></td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>NodeHardening</h3>
+<p>Quantified hardening recommendation for a specific asset.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>asset_id</td><td>String</td><td>No</td><td>FK → Asset.id</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>action</td><td>String</td><td>No</td><td><code><span class="badge badge-patch">PATCH</span></code>, <code>VLAN_SEGMENT</code>, <code>ISOLATE_CONNECTION</code>, <code>COMBINED</code></td></tr><tr><td>current_score</td><td>Float</td><td>No</td><td>Risk score before</td></tr><tr><td>projected_score</td><td>Float</td><td>No</td><td>Risk score after</td></tr><tr><td>reduction</td><td>Float</td><td>No</td><td>0-1 (proportion reduced)</td></tr><tr><td>estimated_impact_reduction_usd</td><td>Float</td><td>Yes</td><td>Dollar impact reduction</td></tr><tr><td>description</td><td>String</td><td>Yes</td><td>Human-readable explanation</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>Organization</h3>
+<p>Top-level tenant.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>name</td><td>String</td><td>No</td><td>Org name</td></tr><tr><td>slug</td><td>String</td><td>No</td><td>URL-safe slug</td></tr><tr><td>plan</td><td>String</td><td>No</td><td>Default: <code>free</code></td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr><tr><td>updated_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique: <code>(slug)</code>. Slug is auto-generated from name (lowercased, hyphens).</p>
+<h3>RefreshToken</h3>
+<p>Persisted refresh tokens for re-authentication.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>user_id</td><td>String</td><td>No</td><td>FK → User.id</td></tr><tr><td>token_hash</td><td>String</td><td>No</td><td>SHA256 hash of refresh token</td></tr><tr><td>revoked</td><td>Boolean</td><td>No</td><td>True if revoked</td></tr><tr><td>expires_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique: <code>(user_id, token_hash)</code>.</p>
+<h3>Scan</h3>
+<p>A scan run — either agent ingest or deep scan.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>source</td><td>String</td><td>No</td><td><code>agent</code> or <code>deep_scan</code></td></tr><tr><td>status</td><td>String</td><td>No</td><td><code>running</code>, <code>complete</code>, <code>error</code></td></tr><tr><td>started_at</td><td>DateTime</td><td>Yes</td><td>UTC</td></tr><tr><td>completed_at</td><td>DateTime</td><td>Yes</td><td>UTC</td></tr><tr><td>metadata</td><td>JSON</td><td>Yes</td><td>Scan-specific metadata (command, devices, etc.)</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>Service</h3>
+<p>A detected service on an asset.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>asset_id</td><td>String</td><td>No</td><td>FK → Asset.id</td></tr><tr><td>scan_id</td><td>String</td><td>Yes</td><td>FK → Scan.id</td></tr><tr><td>port</td><td>Integer</td><td>No</td><td>Port number</td></tr><tr><td>protocol</td><td>String</td><td>No</td><td><code>tcp</code>, <code>udp</code></td></tr><tr><td>name</td><td>String</td><td>No</td><td>Service name (e.g., <code>nginx</code>)</td></tr><tr><td>version</td><td>String</td><td>Yes</td><td>Service version</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr><tr><td>updated_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique: <code>(asset_id, port, protocol)</code>.</p>
+<h3>TokenBucket</h3>
+<p>Rate limit counter (in-memory, persisted for observability).</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>user_id</td><td>String</td><td>No</td><td>FK → User.id</td></tr><tr><td>key</td><td>String</td><td>No</td><td>Bucket identifier (e.g., <code>auth:10.0.0.1</code>)</td></tr><tr><td>tokens</td><td>Float</td><td>No</td><td>Remaining tokens</td></tr><tr><td>last_refill</td><td>DateTime</td><td>No</td><td>UTC</td></tr><tr><td>expires_at</td><td>DateTime</td><td>No</td><td>TTL</td></tr></tbody>
+      </table>
+    </div>
+  <h3>URL Analysis Result</h3>
+<p>Full result of a URL trust analysis.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>url</td><td>String</td><td>No</td><td>Original URL</td></tr><tr><td>hostname</td><td>String</td><td>No</td><td>Extracted hostname</td></tr><tr><td>score</td><td>Integer</td><td>No</td><td>0-100</td></tr><tr><td>band</td><td>String</td><td>No</td><td><code>trusted</code>, <code>caution</code>, <code>high_risk</code></td></tr><tr><td>signals</td><td>JSON</td><td>No</td><td>Provider responses (never cached from API)</td></tr><tr><td>website</td><td>JSON</td><td>Yes</td><td>Static site data</td></tr><tr><td>providers</td><td>JSON</td><td>Yes</td><td>Provider config + last-check</td></tr><tr><td>summary</td><td>JSON</td><td>Yes</td><td>Aggregated summary</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>URL Analysis History</h3>
+<p>Simplified history record (for the history page).</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>result_id</td><td>String</td><td>No</td><td>FK → URLAnalysisResult.id</td></tr><tr><td>url</td><td>String</td><td>No</td><td>Original URL</td></tr><tr><td>score</td><td>Integer</td><td>No</td><td>0-100</td></tr><tr><td>band</td><td>String</td><td>No</td><td><code>trusted</code>, <code>caution</code>, <code>high_risk</code></td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <h3>User</h3>
+<p>Application user.</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>name</td><td>String</td><td>No</td><td>Display name</td></tr><tr><td>email</td><td>String</td><td>No</td><td>Normalized (lowercase, stripped)</td></tr><tr><td>password_hash</td><td>String</td><td>No</td><td>SHA256 + bcrypt</td></tr><tr><td>role</td><td>String</td><td>No</td><td><code>admin</code>, <code>analyst</code>, <code>viewer</code></td></tr><tr><td>token_version</td><td>Integer</td><td>No</td><td>Incremented on password change → invalidates all tokens</td></tr><tr><td>created_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr><tr><td>updated_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique: <code>(org_id, email)</code>.</p>
+<h3>Vulnerability</h3>
+<p>CVE record (populated from NVD / Vulners / agent).</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>Notes</th></tr></thead>
+        <tbody><tr><td>id</td><td>String (UUID)</td><td>No</td><td>PK</td></tr><tr><td>org_id</td><td>String</td><td>No</td><td>FK → Organization.id</td></tr><tr><td>cve_id</td><td>String</td><td>No</td><td>CVE ID (e.g., <code>CVE-2024-1234</code>)</td></tr><tr><td>title</td><td>String</td><td>No</td><td></td></tr><tr><td>description</td><td>String</td><td>Yes</td><td></td></tr><tr><td>cvss</td><td>Float</td><td>Yes</td><td>CVSS score</td></tr><tr><td>severity</td><td>String</td><td>Yes</td><td><code><span class="badge badge-critical">CRITICAL</span></code>, <code><span class="badge badge-high">HIGH</span></code>, <code><span class="badge badge-medium">MEDIUM</span></code>, <code><span class="badge badge-low">LOW</span></code>, <code>unknown</code></td></tr><tr><td>exploitability</td><td>Float</td><td>Yes</td><td>0-1</td></tr><tr><td>cisa_kev</td><td>Boolean</td><td>No</td><td>True if in CISA KEV</td></tr><tr><td>affected_software</td><td>String</td><td>Yes</td><td>Affected software string</td></tr><tr><td>reference_urls</td><td>JSON</td><td>Yes</td><td>Array of URLs</td></tr><tr><td>last_checked_at</td><td>DateTime</td><td>Yes</td><td>Last NVD sync</td></tr><tr><td>discovered_at</td><td>DateTime</td><td>No</td><td>UTC</td></tr></tbody>
+      </table>
+    </div>
+  <p>Unique: <code>(org_id, cve_id)</code>.</p>
+<hr>
+<h2>3. How tables map to API responses</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Table</th><th>Key endpoint</th><th>Transformation</th></tr></thead>
+        <tbody><tr><td>Asset</td><td><code><span class="badge badge-get">GET</span> /assets</code></td><td><code>AssetSummary</code> Pydantic schema — risk_score, blast_radius_count from engine cache</td></tr><tr><td>Asset</td><td><code><span class="badge badge-get">GET</span> /assets/{id}</code></td><td><code>AssetDetail</code> — joins services + findings + computed downstream_value</td></tr><tr><td>Connection</td><td><code><span class="badge badge-get">GET</span> /graph</code></td><td>NetworkX edge + <code>onTopPath</code> annotation</td></tr><tr><td>Finding</td><td><code><span class="badge badge-get">GET</span> /findings</code></td><td><code>FindingOut</code> — asset_ip joined</td></tr><tr><td>NetworkDevice</td><td><code><span class="badge badge-get">GET</span> /live/devices</code></td><td><code>NetworkDeviceOut</code> — adds threat fields</td></tr><tr><td>LiveThreat</td><td><code><span class="badge badge-get">GET</span> /live/network-threats</code></td><td><code>NetworkThreat</code> — ordered, filtered to last 24h</td></tr><tr><td>NetworkThreat</td><td><code><span class="badge badge-get">GET</span> /graph</code></td><td>Threat node annotation on graph</td></tr><tr><td>Scan</td><td><code><span class="badge badge-get">GET</span> /dashboard</code></td><td>Counted in stats</td></tr><tr><td>AI_Remediation</td><td><code><span class="badge badge-get">GET</span> /remediation</code></td><td><code>RemediationOut</code> — with disclaimer</td></tr><tr><td>URL Analysis Result</td><td><code><span class="badge badge-get">GET</span> /url-analyzer/history</code></td><td><code>HistoryItem</code></td></tr><tr><td>NodeHardening</td><td><code><span class="badge badge-get">GET</span> /report/hardening</code></td><td><code>NodeHardening</code> (server-serialized)</td></tr><tr><td>AutoScanConfig</td><td><code><span class="badge badge-get">GET</span>/<span class="badge badge-put">PUT</span> /live/autoscan</code></td><td><code>AutoScanConfigOut</code> / <code>AutoScanConfigUpdate</code></td></tr><tr><td>DeepScanResult</td><td><code><span class="badge badge-post">POST</span> /live/deep-scan</code></td><td><code>DeepScanResult</code></td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>4. Derived / cached columns</h2>
+<p>These columns are written by <code>recompute_org()</code> and are <strong>not</strong> set by the ingest pipeline:</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Table</th><th>Source</th></tr></thead>
+        <tbody><tr><td><code>risk_score</code></td><td>Asset</td><td>Engine node score (0-100)</td></tr><tr><td><code>blast_radius_count</code></td><td>Asset</td><td>Engine blast radius count</td></tr><tr><td><code>downstream_value_usd</code></td><td>Asset</td><td>Engine downstream value sum</td></tr><tr><td><code>is_crown_jewel</code></td><td>Asset</td><td>Engine: score ≥ 70 or <span class="badge badge-critical">CRITICAL</span> asset in crown_jewel zone</td></tr></tbody>
+      </table>
+    </div>
+  <p>These are written by the attack-path enumeration:</p>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Column</th><th>Table</th><th>Source</th></tr></thead>
+        <tbody><tr><td><code>onTopPath</code></td><td>Connection edge annotation</td><td>Attack path engine</td></tr><tr><td><code>path_id</code></td><td>Connection edge annotation</td><td>Attack path ID</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>5. Soft vs hard state</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Pattern</th><th>Usage</th><th>Rationale</th></tr></thead>
+        <tbody><tr><td>Soft delete</td><td><code>LiveThreat.cleared</code></td><td>User action to dismiss; cleared threats hidden from list</td></tr><tr><td>Status field</td><td><code>Finding.status</code></td><td>Workflow: open → remediating → resolved/accepted</td></tr><tr><td>Auto-resolve</td><td><code>Finding.auto_resolved</code></td><td>Agent removed a service; finding no longer applies</td></tr><tr><td>Time-bounded acceptance</td><td><code>Finding.accepted_until</code></td><td>Risk accepted for a window; auto-resumes monitoring after expiry</td></tr><tr><td>Demo label</td><td><code>LiveThreat.demo_label</code></td><td>Separates demo from real threats; cleared on demo stop</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>6. UUIDs everywhere</h2>
+<p>All primary keys are 36-character UUID strings (not UUID columns). This ensures:</p>
+<ul>
+<li><strong>Postgres + SQLite compatibility</strong>: string PKs work identically on both backends</li>
+<li><strong>No migration conflicts</strong>: append-only schema changes (reconcile_columns)</li>
+<li><strong>No special types</strong>: standard VARCHAR, no UUID extension needed</li>
+</ul>
+<hr>
+<h2>7. Schema evolution</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Approach</th><th>Rationale</th></tr></thead>
+        <tbody><tr><td><strong>No Alembic</strong></td><td>Deliberate v1 simplification</td></tr><tr><td><code>reconcile_columns(engine)</code></td><td>Additive: adds missing columns safely</td></tr><tr><td><code>create_all(engine)</code></td><td>Creates missing tables (idempotent)</td></tr><tr><td>Full reset</td><td><code><span class="badge badge-post">POST</span> /api/org/reset</code> drops all data (admin only)</td></tr><tr><td>DB recreation</td><td>In dev, <code>make dev-db</code> drops and recreates</td></tr></tbody>
+      </table>
+    </div>
+  <hr>
+<h2>8. Idempotency rules (ingest)</h2>
+
+    <div class="table-container">
+      <table class="styled-table">
+        <thead><tr><th>Entity</th><th>Idempotency key</th><th>On collision</th></tr></thead>
+        <tbody><tr><td>Asset</td><td><code>(org_id, ip)</code></td><td>Update if found; keep operator-criticality; never downgrade</td></tr><tr><td>Service</td><td><code>(asset_id, port, protocol)</code></td><td>Replace (upsert)</td></tr><tr><td>Finding</td><td><code>(asset_id, vulnerability_id)</code></td><td>Replace (upsert); stale open findings auto-resolve</td></tr><tr><td>Connection</td><td><code>(from, to, relation)</code></td><td>Skip duplicates</td></tr><tr><td>Scan</td><td><code>(org_id, source, started_at)</code></td><td>New row per ingest call</td></tr><tr><td>NetworkDevice</td><td><code>(org_id, mac)</code> or <code>(org_id, subnet, ip)</code></td><td>Update timestamps; subnets only observed by that agent</td></tr></tbody>
+      </table>
+    </div>
+  
+  </div>
+
+</body>
+</html>
