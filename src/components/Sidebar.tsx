@@ -1,29 +1,34 @@
 import {
  Box, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
- IconButton, Toolbar, Typography,
+ Toolbar, Typography,
 } from '@mui/material';
-import { Menu as MenuIcon, Logout as LogoutIcon } from '@mui/icons-material';
+import { Logout as LogoutIcon } from '@mui/icons-material';
 import { authApi } from '../api/auth';
 
 const drawerWidth = 260;
 
-const navItems = [
- { text: 'Dashboard', path: '/dashboard' },
- { text: 'Assets', path: '/assets' },
- { text: 'Attack Paths', path: '/paths' },
- { text: 'Live Monitoring', path: '/live' },
- { text: 'URL Trust', path: '/urltrust' },
- { text: 'Reports', path: '/reports' },
- { text: 'Admin', path: '/admin' },
+interface NavItem {
+ text: string;
+ path: string;
+ icon: React.ReactNode;
+}
+
+const navItems: NavItem[] = [
+ { text: 'Dashboard', path: '/dashboard', icon: null },
+ { text: 'Assets', path: '/assets', icon: null },
+ { text: 'Attack Paths', path: '/paths', icon: null },
+ { text: 'Live Monitoring', path: '/live', icon: null },
+ { text: 'URL Trust', path: '/urltrust', icon: null },
+ { text: 'Reports', path: '/reports', icon: null },
+ { text: 'Admin', path: '/admin', icon: null },
 ];
 
 interface SidebarProps {
  mobileOpen: boolean;
  onClose: () => void;
- icons: Record<string, React.ReactNode>;
 }
 
-export default function Sidebar({ mobileOpen, onClose, icons }: SidebarProps) {
+export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
  const handleLogout = async () => {
  try { await authApi.logout(); } catch {}
  localStorage.removeItem('access_token');
@@ -44,12 +49,10 @@ export default function Sidebar({ mobileOpen, onClose, icons }: SidebarProps) {
  <ListItem key={item.text} disablePadding>
  <ListItemButton
  href={item.path}
- onClick={() => {
- if (window.innerWidth < 900) onClose();
- }}
+ onClick={onClose}
  sx={{ mx: 1, borderRadius: 2, '&:hover': { bgcolor: 'rgba(33, 150, 243, 0.08)' } }}
  >
- <ListItemIcon sx={{ color: '#42a5f5', minWidth: 40 }}>{icons[item.text]}</ListItemIcon>
+ {item.icon && <ListItemIcon sx={{ color: '#42a5f5', minWidth: 40 }}>{item.icon}</ListItemIcon>}
  <ListItemText primary={item.text} />
  </ListItemButton>
  </ListItem>
@@ -57,10 +60,14 @@ export default function Sidebar({ mobileOpen, onClose, icons }: SidebarProps) {
  </List>
  </Box>
  <Box sx={{ px: 2, pb: 2 }}>
- <ListItemButton onClick={handleLogout} sx={{ borderRadius: 2, color: '#f44336' }}>
- <ListItemIcon sx={{ color: '#f44336', minWidth: 40 }}><LogoutIcon /></ListItemIcon>
- <ListItemText primary="Logout" />
- </ListItemButton>
+ <Box
+ component="div"
+ onClick={handleLogout}
+ sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, borderRadius: 2, cursor: 'pointer', color: '#f44336' }}
+ >
+ <LogoutIcon sx={{ fontSize: 20 }} />
+ <Typography variant="body2">Logout</Typography>
+ </Box>
  </Box>
  </Box>
  );
