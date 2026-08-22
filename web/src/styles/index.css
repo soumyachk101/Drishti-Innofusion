@@ -1,0 +1,252 @@
+/* Drishti — global design tokens and base styles | Night Ops (steel + phosphor) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: theme('colors.canvas');
+    color: theme('colors.ink');
+    @apply font-body antialiased;
+  }
+  body {
+    @apply min-h-screen;
+    background-color: theme('colors.canvas');
+    /* Inter Variable feature settings for Framer brand voice */
+    font-feature-settings: "cv01", "cv05", "cv09", "cv11", "ss03", "ss07", "dlig", "tnum";
+  }
+  ::selection {
+    background-color: rgba(255, 94, 36, 0.22); /* Signal Orange wash */
+    color: theme('colors.ink');
+  }
+  
+  /* Visible keyboard focus everywhere */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px theme('colors.accent-blue');
+    border-radius: inherit;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.surface-1') transparent;
+  }
+  
+  /* Cloud-paper gradients — soft sky tints, no hard hue. Kept as distinct names
+     so existing markup works. */
+  .framer-gradient-violet {
+    background: linear-gradient(135deg, #f2f8ff 0%, #e3f1fe 100%);
+  }
+  .framer-gradient-magenta {
+    background: linear-gradient(135deg, #ffffff 0%, #e3f1fe 100%);
+  }
+  .framer-gradient-orange {
+    background: linear-gradient(135deg, #ffe9df 0%, #ffd8c7 100%);
+  }
+  .framer-gradient-coral {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e3f1fe 100%);
+  }
+}
+
+/* ── Threat-instrument console language ─────────────────────────────────────
+   A calibrated-instrument look: coordinate hairline grid, registration ticks,
+   phosphor bloom, faint scanline. Used across the authed app (dashboard / live
+   watch / report) so every screen reads as one console. */
+
+/* Ambient coordinate grid + one contained phosphor bloom, per page root. */
+.console-atmos {
+  position: relative;
+  isolation: isolate;
+}
+.console-atmos::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(120, 150, 180, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 150, 180, 0.10) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(120% 80% at 50% 0%, #000 0%, transparent 72%);
+  mask-image: radial-gradient(120% 80% at 50% 0%, #000 0%, transparent 72%);
+}
+.console-atmos::after {
+  content: "";
+  position: absolute;
+  top: -8%;
+  left: 50%;
+  width: min(880px, 90%);
+  height: 320px;
+  transform: translateX(-50%);
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(255, 94, 36, 0.07), transparent 70%);
+}
+
+/* Registration ticks — four L-shaped corner brackets on framed panels. The
+   panel sets position:relative; these are drawn by the ::before/::after of two
+   helper spans placed top and bottom. */
+.reg-frame { position: relative; }
+.reg-tick {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-color: theme('colors.hairline');
+  transition: border-color 0.3s ease;
+  pointer-events: none;
+}
+.reg-frame:hover .reg-tick { border-color: rgba(255, 94, 36, 0.55); }
+.reg-tl { top: 7px; left: 7px; border-top: 1.5px solid; border-left: 1.5px solid; }
+.reg-tr { top: 7px; right: 7px; border-top: 1.5px solid; border-right: 1.5px solid; }
+.reg-bl { bottom: 7px; left: 7px; border-bottom: 1.5px solid; border-left: 1.5px solid; }
+.reg-br { bottom: 7px; right: 7px; border-bottom: 1.5px solid; border-right: 1.5px solid; }
+
+/* Faint moving scanline for hero readouts — one, slow, easy to ignore. */
+@keyframes scanline-sweep {
+  0% { transform: translateY(-100%); opacity: 0; }
+  8% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { transform: translateY(2400%); opacity: 0; }
+}
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(255, 94, 36, 0.06), transparent);
+  height: 12px;
+  animation: scanline-sweep 6.5s linear infinite;
+}
+
+/* Telemetry eyebrow pulse dot. */
+@keyframes tele-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px currentColor; }
+  50% { opacity: 0.35; box-shadow: 0 0 2px currentColor; }
+}
+.tele-dot { animation: tele-pulse 2.4s ease-in-out infinite; }
+
+/* App motion */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-page-enter {
+  animation: page-enter 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+.animate-toast-in {
+  animation: toast-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-card-enter {
+  animation: card-enter 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Path-rail connectors (auth) + terrain dot grid (auth + app shell ambience) */
+.auth-dash {
+  stroke-dasharray: 6;
+  animation: dash-flow 1.1s linear infinite;
+}
+.dot-terrain {
+  background-image: radial-gradient(#cfe0f0 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Auth brand panel — cloud-paper atmosphere: cloud-mist canvas, a soft orange
+   bloom top-right, a cloud bloom bottom-left, faint sky grid. */
+.auth-atmos {
+  background-color: theme('colors.canvas');
+  background-image:
+    radial-gradient(38rem 28rem at 88% -8%, rgba(255, 94, 36, 0.08), transparent 62%),
+    radial-gradient(34rem 26rem at -14% 82%, rgba(207, 224, 240, 0.55), transparent 62%),
+    linear-gradient(rgba(120, 150, 180, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 150, 180, 0.10) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    48px 48px,
+    48px 48px;
+}
+
+/* React Flow overrides for the "Signal & Terrain" canvas (Legacy) */
+.react-flow__attribution {
+  background: transparent;
+  color: #6b7a94;
+}
+.react-flow__edge-path {
+  transition: opacity 150ms ease-out, stroke 150ms ease-out;
+}
+.rf-edge-toppath .react-flow__edge-path {
+  stroke-dasharray: 8;
+  animation: dash-flow 1s linear infinite;
+}
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rf-edge-toppath .react-flow__edge-path,
+  .auth-dash {
+    animation: none;
+  }
+  .animate-page-enter,
+  .animate-toast-in,
+  .animate-card-enter {
+    animation: none !important;
+  }
+}
+
+/* ── React Flow Dark Mode Overrides ─────────────────────────── */
+.react-flow__controls {
+  box-shadow: rgba(15,34,52,0.08) 0px 7px 14px 0px, rgba(15,34,52,0.06) 0px 2px 4px 0px !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  border: 1px solid theme('colors.hairline') !important;
+}
+.react-flow__controls-button {
+  background-color: theme('colors.canvas') !important;
+  border-bottom: 1px solid theme('colors.surface-1') !important;
+  fill: theme('colors.ink-muted') !important;
+  transition: all 0.2s ease;
+}
+.react-flow__controls-button:hover {
+  background-color: theme('colors.surface-1') !important;
+  fill: theme('colors.ink') !important;
+}
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+

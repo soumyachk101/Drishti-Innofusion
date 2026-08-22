@@ -1,0 +1,82 @@
+/* Hallmark tokens — "Ember Eye" cinematic grade · enterprise cybersecurity register:
+ * warm near-black canvas (hue ~30, projected-film darkness) ember-orange accent
+ * (hue ~38, Signal Orange) with a restrained ice-cyan complement (hue ~215) pulled
+ * straight from the eye's reflection — teal-orange, the classic cinematic pair.
+ * The warm hero photograph dissolves into a darkness of its own temperature. · portable */
+.hml {
+  /* colour — OKLCH. Ember orange leads, cyan answers (≤3% of any viewport). */
+  --color-paper: oklch(11.5% 0.02 38);
+  --color-paper-2: oklch(15.5% 0.024 38);
+  --color-paper-3: oklch(19.5% 0.028 36);
+  --color-rule: oklch(30% 0.03 42);
+  --color-rule-glow: oklch(72% 0.17 55 / 0.35);
+  --color-muted: oklch(74% 0.028 70);
+  --color-ink: oklch(95% 0.018 80);
+  --color-accent: oklch(72% 0.17 55); /* ember orange — the eye's iris fire */
+  --color-accent-hover: oklch(78% 0.16 55);
+  --color-accent-ink: oklch(14% 0.02 40);
+  --color-cyan: oklch(80% 0.09 215); /* ice cyan — the reflection, used sparingly */
+  --color-cyan-glow: oklch(80% 0.09 215 / 0.35);
+  --color-amber: oklch(76% 0.18 72);
+  --color-amber-glow: oklch(76% 0.18 72 / 0.4);
+  --color-focus: oklch(72% 0.17 55);
+
+  /* surfaces with alpha (overlays only) + canvas blooms + map strokes */
+  --color-nav-veil: oklch(14% 0.02 38 / 0.72);
+  --color-glass-card: oklch(17% 0.024 38 / 0.6);
+  --color-glass-card-hover: oklch(21% 0.028 36 / 0.85);
+  --color-sheet: oklch(15% 0.022 38 / 0.94);
+  --color-map-well: oklch(13.5% 0.02 38 / 0.72);
+  --color-edge-path: oklch(72% 0.17 55);
+  --color-bloom-a: oklch(58% 0.14 45 / 0.14); /* low ember bloom, top-right */
+  --color-bloom-b: oklch(45% 0.07 210 / 0.1); /* faint cool counterweight */
+  --color-bloom-c: oklch(80% 0.09 215 / 0.12);
+  --color-veil-strong: oklch(11.5% 0.02 38 / 0.92);
+  --color-veil-mid: oklch(11.5% 0.02 38 / 0.35);
+  --color-grid: oklch(72% 0.14 55 / 0.045);
+  --color-accent-glow: oklch(72% 0.17 55 / 0.45);
+  --color-accent-glow-soft: oklch(72% 0.17 55 / 0.12);
+  --color-cyan-glow-soft: oklch(80% 0.09 215 / 0.12);
+  --shadow-lift: 0 16px 40px oklch(6% 0.015 40 / 0.65);
+  --shadow-glow: 0 0 45px oklch(72% 0.17 55 / 0.3);
+
+  /* type — Sleek tech typography: Space Grotesk display · Manrope body · JetBrains Mono outlier */
+  --font-display: "Space Grotesk", "Clash Display", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Manrope", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: "JetBrains Mono", ui-monospace, monospace;
+
+  /* scale — major third (1.25), five sizes on the page */
+  --text-sm: 0.8rem;
+  --text-base: 1rem;
+  --text-md: 1.25rem;
+  --text-2xl: 2.441rem;
+  --text-3xl: 3.052rem;
+  --text-display: clamp(2.85rem, 6.5vw + 1rem, 7rem);
+
+  /* space — 4pt, named by role */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+
+  /* motion — snappy, technical (0.9×) */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --dur-micro: 110ms;
+  --dur-short: 200ms;
+  --dur-long: 380ms;
+
+  /* shape */
+  --radius-card: 12px;
+  --radius-input: 8px;
+  --radius-pill: 999px;
+  --rule-hair: 1px;
+
+  /* z — named scale */
+  --z-base: 1;
+  --z-sticky: 200;
+}

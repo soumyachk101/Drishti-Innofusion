@@ -1,62 +1,102 @@
-import React, { useState } from 'react';
-import {
- Container, Paper, TextField, Button, Typography, Box, Alert, Link,
-} from '@mui/material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import toast from 'react-hot-toast';
+// Drishti v0.1 — user login page | 11-Jul-2026
+import { useState, type FormEvent } from "react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { ApiError } from "../../api/client";
+import { useAuth } from "../../auth";
+import { AuthButton, AuthLayout, Field } from "./AuthLayout";
 
-export default function LoginPage() {
- const [email, setEmail] = useState('');
- const [password, setPassword] = useState('');
- const [error, setError] = useState('');
- const [loading, setLoading] = useState(false);
- const { login } = useAuth();
- const navigate = useNavigate();
+export function LoginPage() {
+  const { user, login } = useAuth();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
- const submit = async (e: React.FormEvent) => {
- e.preventDefault();
- setError('');
- setLoading(true);
- try {
- await login(email, password);
- toast.success('Welcome back!');
- navigate('/');
- } catch (err: any) {
- setError(err.message || 'Login failed');
- toast.error(err.message || 'Login failed');
- } finally { setLoading(false); }
- };
+  if (user) return <Navigate to="/app" replace />;
 
- return (
- <Container maxWidth="sm" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
- <Paper sx={{ p: 4, width: '100%', bgcolor: '#111827' }}>
- <Typography variant="h4" align="center" sx={{ mb: 1, color: '#00e676', fontWeight: 700 }}>
- Drishti
- </Typography>
- <Typography variant="body2" align="center" sx={{ mb: 3, color: 'grey.400' }}>
- Network Risk Simulator
- </Typography>
- {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
- <form onSubmit={submit}>
- <TextField
- fullWidth label="Email" type="email" value={email}
- onChange={(e) => setEmail(e.target.value)} sx={{ mb: 2, input: { color: '#fff' } }}
- InputLabelProps={{ style: { color: '#9ca3af' } }}
- />
- <TextField
- fullWidth label="Password" type="password" value={password}
- onChange={(e) => setPassword(e.target.value)} sx={{ mb: 3 }}
- InputLabelProps={{ style: { color: '#9ca3af' } }}
- />
- <Button fullWidth variant="contained" type="submit" disabled={loading} sx={{ bgcolor: '#00e676', color: '#000' }}>
- {loading ? 'Signing in…' : 'Sign In'}
- </Button>
- </form>
- <Typography variant="body2" align="center" sx={{ mt: 2, color: 'grey.400' }}>
- No account? <Link component={RouterLink} to="/register" sx={{ color: '#00e676' }}>Register</Link>
- </Typography>
- </Paper>
- </Container>
- );
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!email || !password) {
+      setError("Enter your email and password.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await login(email, password);
+      navigate("/app");
+    } catch (err) {
+      setError(
+        err instanceof ApiError && err.status === 401
+          ? "Invalid email or password."
+          : "Couldn't sign in — is the server reachable?",
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <AuthLayout
+      title="Sign in"
+      subtitle="Welcome back — your attack surface is waiting."
+      footer={
+        <>
+          New to Drishti?{" "}
+          <Link to="/signup" className="font-medium text-accent-blue hover:underline">
+            Create an account
+          </Link>
+        </>
+      }
+    >
+      {/* Demo creds are dev-only — never shipped in a production bundle. */}
+      {import.meta.env.DEV && (
+        <button
+          type="button"
+          onClick={() => {
+            setEmail("analyst@acme-retail.dev");
+            setPassword("drishti-demo");
+            setError(null);
+          }}
+          className="relative mb-5 w-full overflow-hidden rounded-xl bg-surface-2 px-4 py-3 text-left text-ink transition-all border border-hairline hover:border-accent-400/50 hover:bg-surface-2/80"
+        >
+          <span className="block text-xs font-medium tracking-wide">
+            Demo workspace — click to fill
+          </span>
+          <span className="mt-0.5 block font-mono text-sm">analyst@acme-retail.dev · drishti-demo</span>
+        </button>
+      )}
+      <form onSubmit={submit} className="space-y-5" noValidate>
+        <Field
+          label="Email"
+          type="email"
+          autoComplete="email"
+          autoFocus
+          placeholder="you@company.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <Field
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        {error && (
+          <div
+            role="alert"
+            className="rounded-xl border border-risk-critical/30 bg-risk-critical/10 px-4 py-3 text-sm text-risk-critical"
+          >
+            {error}
+          </div>
+        )}
+        <AuthButton type="submit" loading={busy}>
+          Sign in
+        </AuthButton>
+      </form>
+    </AuthLayout>
+  );
 }

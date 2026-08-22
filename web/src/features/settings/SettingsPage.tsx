@@ -1,134 +1,130 @@
-import React, { useState } from 'react';
-import { Box, Typography, Paper, TextField, Button, Grid, Alert, Divider } from '@mui/material';
-import toast from 'react-hot-toast';
-import api from '../../lib/apiClient';
+// Drishti v0.1 — organization settings page | 11-Jul-2026
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState, type FormEvent } from "react";
+import { ApiError, api } from "../../api/client";
+import { useAuth } from "../../auth";
+import { Button } from "../../components/Button";
+import { Card } from "../../components/primitives";
+import { useToast } from "../../store/graphStore";
+import { Field } from "../auth/AuthLayout";
 
-export default function SettingsPage() {
-  const [orgName, setOrgName] = useState('Acme Corporation');
-  const [scanInterval, setScanInterval] = useState('420');
-  const [agentToken, setAgentToken] = useState('drishti_8f9a2e3b1c4d5e6f7a8b9c0d');
-  const [loadingToken, setLoadingToken] = useState(false);
-  const [loadingSample, setLoadingSample] = useState(false);
+export function SettingsPage() {
+  const { user, refreshMe } = useAuth();
+  const toast = useToast();
+  const orgQ = useQuery({ queryKey: ["org"], queryFn: () => api.org() });
 
-  const save = () => {
-    toast.success('Configuration saved successfully');
+  const [name, setName] = useState(user?.name ?? "");
+  const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
+  const [pwError, setPwError] = useState<string | null>(null);
+
+  const saveName = useMutation({
+    mutationFn: () => api.patchMe({ name: name.trim() }),
+    onSuccess: async () => {
+      await refreshMe();
+      toast.show("Profile updated", "success");
+    },
+    onError: () => toast.show("Couldn't update the profile — retry", "error"),
+  });
+
+  const changePw = useMutation({
+    mutationFn: () => api.patchMe({ current_password: pw.current, new_password: pw.next }),
+    onSuccess: () => {
+      setPw({ current: "", next: "", confirm: "" });
+      toast.show("Password changed", "success");
+    },
+    onError: (err) =>
+      setPwError(
+        err instanceof ApiError && err.status === 401
+          ? "Current password is incorrect."
+          : "Couldn't change the password — retry.",
+      ),
+  });
+
+  const submitName = (e: FormEvent) => {
+    e.preventDefault();
+    if (name.trim()) saveName.mutate();
   };
-
-  const generateAgentToken = async () => {
-    setLoadingToken(true);
-    try {
-      const res = await api.post('/org/agent-token');
-      if (res.data && res.data.token) {
-        setAgentToken(res.data.token);
-      } else {
-        setAgentToken(`drishti_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`);
-      }
-      toast.success('New agent token generated!');
-    } catch {
-      const dummyToken = `drishti_${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
-      setAgentToken(dummyToken);
-      toast.success('New agent token generated (offline mode)!');
-    } finally {
-      setLoadingToken(false);
+  const submitPw = (e: FormEvent) => {
+    e.preventDefault();
+    setPwError(null);
+    if (pw.next.length < 8) {
+      setPwError("New password needs at least 8 characters.");
+      return;
     }
-  };
-
-  const loadSampleNetwork = async () => {
-    setLoadingSample(true);
-    try {
-      await api.post('/org/load-sample');
-      toast.success('Acme sample network loaded successfully!');
-    } catch {
-      toast.success('Sample network initialized!');
-    } finally {
-      setLoadingSample(false);
+    if (pw.next !== pw.confirm) {
+      setPwError("New passwords don't match.");
+      return;
     }
+    changePw.mutate();
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 1, fontWeight: 700, color: '#fff' }}>
-        Organization & Platform Settings
-      </Typography>
-      <Typography variant="body2" sx={{ mb: 3, color: 'grey.400' }}>
-        Manage tenant identity, autonomous scan schedules, and edge agent access tokens.
-      </Typography>
+    <div className="mx-auto max-w-2xl space-y-6 p-8">
+      <h1 className="font-display text-h1 text-ink-primary">Settings</h1>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, bgcolor: '#111827', border: '1px solid #1f2937', borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 600 }}>
-              Tenant Profile
-            </Typography>
-            <TextField
-              fullWidth
-              label="Organization Name"
-              value={orgName}
-              onChange={(e) => setOrgName(e.target.value)}
-              sx={{ mb: 2, input: { color: '#fff' } }}
-              InputLabelProps={{ style: { color: '#9ca3af' } }}
-            />
-            <TextField
-              fullWidth
-              label="AutoScan Interval (seconds)"
-              type="number"
-              value={scanInterval}
-              onChange={(e) => setScanInterval(e.target.value)}
-              sx={{ mb: 3, input: { color: '#fff' } }}
-              InputLabelProps={{ style: { color: '#9ca3af' } }}
-            />
-            <Button variant="contained" onClick={save} sx={{ bgcolor: '#00e676', color: '#000', fontWeight: 700 }}>
-              Save Configuration
-            </Button>
-          </Paper>
-        </Grid>
+      <Card className="space-y-4 p-5">
+        <div className="font-display text-h3 text-ink-primary">Profile</div>
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-small">
+          <dt className="text-ink-muted">Email</dt>
+          <dd className="font-mono text-ink-secondary">{user?.email}</dd>
+          <dt className="text-ink-muted">Role</dt>
+          <dd className="text-ink-secondary">{user?.role}</dd>
+          <dt className="text-ink-muted">Organization</dt>
+          <dd className="text-ink-secondary">
+            {user?.org_name}
+            {orgQ.data && (
+              <span className="text-ink-muted">
+                {" "}
+                · {orgQ.data.asset_count} assets · {orgQ.data.member_count} member
+                {orgQ.data.member_count === 1 ? "" : "s"}
+              </span>
+            )}
+          </dd>
+        </dl>
+        <form onSubmit={submitName} className="flex items-end gap-3">
+          <div className="flex-1">
+            <Field label="Display name" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <Button type="submit" loading={saveName.isPending} disabled={!name.trim()}>
+            Save
+          </Button>
+        </form>
+      </Card>
 
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, bgcolor: '#111827', border: '1px solid #1f2937', borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2, color: '#fff', fontWeight: 600 }}>
-              Edge Agent Token
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'grey.400', mb: 2 }}>
-              Deploy this token with <code style={{ color: '#00e676' }}>drishti_watch.py</code> to authenticate LAN telemetry ingest.
-            </Typography>
-            <TextField
-              fullWidth
-              label="Active Agent Token (SHA256 Hashed in DB)"
-              value={agentToken}
-              InputProps={{ readOnly: true }}
-              sx={{ mb: 2, input: { color: '#00e676', fontFamily: 'monospace' } }}
-              InputLabelProps={{ style: { color: '#9ca3af' } }}
-            />
-            <Button
-              variant="outlined"
-              onClick={generateAgentToken}
-              disabled={loadingToken}
-              sx={{ color: '#00e676', borderColor: '#00e676', fontWeight: 600 }}
-            >
-              {loadingToken ? 'Generating…' : 'Rotate Agent Token'}
-            </Button>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Paper sx={{ p: 3, bgcolor: '#111827', border: '1px solid #1f2937', borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 1, color: '#fff', fontWeight: 600 }}>
-              Demo & Sample Data
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'grey.400', mb: 2 }}>
-              Preload the Acme Corporation sample environment with 12 assets, 18 findings, 5 chained attack paths, and live network telemetry.
-            </Typography>
-            <Button
-              variant="contained"
-              onClick={loadSampleNetwork}
-              disabled={loadingSample}
-              sx={{ bgcolor: '#2563eb', color: '#fff', fontWeight: 700 }}
-            >
-              {loadingSample ? 'Loading…' : 'Load Acme Sample Network'}
-            </Button>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+      <Card className="space-y-4 p-5">
+        <div className="font-display text-h3 text-ink-primary">Change password</div>
+        <form onSubmit={submitPw} className="space-y-3" noValidate>
+          <Field
+            label="Current password"
+            type="password"
+            autoComplete="current-password"
+            value={pw.current}
+            onChange={(e) => setPw((s) => ({ ...s, current: e.target.value }))}
+          />
+          <Field
+            label="New password"
+            type="password"
+            autoComplete="new-password"
+            value={pw.next}
+            onChange={(e) => setPw((s) => ({ ...s, next: e.target.value }))}
+          />
+          <Field
+            label="Confirm new password"
+            type="password"
+            autoComplete="new-password"
+            value={pw.confirm}
+            onChange={(e) => setPw((s) => ({ ...s, confirm: e.target.value }))}
+          />
+          {pwError && (
+            <div className="rounded-md border border-risk-critical/30 bg-risk-critical/10 p-2.5 text-small text-ink-secondary">
+              {pwError}
+            </div>
+          )}
+          <Button type="submit" loading={changePw.isPending} disabled={!pw.current || !pw.next}>
+            Change password
+          </Button>
+        </form>
+      </Card>
+    </div>
   );
 }
