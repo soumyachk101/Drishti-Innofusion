@@ -1,103 +1,110 @@
-"""Recompute orchestration: build graph, score nodes, enumerate paths, compute impact, cache."""
+# Drishti v0.1 — recompute orchestration | 11-Jul-2026
+"""Recompute orchestration: build graph → scores → paths → impact → cache.
+
+Per-org, idempotent. Triggered on ingest, finding resolve, or asset edit
+(BACKEND.md §8). For the demo network (≤200 nodes) this runs well under 500 ms.
+"""
 from __future__ import annotations
 
+import time
+from decimal import Decimal
+
+from sqlalchemy import delete, select, text, update
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 
-from app.services.risk_engine import compute_node_scores, blast_radius
-from app.services.attack_paths import enumerate_paths, path_impact_usd, total_exposure
+from app.models import Asset, AttackPath, AttackPathStep, Connection
+from app.services.attack_paths import blast_radius_value, enumerate_paths
 from app.services.engine_loader import load_engine
-from app.models import AttackPath, AttackPathStep, Asset, Connection
+from app.services.impact import id_key, path_impact_usd
+from app.services.risk_engine import INTERNET, Engine, blast_radius, compute_node_scores
 
-
+# in-memory timing/counters for GET /api/stats and the demo narrative
 _LAST_STATS: dict[str, dict] = {}
 
 
 def recompute_org(db: Session, org_id: str) -> dict:
- G, nodes, findings_map = load_engine(db, org_id)
+    start = time.perf_counter()
+    if db.bind.dialect.name != "sqlite":
+        db.execute(text("SELECT pg_advisory_xact_lock(hashtext(:oid))"), {"oid": org_id})
+    engine = load_engine(db, org_id)
 
- # 1. Compute node scores
- scores = compute_node_scores(G, nodes)
+    scores = compute_node_scores(engine)
+    paths = enumerate_paths(engine)
 
- # 2. Compute blast radius for each asset
- blast_counts = {}
- blast_values = {}
- for asset_id in nodes:
- blast_counts[asset_id] = blast_radius(G, asset_id)
- from app.services.risk_engine import blast_radius_value as _brv
- blast_values[asset_id] = _brv(G, asset_id, nodes)
+    # cache node risk scores + blast radius counts
+    for node_id, node in engine.nodes.items():
+        if node_id == INTERNET:
+            continue
+        blast = blast_radius(engine, node_id)
+        db.execute(
+            update(Asset)
+            .where(Asset.id == node_id)
+            .values(
+                risk_score=Decimal(str(scores.get(node_id, 0.0))),
+                blast_radius_count=len(blast),
+            )
+        )
 
- # 3. Cache node scores + blast radius to Asset rows
- for asset_id, score in scores.items():
- db.query(Asset).filter(Asset.org_id == org_id, Asset.id == asset_id).update({
- "risk_score": round(score, 3),
- "blast_radius_count": blast_counts.get(asset_id, 0),
- })
+    # persist edge weights back to connections (engine may recompute them)
+    conns = db.scalars(select(Connection).where(Connection.org_id == org_id)).all()
+    for c in conns:
+        edge = engine.edges.get((c.from_asset_id, c.to_asset_id))
+        if edge is not None:
+            c.weight = Decimal(str(edge.weight))
 
- # 4. Persist edge weights back to connections
- for u, v, data in G.edges(data=True):
- if "relation" in data and u != "INTERNET":
- weight = round(data.get("weight", 0.0), 3)
- db.query(Connection).filter(
- Connection.org_id == org_id,
- Connection.from_asset_id == u,
- Connection.to_asset_id == v,
- ).update({"weight": weight})
+    # replace cached attack paths + steps
+    old_path_ids = db.scalars(select(AttackPath.id).where(AttackPath.org_id == org_id)).all()
+    if old_path_ids:
+        db.execute(delete(AttackPathStep).where(AttackPathStep.path_id.in_(old_path_ids)))
+        db.execute(delete(AttackPath).where(AttackPath.org_id == org_id))
+    db.flush()
 
- # 5. Enumerate paths
- paths = enumerate_paths(G, nodes)
+    impacts: dict[str, float] = {}
+    for p in paths:
+        impact = path_impact_usd(engine, p)
+        impacts[id_key(p)] = impact
 
- # 6. Compute impact
- for p in paths:
- p.impact_usd = round(path_impact_usd(p), 2)
+        path_row = AttackPath(
+            org_id=org_id,
+            entry_label=p.entry_label,
+            target_asset_id=p.target_asset_id,
+            hop_count=p.hop_count,
+            path_risk=Decimal(str(p.path_risk)),
+            likelihood=Decimal(str(p.likelihood)),
+            impact_usd=Decimal(str(impact)),
+        )
+        db.add(path_row)
+        db.flush()
+        for idx, step in enumerate(p.steps):
+            db.add(
+                AttackPathStep(
+                    path_id=path_row.id,
+                    step_index=idx,
+                    asset_id=step.asset_id,
+                    via_vulnerability_id=step.via_vuln_id,
+                    edge_weight=Decimal(str(step.edge_weight))
+                    if step.edge_weight is not None
+                    else None,
+                )
+            )
 
- total_exp = round(total_exposure(paths), 2)
+    db.flush()
 
- # 7. Delete old cached paths + rewrite
- db.query(AttackPathStep).filter(AttackPathStep.path_id.in_(
- db.query(AttackPath.id).filter(AttackPath.org_id == org_id)
- )).delete(synchronize_session=False)
- db.query(AttackPath).filter(AttackPath.org_id == org_id).delete()
-
- for p in paths:
- ap = AttackPath(
- org_id=org_id,
- entry_label=p.entry_label,
- target_asset_id=p.target,
- hop_count=p.hop_count,
- path_risk=round(p.path_risk, 3),
- likelihood=round(p.likelihood, 3),
- impact_usd=p.impact_usd,
- narrative=p.narrative,
- )
- db.add(ap)
- db.flush()
-
- for i, hop in enumerate(p.hops):
- step = AttackPathStep(
- path_id=ap.id,
- step_index=i,
- asset_id=hop,
- edge_weight=None,
- )
- db.add(step)
-
- db.commit()
-
- stats = {
- "nodes": len(nodes),
- "edges": G.number_of_edges(),
- "paths": len(paths),
- "recompute_ms": 0.0,
- "top_path_risk": round(paths[0].path_risk, 3) if paths else 0.0,
- "total_exposure_usd": total_exp,
- }
- _LAST_STATS[org_id] = stats
- return stats
+    elapsed_ms = round((time.perf_counter() - start) * 1000, 1)
+    _LAST_STATS[org_id] = {
+        "nodes": engine.graph.number_of_nodes(),
+        "edges": engine.graph.number_of_edges(),
+        "paths": len(paths),
+        "recompute_ms": elapsed_ms,
+        "top_path_risk": paths[0].path_risk if paths else 0.0,
+    }
+    return _LAST_STATS[org_id]
 
 
-def get_last_stats(org_id: str) -> dict:
- return _LAST_STATS.get(org_id, {
- "nodes": 0, "edges": 0, "paths": 0,
- "recompute_ms": 0.0, "top_path_risk": 0.0, "total_exposure_usd": 0.0,
- })
+def last_stats(org_id: str) -> dict:
+    return _LAST_STATS.get(org_id, {})
+
+
+def blast_radius_for_asset(engine: Engine, asset_id: str) -> tuple[set[str], float]:
+    blast = blast_radius(engine, asset_id)
+    return blast, blast_radius_value(engine, asset_id, blast)

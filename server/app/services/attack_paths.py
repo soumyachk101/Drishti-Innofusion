@@ -1,143 +1,184 @@
+# Drishti v0.1 — bounded attack path enumeration engine | 11-Jul-2026
+"""Bounded attack-path enumeration + path risk/likelihood (BACKEND.md §5.4–5.5).
+
+Never enumerate the unbounded combinatorial set: use Yen's shortest_simple_paths
+(paths in increasing weight), cap per target, cap hop length, keep global top-K.
+"""
 from __future__ import annotations
+
+from dataclasses import dataclass, field
+
 import networkx as nx
-from dataclasses import dataclass
 
-from app.services.risk_engine import NodeData, build_engine, _clamp
+from app.services.risk_engine import (
+    CRIT_FACTOR,
+    INTERNET,
+    Engine,
+    NodeData,
+    hop_ease,
+    value_factor,
+)
 
+# Hard ceiling on candidates pulled from shortest_simple_paths per target,
+# counted whether or not they're kept: without this a target reachable only
+# via long paths forces enumeration of every simple path in the graph.
 MAX_CANDIDATES_PER_TARGET = 500
-max_hops = 6
-paths_per_target = 5
-top_k = 25
 
 
 @dataclass
-class AttackPathResult:
- path_id: str
- entry: str
- target: str
- entry_label: str
- target_label: str
- hop_count: int
- path_risk: float
- likelihood: float
- impact_usd: float
- narrative: str
- top_hop_labels: list[str]
- top_cves: list[str]
- hops: list[str]
- asset_type: str
- criticality: str
- business_value: float
+class PathStep:
+    asset_id: str
+    via_vuln_id: str | None
+    edge_weight: float | None
 
 
-def hop_ease(v: NodeData, relation: str) -> float:
- re = {"exposure": 0.5, "network": 0.4, "trust": 0.45, "admin": 0.5}
- eoc = _clamp(0.6 * v.max_exploitability + 0.4 * (v.max_cvss / 10.0))
- floor = re.get(relation, 0.4)
- return _clamp(max(eoc, floor))
+@dataclass
+class ScoredPath:
+    entry_label: str
+    target_asset_id: str
+    hop_count: int
+    path_risk: float
+    likelihood: float
+    total_weight: float
+    steps: list[PathStep] = field(default_factory=list)
+    node_ids: list[str] = field(default_factory=list)
+    edge_pairs: list[tuple[str, str]] = field(default_factory=list)
 
 
-def _score_path(G: nx.DiGraph, nodes: dict[str, NodeData], path: list[str]) -> tuple[float, float]:
- likelihood = 1.0
- weight_sum = 0.0
- for i in range(len(path) - 1):
- edge_data = G.get_edge_data(path[i], path[i + 1])
- relation = edge_data.get("relation", "network") if edge_data else "network"
- likelihood *= hop_ease(nodes.get(path[i + 1], NodeData("", "", "low", 0, False, False)), relation)
- likelihood = _clamp(likelihood, 0.001, 0.999)
- weight_sum += G[path[i]][path[i + 1]]["weight"] if G.has_edge(path[i], path[i + 1]) else 1.0
-
- target = nodes.get(path[-1])
- if target is None:
- return 0.0, likelihood
-
- value_norm = 1.0 # simplified; full version normalizes across all assets
- crit = {"low": 0.25, "medium": 0.5, "high": 0.75, "critical": 1.0}.get(target.criticality, 0.25)
- avg_weight = weight_sum / max(len(path) - 1, 1)
- weight_norm = avg_weight
-
- path_risk = 100.0 * (0.45 * likelihood + 0.30 * value_norm + 0.15 * crit + 0.10 * (1.0 - weight_norm))
- return path_risk, likelihood
+def _clamp(x: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, x))
 
 
-def find_targets(G: nx.DiGraph, nodes: dict[str, NodeData]) -> list[str]:
- targets = []
- for nid, nd in nodes.items():
- if nd.is_crown_jewel:
- targets.append(nid)
- return targets
+def find_targets(engine: Engine) -> list[str]:
+    """Crown jewels: crown_jewel zone OR critical OR top-decile business value."""
+    reals = [n for nid, n in engine.nodes.items() if nid != INTERNET]
+    if not reals:
+        return []
+    values = sorted((n.business_value for n in reals), reverse=True)
+    decile_index = max(0, int(len(values) * 0.1) - 1)
+    top_decile_threshold = values[decile_index] if values else 0.0
+
+    targets: list[str] = []
+    for n in reals:
+        if (
+            n.zone_kind == "crown_jewel"
+            or n.criticality == "critical"
+            or n.business_value >= top_decile_threshold
+        ):
+            targets.append(n.id)
+    return targets
 
 
-def enumerate_paths(G: nx.DiGraph, nodes: dict[str, NodeData], top_k: int = 25) -> list[AttackPathResult]:
- targets = find_targets(G, nodes)
- candidates = []
- total_candidates = 0
-
- for target in targets:
- # Find entry points (internet-facing or connected from INTERNET)
- entries = [n for n in G.predecessors(target) if n in nodes]
- if not entries:
- continue
-
- for entry in entries:
- if total_candidates >= MAX_CANDIDATES_PER_TARGET:
- break
- try:
- gen = nx.shortest_simple_paths(G, entry, target, weight="weight")
- count = 0
- for path in gen:
- if len(path) > max_hops + 1:
- break
- if count >= paths_per_target:
- break
- p_risk, likelihood = _score_path(G, nodes, path)
- nd_target = nodes.get(target)
- candidates.append(AttackPathResult(
- path_id="",
- entry=entry,
- target=target,
- entry_label=entry,
- target_label=target,
- hop_count=len(path) - 1,
- path_risk=p_risk,
- likelihood=likelihood,
- impact_usd=0.0,
- narrative="",
- top_hop_labels=[path[i] for i in range(1, min(len(path), 4))],
- top_cves=[],
- hops=path,
- asset_type=nd_target.asset_type if nd_target else "",
- criticality=nd_target.criticality if nd_target else "",
- business_value=nd_target.business_value if nd_target else 0.0,
- ))
- count += 1
- total_candidates += 1
- except (nx.NetworkXNoPath, nx.NodeNotFound):
- continue
- if total_candidates >= MAX_CANDIDATES_PER_TARGET:
- break
-
- # Sort by path_risk desc, then hop_count, then target
- candidates.sort(key=lambda p: (-p.path_risk, p.hop_count, p.target))
- return candidates[:top_k]
+def _total_weight(engine: Engine, node_path: list[str]) -> float:
+    total = 0.0
+    for u, v in zip(node_path, node_path[1:]):
+        total += engine.graph[u][v].get("weight", 1.0)
+    return total
 
 
-IMPACT_MULTIPLIER = {
- "database": 1.0, "cloud": 0.8, "webapp": 0.7, "server": 0.6,
- "firewall": 0.5, "router": 0.5, "iot": 0.4, "workstation": 0.3,
- }
+def _normalize_weight(total_weight: float, all_weights: list[float]) -> float:
+    if not all_weights:
+        return 0.0
+    lo, hi = min(all_weights), max(all_weights)
+    if hi <= lo:
+        return 0.0
+    return _clamp((total_weight - lo) / (hi - lo), 0.0, 1.0)
 
 
-def path_impact_usd(path: AttackPathResult, breach_cost_base: float = 500_000.0) -> float:
- mult = IMPACT_MULTIPLIER.get(path.asset_type, 0.5)
- value = path.business_value
- return path.likelihood * value * mult + path.likelihood * breach_cost_base
+def _score_path(engine: Engine, node_path: list[str], weight_norm: float) -> ScoredPath:
+    cfg = engine.config
+    target = engine.nodes[node_path[-1]]
+
+    # likelihood = product of per-hop ease (chained easiness, decays with length)
+    likelihood = 1.0
+    steps: list[PathStep] = []
+    edge_pairs: list[tuple[str, str]] = []
+    for u, v in zip(node_path, node_path[1:]):
+        dest = engine.nodes[v]
+        likelihood *= hop_ease(engine, u, v)
+        edge = engine.edges.get((u, v))
+        steps.append(
+            PathStep(
+                asset_id=v,
+                via_vuln_id=edge.via_vuln_id if edge else dest.top_finding_vuln_id,
+                edge_weight=engine.graph[u][v].get("weight"),
+            )
+        )
+        edge_pairs.append((u, v))
+    likelihood = _clamp(likelihood, 0.001, 0.999)
+
+    target_value_f = value_factor(engine, target)
+    target_crit_f = CRIT_FACTOR.get(target.criticality, 0.5)
+
+    path_risk = 100.0 * (
+        cfg.pw_likelihood * likelihood
+        + cfg.pw_value * target_value_f
+        + cfg.pw_crit * target_crit_f
+        + cfg.pw_weight * (1.0 - weight_norm)
+    )
+
+    return ScoredPath(
+        entry_label=INTERNET if node_path[0] == INTERNET else engine.nodes[node_path[0]].label,
+        target_asset_id=target.id,
+        hop_count=len(node_path) - 1,
+        path_risk=round(_clamp(path_risk, 0.0, 100.0), 3),
+        likelihood=round(likelihood, 3),
+        total_weight=round(_total_weight(engine, node_path), 3),
+        steps=steps,
+        node_ids=list(node_path),
+        edge_pairs=edge_pairs,
+    )
 
 
-def total_exposure(paths: list[AttackPathResult], breach_cost_base: float = 500_000.0) -> float:
- seen: dict[str, float] = {}
- for p in paths:
- imp = path_impact_usd(p, breach_cost_base)
- if p.target not in seen or imp > seen[p.target]:
- seen[p.target] = imp
- return sum(seen.values())
+def enumerate_paths(engine: Engine) -> list[ScoredPath]:
+    """Top-K ranked attack paths from INTERNET to crown jewels, bounded."""
+    cfg = engine.config
+    g = engine.graph
+    if INTERNET not in g:
+        return []
+
+    targets = find_targets(engine)
+    raw_paths: list[list[str]] = []
+
+    for target in targets:
+        if target == INTERNET or not nx.has_path(g, INTERNET, target):
+            continue
+        try:
+            gen = nx.shortest_simple_paths(g, INTERNET, target, weight="weight")
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            continue
+        taken = 0
+        examined = 0
+        for node_path in gen:
+            examined += 1
+            if examined > MAX_CANDIDATES_PER_TARGET:
+                break
+            if len(node_path) - 1 > cfg.max_hops:
+                # shortest_simple_paths yields by weight, not length; a long path
+                # here can still precede shorter ones, so skip rather than break.
+                continue
+            raw_paths.append(node_path)
+            taken += 1
+            if taken >= cfg.paths_per_target:
+                break
+
+    if not raw_paths:
+        return []
+
+    weights = [_total_weight(engine, p) for p in raw_paths]
+    scored = [
+        _score_path(engine, p, _normalize_weight(w, weights))
+        for p, w in zip(raw_paths, weights)
+    ]
+    # rank by path_risk desc; deterministic tie-break by (hop_count, target id)
+    scored.sort(key=lambda s: (-s.path_risk, s.hop_count, s.target_asset_id))
+    return scored[: cfg.top_k]
+
+
+def blast_radius_value(engine: Engine, node_id: str, blast: set[str]) -> float:
+    total = 0.0
+    for nid in blast:
+        node: NodeData | None = engine.nodes.get(nid)
+        if node:
+            total += max(0.0, float(node.business_value))
+    return round(total, 2)

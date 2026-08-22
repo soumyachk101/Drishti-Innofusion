@@ -1,51 +1,62 @@
-from sqlalchemy import String, Boolean, Integer, DateTime, Numeric, Text, ForeignKey, UniqueConstraint, CheckConstraint
+# Drishti v0.1 — vulnerability catalog model | 11-Jul-2026
+"""Vulnerability catalog + per-asset findings."""
+from datetime import datetime
+from decimal import Decimal
+
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    Index,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.models.base import Base, TimestampMixin, uuid_pk
-from datetime import datetime, timezone
+
+from app.db import Base
+from app.models.base import ts_col, uuid_fk, uuid_pk
+
+SEVERITIES = ("low", "medium", "high", "critical")
+FINDING_STATUSES = ("open", "remediating", "resolved", "accepted")
 
 
-class Vulnerability(Base, TimestampMixin):
- __tablename__ = "vulnerabilities"
+class Vulnerability(Base):
+    __tablename__ = "vulnerabilities"
+    __table_args__ = (CheckConstraint("severity IN ('low','medium','high','critical')"),)
 
- id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_pk)
- org_id: Mapped[str] = mapped_column(String(36), index=True)
- cve_id: Mapped[str | None] = mapped_column(String(30), unique=True, nullable=True)
- title: Mapped[str] = mapped_column(String(255))
- description: Mapped[str | None] = mapped_column(Text, nullable=True)
- cvss: Mapped[float] = mapped_column(Numeric(3, 1), default=5.0)
- severity: Mapped[str] = mapped_column(String(20))
- exploitability: Mapped[float] = mapped_column(Numeric(3, 2), default=0.30)
- cwe: Mapped[str | None] = mapped_column(String(30), nullable=True)
- discovered_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    id: Mapped[str] = uuid_pk()
+    cve_id: Mapped[str | None] = mapped_column(String(30), nullable=True, unique=True)
+    title: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cvss: Mapped[Decimal] = mapped_column(Numeric(3, 1), default=Decimal("5.0"))
+    severity: Mapped[str] = mapped_column(String(20), default="medium")
+    exploitability: Mapped[Decimal] = mapped_column(Numeric(3, 2), default=Decimal("0.30"))
+    cwe: Mapped[str | None] = mapped_column(String(30), nullable=True)
 
- asset_vulnerabilities: Mapped[list["AssetVulnerability"]] = relationship(back_populates="vulnerability", cascade="all, delete-orphan")
-
- __table_args__ = (
- UniqueConstraint("org_id", "cve_id", name="uq_vuln_org_cve"),
- CheckConstraint("severity IN ('critical','high','medium','low','unknown')", name="ck_vuln_severity"),
- CheckConstraint("exploitability >= 0 AND exploitability <= 1", name="ck_vuln_exploit"),
- )
+    findings: Mapped[list["AssetVulnerability"]] = relationship(back_populates="vulnerability")
 
 
-class AssetVulnerability(Base, TimestampMixin):
- __tablename__ = "asset_vulnerabilities"
+class AssetVulnerability(Base):
+    """A finding: this asset is affected by this vulnerability."""
 
- id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_pk)
- org_id: Mapped[str] = mapped_column(String(36), index=True)
- asset_id: Mapped[str] = mapped_column(String(36), ForeignKey("assets.id"), index=True)
- vulnerability_id: Mapped[str] = mapped_column(String(36), ForeignKey("vulnerabilities.id"), index=True)
- service_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("services.id"), nullable=True)
- status: Mapped[str] = mapped_column(String(20), default="open")
- detected_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
- resolved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    __tablename__ = "asset_vulnerabilities"
+    __table_args__ = (
+        UniqueConstraint("asset_id", "vulnerability_id"),
+        CheckConstraint("status IN ('open','remediating','resolved','accepted')"),
+        Index("ix_findings_org_status", "org_id", "status"),
+    )
 
- asset: Mapped["Asset"] = relationship(back_populates="findings")
- vulnerability: Mapped["Vulnerability"] = relationship(back_populates="asset_vulnerabilities")
- service: Mapped["Service | None"] = relationship()
- remediations: Mapped[list["Remediation"]] = relationship(back_populates="asset_vulnerability", cascade="all, delete-orphan")
+    id: Mapped[str] = uuid_pk()
+    org_id: Mapped[str] = uuid_fk("organizations.id", index=True)
+    asset_id: Mapped[str] = uuid_fk("assets.id", fk_kw={"ondelete": "CASCADE"}, index=True)
+    vulnerability_id: Mapped[str] = uuid_fk("vulnerabilities.id", index=True)
+    service_id: Mapped[str | None] = uuid_fk(
+        "services.id", fk_kw={"ondelete": "SET NULL"}, nullable=True
+    )
+    status: Mapped[str] = mapped_column(String(20), default="open")
+    detected_at: Mapped[datetime] = ts_col()
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
- __table_args__ = (
- UniqueConstraint("asset_id", "vulnerability_id", name="uq_finding_asset_vuln"),
- Index("ix_findings_org_status", "org_id", "status"),
- CheckConstraint("status IN ('open','remediating','resolved','accepted')", name="ck_finding_status"),
- )
+    asset: Mapped["Asset"] = relationship(back_populates="findings")  # noqa: F821
+    vulnerability: Mapped[Vulnerability] = relationship(back_populates="findings")

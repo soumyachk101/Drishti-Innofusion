@@ -1,174 +1,252 @@
+# Drishti v0.1 — risk intelligence scoring engine | 11-Jul-2026
+"""Risk Intelligence Engine — graph construction, edge weights, node risk scores.
+
+All formulas live here with coefficients in one RiskConfig so the demo can
+explain them in a sentence (BACKEND.md §5). Pure functions over a NetworkX
+DiGraph; no HTTP, no ORM writes (recompute.py persists results).
+"""
 from __future__ import annotations
+
 from dataclasses import dataclass, field
+
 import networkx as nx
-import numpy as np
 
-from app.models import Asset, AssetVulnerability, Vulnerability, Connection
+INTERNET = "INTERNET"
+
+CRIT_FACTOR = {"low": 0.25, "medium": 0.5, "high": 0.75, "critical": 1.0}
+RELATION_BASE = {"exposure": 0.1, "network": 0.2, "trust": 0.25, "admin": 0.15}
+# Minimum per-hop ease from the relationship alone: once an attacker has a
+# foothold, moving over a link has a baseline traversal ease even without a
+# fresh vulnerability. Blended as max(node_ease, relation_ease). These floors
+# sit *below* a typical vuln-driven node ease so a present vulnerability
+# dominates — and resolving it drops the hop back to the floor, which is what
+# makes "mark resolved → exposure drops" work on the demo.
+RELATION_EASE = {"exposure": 0.5, "network": 0.4, "trust": 0.45, "admin": 0.5}
+IMPACT_MULTIPLIER = {
+    "database": 1.0,
+    "webapp": 0.7,
+    "server": 0.6,
+    "workstation": 0.3,
+    "firewall": 0.5,
+    "router": 0.5,
+    "iot": 0.4,
+    "cloud": 0.8,
+}
 
 
-# --- Config ---
+@dataclass
 class RiskConfig:
- expose_reach_weight: float = 0.25
- centrality_weight: float = 0.20
- value_weight: float = 0.15
- criticality_weight: float = 0.10
- ease_exploit: float = 0.6
- ease_severity: float = 0.4
- relation_base: dict[str, float] = field(default_factory=lambda: {
- "exposure": 0.1, "network": 0.2, "trust": 0.25, "admin": 0.15,
- })
- relation_ease: dict[str, float] = field(default_factory=lambda: {
- "exposure": 0.5, "network": 0.4, "trust": 0.45, "admin": 0.5,
- })
- crit_factor: dict[str, float] = field(default_factory=lambda: {
- "low": 0.25, "medium": 0.5, "high": 0.75, "critical": 1.0,
- })
+    # node risk weights (sum = 1.0)
+    w_exploit: float = 0.30
+    w_reachability: float = 0.25
+    w_centrality: float = 0.20
+    w_value: float = 0.15
+    w_crit: float = 0.10
+    # path risk weights (sum = 1.0)
+    pw_likelihood: float = 0.45
+    pw_value: float = 0.30
+    pw_crit: float = 0.15
+    pw_weight: float = 0.10
+    # enumeration bounds
+    max_hops: int = 6
+    paths_per_target: int = 5
+    top_k: int = 25
+    # edge-ease blend
+    ease_exploit: float = 0.6
+    ease_severity: float = 0.4
 
-cfg = RiskConfig()
 
-
-# --- Data classes ---
 @dataclass
 class NodeData:
- asset_id: str
- asset_type: str
- criticality: str
- business_value: float
- internet_facing: bool
- is_crown_jewel: bool
- max_exploitability: float = 0.0
- max_cvss: float = 0.0
- vuln_count: int = 0
+    id: str
+    label: str
+    asset_type: str
+    zone: str | None
+    zone_kind: str | None
+    criticality: str
+    business_value: float
+    internet_facing: bool
+    open_findings: int
+    # most exploitable open finding on this node (for edge weight + risk)
+    max_exploitability: float = 0.1
+    max_cvss: float = 1.0
+    top_finding_vuln_id: str | None = None
 
 
 @dataclass
 class EdgeData:
- relation: str
- weight: float = 0.0
+    source: str
+    target: str
+    relation: str
+    weight: float = 0.0
+    via_vuln_id: str | None = None
 
 
-def _clamp(v: float, lo: float = 0.0, hi: float = 1.0) -> float:
- return max(lo, min(hi, v))
+@dataclass
+class Engine:
+    graph: nx.DiGraph
+    nodes: dict[str, NodeData]
+    edges: dict[tuple[str, str], EdgeData]
+    config: RiskConfig = field(default_factory=RiskConfig)
+    _value_min: float = 0.0
+    _value_max: float = 1.0
 
 
-def ease_of_compromise(node: NodeData) -> float:
- dest_exploit = node.max_exploitability
- dest_sev = node.max_cvss / 10.0
- return _clamp(cfg.ease_exploit * dest_exploit + cfg.ease_severity * dest_sev)
+def _clamp(x: float, lo: float = 0.0, hi: float = 1.0) -> float:
+    return max(lo, min(hi, x))
 
 
-def compute_edge_weight(u: NodeData, v: NodeData, relation: str) -> float:
- e = ease_of_compromise(v)
- base = cfg.relation_base.get(relation, 0.2)
- return base + (1.0 - e)
+def ease_of_compromise(node: NodeData, cfg: RiskConfig) -> float:
+    """0..1, higher = easier to exploit (BACKEND.md §5.2)."""
+    dest_exploit = node.max_exploitability
+    dest_sev = node.max_cvss / 10.0
+    return _clamp(cfg.ease_exploit * dest_exploit + cfg.ease_severity * dest_sev)
 
 
-def compute_node_scores(G: nx.DiGraph, nodes: dict[str, NodeData]) -> dict[str, float]:
- # 1. Normalize business value
- values = np.array([n.business_value for n in nodes.values()], dtype=float)
- vmin, vmax = values.min(), values.max()
- val_norm = (values - vmin) / (vmax - vmin + 1e-9)
-
- # 2. Dijkstra shortest paths from INTERNET
- try:
- lengths = nx.single_source_dijkstra_path_length(G, "INTERNET")
- reach = {}
- for nid in nodes:
- d = lengths.get(nid, float("inf"))
- reach[nid] = 1.0 / (1.0 + d) if d != float("inf") else 0.0
- except Exception:
- reach = {nid: 0.0 for nid in nodes}
-
- # 3. Betweenness centrality
- try:
- bc = nx.betweenness_centrality(G, weight="weight", normalized=True)
- bc_max = max(bc.values()) if bc else 1.0
- except Exception:
- bc = {nid: 0.0 for nid in nodes}
- bc_max = 1.0
-
- scores = {}
- for i, (nid, nd) in enumerate(nodes.items()):
- exploit = ease_of_compromise(nd)
- r = max(reach.get(nid, 0.0), 0.5 if reach.get(nid, 0.0) > 0 else 0.0)
- cent = bc.get(nid, 0.0) / (bc_max + 1e-9)
- crit = cfg.crit_factor.get(nd.criticality, 0.25)
-
- score = 100.0 * (
- cfg.expose_reach_weight * exploit
- + cfg.centrality_weight * cent
- + cfg.value_weight * val_norm[i]
- + cfg.criticality_weight * crit
- )
- scores[nid] = _clamp(score, 0.0, 100.0)
-
- return scores
+def hop_ease(engine: "Engine", u: str, v: str) -> float:
+    """Per-hop traversal ease for likelihood: exploit the destination OR abuse
+    the relationship (trust/admin) — whichever is easier."""
+    node_ease = ease_of_compromise(engine.nodes[v], engine.config)
+    edge = engine.edges.get((u, v))
+    relation_ease = RELATION_EASE.get(edge.relation, 0.4) if edge else 0.4
+    return _clamp(max(node_ease, relation_ease))
 
 
-def blast_radius(G: nx.DiGraph, node_id: str) -> int:
- descendants = nx.descendants(G, node_id)
- return len(descendants)
+def build_engine(
+    nodes: list[NodeData],
+    edges: list[EdgeData],
+    config: RiskConfig | None = None,
+) -> Engine:
+    cfg = config or RiskConfig()
+    g = nx.DiGraph()
+    node_map = {n.id: n for n in nodes}
+
+    # Synthetic INTERNET entry node (BACKEND.md §5.1 step 3).
+    g.add_node(INTERNET)
+    internet_node = NodeData(
+        id=INTERNET,
+        label=INTERNET,
+        asset_type="cloud",
+        zone="Internet",
+        zone_kind=None,
+        criticality="low",
+        business_value=0.0,
+        internet_facing=True,
+        open_findings=0,
+    )
+    node_map[INTERNET] = internet_node
+
+    for n in nodes:
+        g.add_node(n.id)
+
+    edge_map: dict[tuple[str, str], EdgeData] = {}
+
+    # exposure edges from INTERNET to internet-facing assets
+    for n in nodes:
+        if n.internet_facing:
+            e = EdgeData(source=INTERNET, target=n.id, relation="exposure")
+            edge_map[(INTERNET, n.id)] = e
+            g.add_edge(INTERNET, n.id)
+
+    for e in edges:
+        if e.source not in node_map or e.target not in node_map:
+            continue
+        edge_map[(e.source, e.target)] = e
+        g.add_edge(e.source, e.target)
+
+    # normalize business value across real assets (0..1)
+    values = [n.business_value for n in nodes] or [0.0]
+    vmin, vmax = min(values), max(values)
+
+    engine = Engine(
+        graph=g,
+        nodes=node_map,
+        edges=edge_map,
+        config=cfg,
+        _value_min=vmin,
+        _value_max=vmax,
+    )
+    _compute_edge_weights(engine)
+    return engine
 
 
-def blast_radius_value(G: nx.DiGraph, node_id: str, nodes: dict[str, NodeData]) -> float:
- return sum(
- nodes.get(d, NodeData("", "", "low", 0.0, False, False)).business_value
- for d in nx.descendants(G, node_id)
- )
+def _compute_edge_weights(engine: Engine) -> None:
+    cfg = engine.config
+    for (u, v), edge in engine.edges.items():
+        dest = engine.nodes[v]
+        ease = ease_of_compromise(dest, cfg)
+        base = RELATION_BASE.get(edge.relation, 0.2)
+        edge.weight = round(base + (1.0 - ease), 3)
+        edge.via_vuln_id = dest.top_finding_vuln_id
+        engine.graph[u][v]["weight"] = edge.weight
+        engine.graph[u][v]["relation"] = edge.relation
 
 
-def is_crown_jewel(nd: NodeData, zone_kind: str | None = None) -> bool:
- if zone_kind == "crown_jewel":
- return True
- if nd.criticality == "critical":
- return True
- return False
+def value_factor(engine: Engine, node: NodeData) -> float:
+    if engine._value_max <= engine._value_min:
+        return 0.0
+    return _clamp(
+        (node.business_value - engine._value_min) / (engine._value_max - engine._value_min)
+    )
 
 
-def build_engine(org_id: str, assets: list[Asset], connections: list[Connection],
- findings_map: dict[str, list[tuple[AssetVulnerability, Vulnerability]]]) -> tuple[nx.DiGraph, dict[str, NodeData]]:
- G = nx.DiGraph()
- G.add_node("INTERNET", _data=NodeData("INTERNET", "", "low", 0.0, False, False))
+def reachability_factor(engine: Engine, node_id: str, shortest: dict[str, float]) -> float:
+    """1.0 if reachable from INTERNET; else decays with shortest-path weight."""
+    if node_id == INTERNET:
+        return 0.0
+    dist = shortest.get(node_id)
+    if dist is None:
+        return 0.0  # unreachable from the internet
+    # nearer to the internet (smaller weight) → closer to 1.0
+    return _clamp(1.0 / (1.0 + dist))
 
- nodes: dict[str, NodeData] = {}
 
- # Create asset nodes
- for asset in assets:
- findings = findings_map.get(asset.id, [])
- max_exploit = 0.0
- max_cvss = 0.0
- for f, v in findings:
- if f.status in ("open", "remediating"):
- exp = float(v.cvss or 0) / 10.0
- max_exploit = max(max_exploit, exp)
- max_cvss = max(max_cvss, float(v.cvss or 0))
+def compute_node_scores(engine: Engine) -> dict[str, float]:
+    """Return {asset_id: risk_score 0..100} for real assets (excludes INTERNET)."""
+    cfg = engine.config
+    g = engine.graph
 
- nd = NodeData(
- asset_id=asset.id,
- asset_type=asset.asset_type,
- criticality=asset.criticality,
- business_value=float(asset.business_value),
- internet_facing=asset.internet_facing,
- is_crown_jewel=asset.zone and asset.zone.kind == "crown_jewel" or asset.criticality == "critical",
- max_exploitability=max_exploit,
- max_cvss=max_cvss,
- vuln_count=len(findings),
- )
- nodes[asset.id] = nd
- G.add_node(asset.id, _data=nd)
+    try:
+        shortest = nx.single_source_dijkstra_path_length(g, INTERNET, weight="weight")
+    except nx.NodeNotFound:
+        shortest = {}
 
- # Exposure edges from INTERNET
- for nid, nd in nodes.items():
- if nd.internet_facing:
- w = compute_edge_weight(nodes["INTERNET"], nd, "exposure")
- G.add_edge("INTERNET", nid, weight=w, relation="exposure")
+    # betweenness centrality on the whole directed graph (0..1 already)
+    if g.number_of_nodes() > 2:
+        centrality = nx.betweenness_centrality(g, weight="weight", normalized=True)
+    else:
+        centrality = {n: 0.0 for n in g.nodes}
+    cmax = max(centrality.values()) if centrality else 0.0
 
- # Declared connections
- for conn in connections:
- if conn.from_asset_id in nodes and conn.to_asset_id in nodes:
- src = nodes[conn.from_asset_id]
- dst = nodes[conn.to_asset_id]
- w = compute_edge_weight(src, dst, conn.relation)
- G.add_edge(conn.from_asset_id, conn.to_asset_id, weight=w, relation=conn.relation)
+    scores: dict[str, float] = {}
+    for node_id, node in engine.nodes.items():
+        if node_id == INTERNET:
+            continue
+        exploit = ease_of_compromise(node, cfg)
+        # A path from INTERNET means the node is reachable; blend the distance
+        # decay for nuance but floor reachable nodes at 0.5 (BACKEND.md §5.3).
+        reach = reachability_factor(engine, node_id, shortest)
+        if node_id in shortest:
+            reach = max(reach, 0.5)
+        cent = (centrality.get(node_id, 0.0) / cmax) if cmax > 0 else 0.0
+        val = value_factor(engine, node)
+        crit = CRIT_FACTOR.get(node.criticality, 0.5)
 
- return G, nodes
+        risk = 100.0 * (
+            cfg.w_exploit * exploit
+            + cfg.w_reachability * reach
+            + cfg.w_centrality * cent
+            + cfg.w_value * val
+            + cfg.w_crit * crit
+        )
+        scores[node_id] = round(_clamp(risk, 0.0, 100.0), 3)
+    return scores
+
+
+def blast_radius(engine: Engine, node_id: str) -> set[str]:
+    """All assets reachable if node_id is compromised (BACKEND.md §5.6)."""
+    if node_id not in engine.graph:
+        return set()
+    reachable = nx.descendants(engine.graph, node_id)
+    reachable.discard(INTERNET)
+    return reachable
