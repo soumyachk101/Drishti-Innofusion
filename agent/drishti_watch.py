@@ -173,6 +173,8 @@ def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
     conn_thread = threading.Thread(target=run_conn, args=(reporter, interval), daemon=True)
     conn_thread.start()
 
+    _live_pkt_devices: dict[str, str] = {}
+
     log("Starting continuous LAN device discovery sweep in background…")
     def _bg_device_sweep():
         time.sleep(1.0)
@@ -183,6 +185,14 @@ def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
                     if c.get("scan") and c.get("kind") == "on-link":
                         net = ipaddress.ip_network(c["cidr"], strict=False)
                         devices = _scan_on_link(net)
+                        existing_ips = {d.get("ip") for d in devices}
+                        for ip_str, mac_str in list(_live_pkt_devices.items()):
+                            try:
+                                if ipaddress.ip_address(ip_str) in net and ip_str not in existing_ips:
+                                    devices.append({"ip": ip_str, "mac": mac_str, "hostname": None, "subnet": c["cidr"], "discovery": "arp"})
+                                    existing_ips.add(ip_str)
+                            except Exception:
+                                pass
                         self_mac = _self_mac()
                         if c.get("self_ip") and self_mac and not any(d.get("mac") == self_mac for d in devices):
                             devices.append({"ip": c["self_ip"], "mac": self_mac, "hostname": reporter.source_host, "subnet": c["cidr"], "discovery": "arp"})
@@ -191,9 +201,9 @@ def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
                                 "subnet": c["cidr"], "gateway_ip": _gateway_ip(), "label": "Local LAN", "devices": devices
                             })
                             log(f"Synced {len(devices)} active LAN device(s) on {c['cidr']}")
-            except Exception as exc:
+            except Exception:
                 pass
-            time.sleep(25.0)
+            time.sleep(15.0)
 
     dev_thread = threading.Thread(target=_bg_device_sweep, daemon=True)
     dev_thread.start()
@@ -201,35 +211,65 @@ def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
     log("Sniffing network DNS & mDNS queries (UDP 53, 5353) across LAN devices… (Ctrl-C to stop, needs sudo)")
 
     def on_pkt(pkt) -> None:
+        try:
+            from scapy.all import Ether
+            if pkt.haslayer(IP) and pkt.haslayer(Ether):
+                src_ip = pkt[IP].src
+                dst_ip = pkt[IP].dst
+                src_mac = _norm_mac(pkt[Ether].src)
+                if src_ip and not src_ip.startswith(("127.", "224.", "239.", "8.8.", "1.1.")) and not src_ip.endswith(".255"):
+                    _live_pkt_devices[src_ip] = src_mac
+        except Exception:
+            pass
+
         if not pkt.haslayer(DNSQR) and not pkt.haslayer(DNS):
             return
         try:
-            src_ip = pkt[IP].src if pkt.haslayer(IP) else None
-            if not src_ip:
+            if not pkt.haslayer(IP):
                 return
+            src_ip = pkt[IP].src
+            dst_ip = pkt[IP].dst
+
+            # Identify the actual LAN client machine
+            client_ip = src_ip
+            # If this is a DNS response from a public DNS or router to a LAN device, target is dst_ip
+            try:
+                is_src_private = ipaddress.ip_address(src_ip).is_private
+                is_dst_private = ipaddress.ip_address(dst_ip).is_private
+            except Exception:
+                is_src_private = False
+                is_dst_private = False
+
+            if not is_src_private and is_dst_private:
+                client_ip = dst_ip
+            elif is_src_private and is_dst_private and (src_ip == _gateway_ip() or src_ip.endswith(".1")):
+                # Router replied to a client machine
+                client_ip = dst_ip
 
             qname = ""
             if pkt.haslayer(DNSQR) and pkt[DNSQR].qname:
                 qname = pkt[DNSQR].qname.decode("utf-8", "ignore").lower()
+            elif pkt.haslayer(DNS) and getattr(pkt[DNS], "qd", None) and getattr(pkt[DNS].qd, "qname", None):
+                qname = pkt[DNS].qd.qname.decode("utf-8", "ignore").lower()
 
             # 1. Detect mDNS broadcast applications for this specific device
-            if qname:
+            if qname and client_ip:
                 for service_key, app_name in _MDNS_APP_MAP.items():
                     if service_key in qname:
-                        reporter.sync_active(set(), active_apps=[app_name], source_host=src_ip)
-                        log(f"Discovered Active App on {src_ip}: {app_name}")
+                        reporter.sync_active(set(), active_apps=[app_name], source_host=client_ip)
+                        log(f"Discovered Active App on {client_ip}: {app_name}")
                         break
 
-            # 2. Extract and report website domain queries
+            # 2. Extract and report website domain queries for this specific device
             dom = registrable(qname)
-            if dom:
-                reporter.report(dom, source_host=src_ip)
+            if dom and client_ip and client_ip not in ("8.8.8.8", "8.8.4.4", "1.1.1.1"):
+                reporter.report(dom, source_host=client_ip)
         except Exception:
             return
 
     try:
         # udp port 53 / 5353 = DNS queries & mDNS service broadcasts from all LAN devices
-        sniff(filter="udp port 53 or udp port 5353", prn=on_pkt, store=False, promisc=True)
+        sniff(filter="udp port 53 or udp port 5353 or arp", prn=on_pkt, store=False, promisc=True)
     except Exception as e:
         log(f"scapy packet sniffing encounter error: {e}. Active tab watcher is still running.")
         while True:
@@ -551,18 +591,47 @@ def _sweep_responders(net: "ipaddress.IPv4Network") -> set[str]:
 
 
 def _scan_on_link(net: "ipaddress.IPv4Network") -> list[dict]:
-    """On-link path: ping sweep populates ARP, harvest IP+MAC+hostname."""
+    """On-link path: Scapy L2 ARP broadcast + ICMP ping sweep + system ARP table."""
+    devices_by_ip: dict[str, dict] = {}
+
+    # 1. Scapy Layer-2 ARP broadcast sweep (reaches mobile phones/devices that drop ICMP ping)
+    try:
+        from scapy.all import Ether, ARP, srp
+        ans, _ = srp(
+            Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=str(net)),
+            timeout=2.0,
+            verbose=False,
+        )
+        for _, r in ans:
+            ip = getattr(r, "psrc", None)
+            mac = getattr(r, "hwsrc", None)
+            if ip and mac:
+                devices_by_ip[ip] = {
+                    "ip": ip,
+                    "mac": _norm_mac(mac),
+                    "hostname": None,
+                    "subnet": str(net),
+                    "discovery": "arp",
+                }
+    except Exception:
+        pass
+
+    # 2. ICMP ping sweep to populate kernel ARP cache
     _sweep_responders(net)
-    devices = []
     for d in _arp_devices():
         try:
-            if ipaddress.ip_address(d["ip"]) in net:
-                d["subnet"] = str(net)
-                d["discovery"] = "arp"
-                devices.append(d)
+            ip = d.get("ip")
+            if ip and ipaddress.ip_address(ip) in net:
+                if ip not in devices_by_ip or not devices_by_ip[ip].get("mac"):
+                    d["subnet"] = str(net)
+                    d["discovery"] = "arp"
+                    devices_by_ip[ip] = d
+                elif d.get("hostname") and not devices_by_ip[ip].get("hostname"):
+                    devices_by_ip[ip]["hostname"] = d["hostname"]
         except ValueError:
             continue
-    return devices
+
+    return list(devices_by_ip.values())
 
 
 def _scan_off_link(net: "ipaddress.IPv4Network") -> list[dict]:

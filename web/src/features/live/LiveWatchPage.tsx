@@ -674,6 +674,8 @@ function DevicesSection() {
           const Icon = deviceIcon(d);
           const accent =
             scanRisk[d.id] != null ? RISK_HEX[riskBucket(scanRisk[d.id])] : deviceAccent(d);
+          const activeAppCount = d.active_apps?.length ?? 0;
+          const activeDomCount = d.active_domains?.length ?? 0;
           return (
             <motion.button
               variants={{
@@ -682,16 +684,19 @@ function DevicesSection() {
               }}
               key={d.id}
               onClick={() => setPicked(d)}
-              className={`rounded-node border bg-surface-2 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-hairline-soft ${
+              className={`group rounded-node border bg-surface-2 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-hairline-soft ${
                 d.online ? "border-hairline" : "border-hairline/40 opacity-50"
               }`}
               style={{ borderLeft: `3px solid ${accent}` }}
             >
               <div className="flex items-center gap-2">
                 <Icon className="h-4 w-4 shrink-0" style={{ color: accent }} />
-                <span className="truncate font-mono text-small text-ink">{d.ip}</span>
+                <span className="truncate font-mono text-small font-semibold text-ink">{d.ip}</span>
                 {d.online && (
-                  <span className="ml-auto h-1.5 w-1.5 rounded-full bg-risk-safe" title="online" />
+                  <span className="ml-auto flex items-center gap-1">
+                    <span className="h-2 w-2 rounded-full bg-risk-safe animate-pulse" title="online" />
+                    <span className="text-[9px] font-medium text-risk-safe">LIVE</span>
+                  </span>
                 )}
               </div>
               <div className="mt-1.5">
@@ -713,6 +718,36 @@ function DevicesSection() {
                   {d.vendor ?? "unknown vendor"}
                 </span>
               </div>
+
+              {/* ── Active Telemetry Badges (Compact & Sleek) ────────── */}
+              {(activeAppCount > 0 || activeDomCount > 0) && (
+                <div className="mt-2.5 flex flex-wrap items-center gap-1 border-t border-hairline/50 pt-2">
+                  {d.active_apps?.slice(0, 2).map((app) => (
+                    <span
+                      key={app}
+                      className="inline-flex items-center gap-1 rounded border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 text-[9px] font-medium text-accent-300"
+                    >
+                      <Laptop className="h-2.5 w-2.5" />
+                      {app}
+                    </span>
+                  ))}
+                  {d.active_domains?.slice(0, 2).map((dom) => (
+                    <span
+                      key={dom}
+                      className="inline-flex max-w-[100px] items-center gap-1 truncate rounded border border-hairline bg-canvas/80 px-1.5 py-0.5 font-mono text-[9px] text-ink-secondary"
+                      title={dom}
+                    >
+                      <Globe className="h-2.5 w-2.5 text-accent-400" />
+                      <span className="truncate">{dom}</span>
+                    </span>
+                  ))}
+                  {(activeAppCount + activeDomCount > 4) && (
+                    <span className="rounded bg-surface-1 px-1 py-0.5 font-mono text-[9px] text-ink-muted">
+                      +{activeAppCount + activeDomCount - 4}
+                    </span>
+                  )}
+                </div>
+              )}
             </motion.button>
           );
         })}
@@ -764,6 +799,7 @@ function SubnetScan({
     return m;
   }, [devices]);
 
+  const qc = useQueryClient();
   const scan = useMutation({
     mutationFn: () => api.deepScanRange(cidr, true),
     onSuccess: (r) => {
@@ -775,6 +811,11 @@ function SubnetScan({
         if (id && h.available && h.risk_score != null) risks[id] = h.risk_score;
       }
       if (Object.keys(risks).length) onScanned(risks);
+      qc.invalidateQueries({ queryKey: ["live", "devices"] });
+      qc.invalidateQueries({ queryKey: ["live", "network-threats"] });
+      qc.invalidateQueries({ queryKey: ["assets"] });
+      qc.invalidateQueries({ queryKey: ["paths"] });
+      toast.show(`Subnet scan completed for ${r.cidr} (${r.hosts.length} hosts analyzed)`, "success");
     },
     onError: (e) => {
       setPhase("consent");
@@ -992,12 +1033,23 @@ function DeviceDetail({
     ["Last seen", relTime(d.last_seen)],
   ];
 
+  const qc = useQueryClient();
   const scan = useMutation({
     mutationFn: () => api.deepScan(d.ip, true),
     onSuccess: (r) => {
       setResult(r);
       setPhase("result");
       if (r.available && r.risk_score != null) onScanned(d.id, r.risk_score);
+      qc.invalidateQueries({ queryKey: ["live", "devices"] });
+      qc.invalidateQueries({ queryKey: ["live", "network-threats"] });
+      qc.invalidateQueries({ queryKey: ["assets"] });
+      qc.invalidateQueries({ queryKey: ["paths"] });
+      toast.show(
+        r.available
+          ? `Deep scan completed for ${d.ip} (Risk Score: ${r.risk_score != null ? Math.round(r.risk_score) : "—"})`
+          : `Deep scan unavailable: ${r.unavailable_reason ?? "scan failed"}`,
+        r.available ? "success" : "error"
+      );
     },
     onError: (e) => {
       setPhase("idle");
@@ -1427,43 +1479,137 @@ function RadarGrid({
   onPick: (t: LiveThreat) => void;
   selected: LiveThreat | null;
 }) {
+  const [filter, setFilter] = useState<"realtime" | "threats" | "all">("all");
+  const [search, setSearch] = useState("");
+
+  const now = Date.now();
+  const fiveMinAgo = now - 5 * 60 * 1000;
+
+  const filtered = useMemo(() => {
+    return threats.filter((t) => {
+      if (search.trim() && !t.domain.toLowerCase().includes(search.toLowerCase().trim())) {
+        return false;
+      }
+      if (filter === "threats") {
+        return t.band !== "Trusted";
+      }
+      if (filter === "realtime") {
+        const lastSeenMs = new Date(t.last_seen).getTime();
+        return lastSeenMs >= fiveMinAgo;
+      }
+      return true;
+    });
+  }, [threats, filter, search, fiveMinAgo]);
+
+  const realTimeCount = threats.filter((t) => new Date(t.last_seen).getTime() >= fiveMinAgo).length;
+  const threatCount = threats.filter((t) => t.band !== "Trusted").length;
+
   // risky first, so the dangerous ones sit at the top of the grid
-  const ordered = [...threats].sort((a, b) => a.score - b.score);
+  const ordered = [...filtered].sort((a, b) => a.score - b.score);
+
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      {ordered.map((t) => {
-        const hex = hexFor(t.band);
-        const risky = t.band !== "Trusted";
-        const active = selected?.id === t.id;
-        return (
+    <div className="space-y-3">
+      {/* ── Filter Bar ────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hairline bg-surface-1/50 p-2">
+        <div className="flex items-center gap-1">
           <button
-            key={t.id}
-            onClick={() => onPick(t)}
-            className={`group relative flex flex-col items-start gap-2 rounded-node border bg-surface-2 p-3 text-left transition-all hover:-translate-y-0.5 ${
-              active ? "border-accent-500" : "border-hairline hover:border-hairline-soft"
+            onClick={() => setFilter("all")}
+            className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              filter === "all"
+                ? "bg-accent-500/15 text-accent-400 font-semibold"
+                : "text-ink-muted hover:text-ink"
             }`}
-            style={{ borderLeft: `3px solid ${hex}` }}
           >
-            {risky && (
-              <span
-                aria-hidden
-                className="absolute right-2 top-2 h-2 w-2 rounded-full"
-                style={{ backgroundColor: hex, boxShadow: `0 0 0 4px ${hex}22` }}
-              />
-            )}
-            <span className="flex h-8 w-8 items-center justify-center rounded-md" style={{ backgroundColor: `${hex}1f`, color: hex }}>
-              {risky ? <ShieldAlert className="h-4 w-4" /> : <Globe className="h-4 w-4" />}
-            </span>
-            <span className="w-full truncate font-mono text-small text-ink" title={t.domain}>
-              {t.domain}
-            </span>
-            <span className="flex w-full items-center justify-between font-mono text-[10px] text-ink-muted">
-              <span style={{ color: hex }}>{t.band}</span>
-              <span>×{t.hit_count}</span>
-            </span>
+            All Activity ({threats.length})
           </button>
-        );
-      })}
+          <button
+            onClick={() => setFilter("realtime")}
+            className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              filter === "realtime"
+                ? "bg-accent-500/15 text-accent-400 font-semibold"
+                : "text-ink-muted hover:text-ink"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-risk-safe animate-pulse" />
+            Real-Time 5m ({realTimeCount})
+          </button>
+          <button
+            onClick={() => setFilter("threats")}
+            className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              filter === "threats"
+                ? "bg-risk-critical/15 text-risk-critical font-semibold"
+                : "text-ink-muted hover:text-ink"
+            }`}
+          >
+            <ShieldAlert className="h-3 w-3" />
+            Threats Only ({threatCount})
+          </button>
+        </div>
+
+        <div className="flex items-center">
+          <input
+            type="text"
+            placeholder="Search domain..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="rounded border border-hairline bg-surface-2 px-2 py-0.5 font-mono text-[11px] text-ink placeholder-ink-muted/60 outline-none focus:border-accent-500"
+          />
+        </div>
+      </div>
+
+      {ordered.length === 0 ? (
+        <div className="rounded-node border border-hairline bg-surface-2 p-8 text-center text-small text-ink-muted">
+          No domains matched the selected filter ({filter}).
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {ordered.map((t) => {
+            const hex = hexFor(t.band);
+            const risky = t.band !== "Trusted";
+            const isLive = new Date(t.last_seen).getTime() >= fiveMinAgo;
+            const active = selected?.id === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => onPick(t)}
+                className={`group relative flex flex-col items-start gap-2 rounded-node border bg-surface-2 p-3 text-left transition-all hover:-translate-y-0.5 ${
+                  active ? "border-accent-500" : "border-hairline hover:border-hairline-soft"
+                }`}
+                style={{ borderLeft: `3px solid ${hex}` }}
+              >
+                {risky && (
+                  <span
+                    aria-hidden
+                    className="absolute right-2 top-2 h-2 w-2 rounded-full"
+                    style={{ backgroundColor: hex, boxShadow: `0 0 0 4px ${hex}22` }}
+                  />
+                )}
+                <div className="flex w-full items-center justify-between">
+                  <span
+                    className="flex h-7 w-7 items-center justify-center rounded-md"
+                    style={{ backgroundColor: `${hex}1f`, color: hex }}
+                  >
+                    {risky ? <ShieldAlert className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
+                  </span>
+                  {isLive && (
+                    <span className="flex items-center gap-1 rounded bg-risk-safe/10 px-1.5 py-0.5 text-[8px] font-semibold text-risk-safe">
+                      <span className="h-1.5 w-1.5 rounded-full bg-risk-safe animate-pulse" />
+                      LIVE
+                    </span>
+                  )}
+                </div>
+                <span className="w-full truncate font-mono text-small text-ink" title={t.domain}>
+                  {t.domain}
+                </span>
+                <span className="flex w-full items-center justify-between font-mono text-[10px] text-ink-muted">
+                  <span style={{ color: hex }}>{t.band}</span>
+                  <span>×{t.hit_count}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

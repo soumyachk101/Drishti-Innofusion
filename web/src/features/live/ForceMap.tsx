@@ -330,9 +330,6 @@ function ForceCanvas({
  sim.on("tick", paint);
  sim.on("end", () => {
  paint();
- setTimeout(() => {
- rf.fitView({ padding: 0.25, duration: 350, maxZoom: 1.3 });
- }, 50);
  });
 
  paint();
@@ -344,15 +341,16 @@ function ForceCanvas({
  // eslint-disable-next-line react-hooks/exhaustive-deps
  }, [structureKey, rf]);
 
- // Fit the viewport on mount and when node count changes
+ // Fit the viewport ONLY once on initial mount so camera never jumps during live polling
  useEffect(() => {
  if (rfNodes.length === 0) return;
- if (fittedRef.current === rfNodes.length) return;
+ if (fittedRef.current === 0) {
  const t = window.setTimeout(() => {
  rf.fitView({ padding: 0.25, duration: 400, maxZoom: 1.3 });
  fittedRef.current = rfNodes.length;
- }, 200);
+ }, 250);
  return () => window.clearTimeout(t);
+ }
  }, [rfNodes.length, rf]);
 
  // merge FRESH per-node data (risk, vuln counts, callbacks) into the painted

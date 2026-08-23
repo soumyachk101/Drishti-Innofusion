@@ -590,12 +590,17 @@ def _normalize_host(h: str | None) -> str:
 def _hosts_match(host_a: str | None, host_b: str | None) -> bool:
     if not host_a or not host_b:
         return False
-    if host_a == host_b:
-        return True
     na, nb = _normalize_host(host_a), _normalize_host(host_b)
     if not na or not nb:
         return False
-    return na == nb or na in nb or nb in na
+    if na == nb:
+        return True
+    # For IP addresses, strictly require exact match (do NOT do substring match)
+    is_ip_a = re.match(r"^\d+\.\d+\.\d+\.\d+$", na) is not None
+    is_ip_b = re.match(r"^\d+\.\d+\.\d+\.\d+$", nb) is not None
+    if is_ip_a or is_ip_b:
+        return na == nb
+    return na in nb or nb in na
 
 
 def list_devices(db: Session, org_id: str) -> list[NetworkDeviceOut]:
@@ -637,14 +642,14 @@ def list_devices(db: Session, org_id: str) -> list[NetworkDeviceOut]:
 
         active_domains_set: set[str] = set()
         for k, doms in obs_by_host.items():
-            if _hosts_match(k, r.ip) or _hosts_match(k, r.hostname) or (r.is_self and (k in ("manual", "localhost", "127.0.0.1", "") or _hosts_match(k, r.ip) or _hosts_match(k, r.hostname))):
+            if _hosts_match(k, r.ip) or (r.hostname and _hosts_match(k, r.hostname)) or (r.is_self and k in ("manual", "localhost", "127.0.0.1", "")):
                 active_domains_set.update(doms)
 
         active_apps_set: set[str] = set()
         now_time = utcnow()
         for k, (apps, ts) in _ACTIVE_APPS_BY_HOST.items():
             if (now_time - ts).total_seconds() < 300:
-                if _hosts_match(k, r.ip) or _hosts_match(k, r.hostname) or (r.is_self and (k in ("manual", "localhost", "127.0.0.1", "") or _hosts_match(k, r.ip) or _hosts_match(k, r.hostname))):
+                if _hosts_match(k, r.ip) or (r.hostname and _hosts_match(k, r.hostname)) or (r.is_self and k in ("manual", "localhost", "127.0.0.1", "")):
                     active_apps_set.update(apps)
 
         out.append(NetworkDeviceOut(
