@@ -29,6 +29,174 @@ import "./landing-cinema.css";
 import heroBg from "../../assets/hero-bg.jpg";
 import { EntryAnimation } from "./EntryAnimation";
 
+/* ============================================================
+   PIPELINE STAGES DATA
+   ============================================================ */
+const PIPELINE_STAGES = [
+  {
+    stage: "STAGE 01",
+    label: "DISCOVERY",
+    icon: <Zap size={14} />,
+    title: "LAN & Perimeter Ingestion",
+    desc: "Edge agent performs non-intrusive ARP polling, passive DNS observation, and live LAN device detection across subnet ranges.",
+    accent: "#ea580c",
+    gradient: "linear-gradient(90deg, #ea580c, #f97316)",
+    meta: "RFC1918 Private Gate",
+    visual: (
+      <div className="hml-card-visual-box">
+        <div className="hml-visual-header">
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#4ade80", boxShadow: "0 0 8px #4ade80" }} />
+            <span style={{ color: "#fb923c", fontWeight: 700, letterSpacing: "0.05em" }}>SUBNET 192.168.1.0/24</span>
+          </div>
+          <span className="hml-pulse-tag">● 14 LIVE HOSTS</span>
+        </div>
+        <div className="hml-visual-list">
+          <div className="hml-visual-row">
+            <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#e2e8f0" }}>
+              <Server size={12} color="#38c6f4" />
+              <span>192.168.1.1 (Gateway)</span>
+            </span>
+            <span className="hml-tag-cyan">PORT 22, 443</span>
+          </div>
+          <div className="hml-visual-row">
+            <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#e2e8f0" }}>
+              <Server size={12} color="#fb7185" />
+              <span>192.168.1.10 (Nginx DMZ)</span>
+            </span>
+            <span className="hml-tag-rose">CVE-2024-4321</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    stage: "STAGE 02",
+    label: "TOPOLOGY",
+    icon: <Network size={14} />,
+    title: "Directed Graph Construction",
+    desc: "Translates isolated host scans into a unified mathematical attack topology with weighted edge traversal difficulties.",
+    accent: "#38c6f4",
+    gradient: "linear-gradient(90deg, #38c6f4, #0284c7)",
+    meta: "NetworkX DiGraph",
+    visual: (
+      <div className="hml-card-visual-box" style={{ background: "#0c0f14" }}>
+        <div className="hml-graph-pipeline">
+          <div className="hml-node-pill" style={{ borderColor: "rgba(244,63,94,0.3)", background: "rgba(244,63,94,0.1)" }}>
+            <div style={{ fontSize: 9, color: "#fb7185", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>SOURCE</div>
+            <span style={{ color: "#ffffff", fontSize: 11, fontWeight: 700, fontFamily: "var(--font-family-mono)" }}>INTERNET</span>
+          </div>
+          <div className="hml-node-arrow">
+            <div className="hml-arrow-line" />
+            <span className="hml-arrow-label">HTTPS 443</span>
+          </div>
+          <div className="hml-node-pill" style={{ borderColor: "rgba(56,198,244,0.3)", background: "rgba(56,198,244,0.1)" }}>
+            <div style={{ fontSize: 9, color: "#38c6f4", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>DMZ NODE</div>
+            <span style={{ color: "#ffffff", fontSize: 11, fontWeight: 700, fontFamily: "var(--font-family-mono)" }}>web-lb-01</span>
+          </div>
+          <div className="hml-node-arrow">
+            <div className="hml-arrow-line" />
+            <span className="hml-arrow-label">PORT 5432</span>
+          </div>
+          <div className="hml-node-pill" style={{ borderColor: "rgba(234,88,12,0.5)", background: "rgba(234,88,12,0.15)", boxShadow: "0 0 12px rgba(234,88,12,0.3)" }}>
+            <div style={{ fontSize: 9, color: "#fb923c", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>👑 CROWN</div>
+            <span style={{ color: "#fed7aa", fontSize: 11, fontWeight: 700, fontFamily: "var(--font-family-mono)" }}>db-prod-01</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    stage: "STAGE 03",
+    label: "SOLVER",
+    icon: <Cpu size={14} />,
+    title: "Bounded Yen's Path Solver",
+    desc: "Enumerates the top 5 shortest attack routes per crown jewel (bounded at max 6 hops), avoiding exponential traversal explosion.",
+    accent: "#d97706",
+    gradient: "linear-gradient(90deg, #d97706, #f59e0b)",
+    meta: "Bounded Yen's K-Shortest",
+    visual: (
+      <div className="hml-card-visual-box">
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11, fontFamily: "var(--font-family-mono)", marginBottom: 4 }}>
+              <span style={{ color: "#fb7185", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
+                <Shield size={11} /> #1 Primary Path (88.0%)
+              </span>
+              <span style={{ color: "#94a3b8" }}>3 Hops · CVSS 9.8</span>
+            </div>
+            <div style={{ height: 6, width: "100%", background: "#1e293b", borderRadius: 999, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: "88%", background: "linear-gradient(90deg, #fb7185, #f97316)", borderRadius: 999 }} />
+            </div>
+          </div>
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11, fontFamily: "var(--font-family-mono)", marginBottom: 4 }}>
+              <span style={{ color: "#fb923c", fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
+                <Activity size={11} /> #2 Lateral Path (41.0%)
+              </span>
+              <span style={{ color: "#94a3b8" }}>4 Hops · CVSS 7.5</span>
+            </div>
+            <div style={{ height: 6, width: "100%", background: "#1e293b", borderRadius: 999, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: "41%", background: "linear-gradient(90deg, #f97316, #fbbf24)", borderRadius: 999 }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    stage: "STAGE 04",
+    label: "VALUATION",
+    icon: <DollarSign size={14} />,
+    title: "Deterministic $ Valuation",
+    desc: "Applies mathematical risk pricing: Likelihood × Asset Value × Multiplier + Base Cost. Zero fabricated numbers.",
+    accent: "#15803d",
+    gradient: "linear-gradient(90deg, #15803d, #22c55e)",
+    meta: "Deterministic ($ USD)",
+    visual: (
+      <div className="hml-card-visual-box" style={{ background: "rgba(225, 29, 72, 0.06)", borderColor: "rgba(225, 29, 72, 0.2)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 10, fontFamily: "var(--font-family-mono)", color: "#f43f5e", fontWeight: 700, letterSpacing: "0.08em" }}>CALCULATED EXPOSURE</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: "#f43f5e", fontFamily: "var(--font-family-mono)", lineHeight: 1.2 }}>$902,900</div>
+          </div>
+          <div style={{ textAlign: "right", fontSize: 11, fontFamily: "var(--font-family-mono)", color: "#94a3b8", borderLeft: "1px solid rgba(255,255,255,0.1)", paddingLeft: 12 }}>
+            <div style={{ color: "#e2e8f0", fontWeight: 600 }}>0.88 × $500K DB</div>
+            <div style={{ color: "#64748b" }}>+ $462.9K Blast</div>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    stage: "STAGE 05",
+    label: "REMEDIATION",
+    icon: <Terminal size={14} />,
+    title: "Defensive Playbook Synthesis",
+    desc: "Synthesizes contextual Ansible, Shell, and AWS CLI remediations with strict output-side offensive marker screening.",
+    accent: "#7c3aed",
+    gradient: "linear-gradient(90deg, #7c3aed, #a855f7)",
+    meta: "NVIDIA NIM Guardrails",
+    visual: (
+      <div className="hml-card-visual-box">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: 6, marginBottom: 8 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 6, color: "#4ade80", fontWeight: 700, fontSize: 11, fontFamily: "var(--font-family-mono)" }}>
+            <CheckCircle2 size={12} /> PLAYBOOK VERIFIED
+          </span>
+          <span style={{ fontSize: 10, fontFamily: "var(--font-family-mono)", color: "#94a3b8" }}>ansible-playbook</span>
+        </div>
+        <div style={{ fontFamily: "var(--font-family-mono)", fontSize: 11, color: "#cbd5e1", lineHeight: 1.5 }}>
+          <span style={{ color: "#c084fc" }}>- name:</span> Patch CVE & Harden DMZ<br />
+          <span style={{ color: "#38bdf8" }}>  ansible.builtin.iptables:</span> drop
+        </div>
+      </div>
+    ),
+  },
+];
+
+/* ============================================================
+   MAIN LANDING PAGE
+   ============================================================ */
 export default function Landing() {
   const { user } = useAuth();
   const [replayKey, setReplayKey] = useState(0);
@@ -44,27 +212,40 @@ export default function Landing() {
   return (
     <EntryAnimation key={replayKey} forcePlay={replayKey > 0}>
       <div className="hml">
-        {/* 1. SCROLL PROGRESS — Fixed at top with spring smoothing */}
+        {/* Scroll Progress Bar */}
         <motion.div className="hml-scroll-progress-bar" style={{ scaleX }} />
 
-        {/* Unified Full-Viewport Hero Section */}
+        {/* Master Full-Bleed Dark Hero Section */}
         <div className="hml-hero-master-wrap">
           <HeroBackdrop scrollYProgress={scrollYProgress} />
           <TopStatusStrip onReplay={() => setReplayKey((k) => k + 1)} />
           <Navbar />
-          <HeroSection />
+          <HeroContent />
         </div>
 
         <main>
+          {/* Interactive Multi-Hop Attack Path Simulator */}
           <InteractivePathSection />
-          {/* 2, 3, 4, 5. TRUE SCROLL-DRIVEN HORIZONTAL SCROLL & PIN ANIMATION */}
+
+          {/* Scroll-Driven Horizontal Threat Pipeline */}
           <ScrollDrivenHorizontalPipeline />
+
+          {/* Six Architectural Pillars */}
           <PillarsSection />
+
+          {/* Competitive Benchmark Comparison */}
           <ComparisonSection />
+
+          {/* Defensive Playbook Terminal Showcase */}
           <PlaybookTerminalSection />
+
+          {/* Frequently Asked Questions */}
           <FaqSection />
+
+          {/* Final Call to Action */}
           <CtaBandSection />
         </main>
+
         <FooterSection />
       </div>
     </EntryAnimation>
@@ -101,34 +282,39 @@ function TopStatusStrip({ onReplay }: { onReplay?: () => void }) {
   return (
     <div className="hml-strip">
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-        <span>DRISHTI <em>//</em> DEFENSIVE GRAPH INTELLIGENCE</span>
-        <span style={{ opacity: 0.3 }}>|</span>
-        <span>ENGINE: NETWORKX 3.3 (BOUNDED YEN'S K-SHORTEST)</span>
+        <span>
+          DRISHTI <em>//</em> DEFENSIVE GRAPH INTELLIGENCE
+        </span>
+        <span style={{ opacity: 0.35 }}>|</span>
+        <span>ENGINE: NETWORKX 3.3 (BOUNDED YEN&apos;S K-SHORTEST)</span>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
         {onReplay && (
           <button
             onClick={onReplay}
             style={{
-              background: "rgba(56, 198, 244, 0.08)",
-              border: "1px solid rgba(56, 198, 244, 0.3)",
-              color: "#38c6f4",
-              borderRadius: "4px",
-              padding: "2px 8px",
-              fontSize: "10px",
-              cursor: "pointer",
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
               gap: "4px",
+              padding: "2px 8px",
+              fontSize: "11px",
               fontFamily: "var(--font-family-mono)",
+              fontWeight: 700,
+              color: "var(--color-accent)",
+              background: "rgba(234, 88, 12, 0.12)",
+              border: "1px solid rgba(234, 88, 12, 0.3)",
+              borderRadius: "4px",
+              cursor: "pointer",
             }}
-            title="Replay entry scan animation"
           >
             <Activity size={10} /> REPLAY SCAN
           </button>
         )}
-        <span>STATUS: <span style={{ color: "var(--color-status-success)", fontWeight: 700 }}>OPERATIONAL</span></span>
-        <span>IST: {time} (KOLKATA)</span>
+        <span>
+          STATUS:{" "}
+          <span style={{ color: "#4ade80", fontWeight: 700 }}>OPERATIONAL</span>
+        </span>
+        <span className="mono">IST: {time} (KOLKATA)</span>
       </div>
     </div>
   );
@@ -137,58 +323,79 @@ function TopStatusStrip({ onReplay }: { onReplay?: () => void }) {
 /* ------------------------------------------------------------- Navigation Bar */
 function Navbar() {
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="hml-nav hml-wrap"
-    >
+    <header className="hml-nav">
       <div className="hml-nav-inner">
         <Link to="/" className="hml-brand">
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             style={{
-              width: 28,
-              height: 28,
-              borderRadius: 6,
+              width: 32,
+              height: 32,
+              borderRadius: 8,
               background: "var(--color-accent)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 2px 8px rgba(234, 88, 12, 0.35)",
+              boxShadow: "0 2px 14px rgba(234, 88, 12, 0.45)",
             }}
           >
-            <Shield size={16} color="#ffffff" />
+            <Shield size={18} color="#ffffff" />
           </motion.div>
-          <span>DR<em>I</em>SHTI</span>
+          <span>
+            DR<em>I</em>SHTI
+          </span>
         </Link>
 
-        <ul className="hml-nav-links">
-          <li><a href="#topology" className="hml-nav-link">Attack Topology</a></li>
-          <li><a href="#pipeline" className="hml-nav-link">Pipeline</a></li>
-          <li><a href="#pillars" className="hml-nav-link">Architecture</a></li>
-          <li><a href="#comparison" className="hml-nav-link">Comparison</a></li>
-          <li><a href="#playbooks" className="hml-nav-link">Playbooks</a></li>
-          <li><a href="#faq" className="hml-nav-link">FAQ</a></li>
-        </ul>
+        <nav>
+          <ul className="hml-nav-links">
+            <li>
+              <a href="#topology" className="hml-nav-link">
+                Attack Topology
+              </a>
+            </li>
+            <li>
+              <a href="#pipeline" className="hml-nav-link">
+                Threat Pipeline
+              </a>
+            </li>
+            <li>
+              <a href="#pillars" className="hml-nav-link">
+                Architecture
+              </a>
+            </li>
+            <li>
+              <a href="#comparison" className="hml-nav-link">
+                Comparison
+              </a>
+            </li>
+            <li>
+              <a href="#playbooks" className="hml-nav-link">
+                Playbooks
+              </a>
+            </li>
+            <li>
+              <a href="#faq" className="hml-nav-link">
+                FAQ
+              </a>
+            </li>
+          </ul>
+        </nav>
 
         <div className="hml-nav-actions">
           <Link to="/login" className="hml-btn-ghost">
             Sign In
           </Link>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Link to="/signup" className="hml-btn-primary">
-              Launch Console <ArrowRight size={14} />
-            </Link>
-          </motion.div>
+          <Link to="/signup" className="hml-btn-primary">
+            Launch Console <ArrowRight size={14} />
+          </Link>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 }
 
-/* ------------------------------------------------------------- 6. PARALLAX Hero Backdrop & Section */
+/* ------------------------------------------------------------- Hero Backdrop */
 function HeroBackdrop({ scrollYProgress }: { scrollYProgress: any }) {
   const heroBgY = useTransform(scrollYProgress, [0, 0.4], [0, 80]);
 
@@ -205,7 +412,8 @@ function HeroBackdrop({ scrollYProgress }: { scrollYProgress: any }) {
   );
 }
 
-function HeroSection() {
+/* ------------------------------------------------------------- Hero Content */
+function HeroContent() {
   return (
     <section className="hml-hero hml-wrap">
       <motion.div
@@ -214,10 +422,12 @@ function HeroSection() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="hml-pill-tag"
       >
-        <span className="hml-pill-dot"></span>
+        <span className="hml-pill-dot" />
         <span>Defensive Attack-Path Intelligence</span>
         <span style={{ color: "rgba(255, 255, 255, 0.35)" }}>|</span>
-        <span style={{ color: "var(--color-accent)", fontWeight: 700 }}>Zero-Hallucination Impact</span>
+        <span style={{ color: "var(--color-accent)", fontWeight: 700 }}>
+          Zero-Hallucination Impact
+        </span>
       </motion.div>
 
       <motion.h1
@@ -237,7 +447,9 @@ function HeroSection() {
         className="hml-hero-desc text-slate-200"
         style={{ color: "#e2e8f0" }}
       >
-        Drishti maps real routes from the internet to your crown-jewel assets, prices every path in <span className="text-orange-400 font-bold">$ dollars</span>, and synthesizes human-reviewed Ansible playbooks. Never attacks.
+        Drishti maps real routes from the internet to your crown-jewel assets,
+        prices every path in <span style={{ color: "#fb923c", fontWeight: 700 }}>$ dollars</span>,
+        and synthesizes human-reviewed Ansible playbooks. Never attacks.
       </motion.p>
 
       <motion.div
@@ -252,8 +464,8 @@ function HeroSection() {
           </Link>
         </motion.div>
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <a href="#topology" className="hml-btn-outline">
-            Explore Attack Surface Map
+          <a href="#pipeline" className="hml-btn-outline">
+            Explore Threat Pipeline
           </a>
         </motion.div>
       </motion.div>
@@ -278,41 +490,26 @@ function InteractivePathSection() {
         { label: "Hop 02", name: "Web Server", ip: "192.168.1.10", type: "srv" },
         { label: "Crown Jewel", name: "PostgreSQL DB", ip: "10.0.0.5", type: "target" },
       ],
-      vuln: "CVE-2024-4321 (PostgreSQL Privilege Escalation)",
-      likelihood: remediated ? 0.05 : 0.88,
-      exposure: remediated ? 250000 : 902900,
-      riskScore: remediated ? 24.5 : 94.2,
+      vuln: "CVE-2024-4321 (RCE on DMZ Web Node)",
+      likelihood: remediated ? 0.04 : 0.88,
+      exposure: remediated ? 50000 : 902900,
+      riskScore: remediated ? 12.4 : 88.0,
     },
     {
       id: 2,
       name: "Path #2",
-      subtitle: "Customer Vault Compromise",
-      target: "Customer Data Vault (10.0.0.8)",
+      subtitle: "Lateral Admin Pivot",
+      target: "Domain Controller (10.0.0.2)",
       hops: [
         { label: "Entry Point", name: "INTERNET", ip: "0.0.0.0", type: "entry" },
-        { label: "Hop 01", name: "Edge Firewall", ip: "192.168.1.1", type: "fw" },
-        { label: "Hop 02", name: "API Gateway", ip: "192.168.1.50", type: "srv" },
-        { label: "Crown Jewel", name: "Data Vault", ip: "10.0.0.8", type: "target" },
+        { label: "Hop 01", name: "VPN Gateway", ip: "192.168.1.5", type: "fw" },
+        { label: "Hop 02", name: "Admin Workstation", ip: "192.168.1.45", type: "srv" },
+        { label: "Crown Jewel", name: "Active Directory DC", ip: "10.0.0.2", type: "target" },
       ],
-      vuln: "CVE-2024-2141 (Apache Log4j RCE)",
-      likelihood: 0.72,
-      exposure: 750000,
-      riskScore: 86.5,
-    },
-    {
-      id: 3,
-      name: "Path #3",
-      subtitle: "Keycloak Auth Bypass",
-      target: "Auth Keycloak (192.168.1.15)",
-      hops: [
-        { label: "Entry Point", name: "INTERNET", ip: "0.0.0.0", type: "entry" },
-        { label: "Hop 01", name: "Edge Firewall", ip: "192.168.1.1", type: "fw" },
-        { label: "Crown Jewel", name: "Auth Keycloak", ip: "192.168.1.15", type: "target" },
-      ],
-      vuln: "CVE-2024-1188 (OpenSSH Auth Bypass)",
-      likelihood: 0.54,
-      exposure: 350000,
-      riskScore: 69.4,
+      vuln: "Weak VPN Credential Spraying + Kerberoasting",
+      likelihood: remediated ? 0.02 : 0.41,
+      exposure: remediated ? 30000 : 420000,
+      riskScore: remediated ? 8.1 : 54.5,
     },
   ];
 
@@ -320,100 +517,99 @@ function InteractivePathSection() {
 
   return (
     <section id="topology" className="hml-section hml-wrap">
+      <div className="hml-section-header">
+        <span className="hml-section-tag">Interactive Topology Intelligence</span>
+        <h2 className="hml-section-title">Multi-Hop Attack Path Simulator</h2>
+        <p className="hml-section-desc">
+          Test Yen&apos;s K-shortest path algorithm live. Select a computed route, inspect intermediate hops, and simulate automated remediation.
+        </p>
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="hml-section-header"
-      >
-        <span className="hml-section-tag">Graph Engine Demonstration</span>
-        <h2 className="hml-section-title">Bounded Yen's Shortest Path Simulator</h2>
-        <p className="hml-section-desc">
-          See how resolving a single upstream vulnerability breaks the lateral movement chain and mathematically slashes financial exposure.
-        </p>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 25 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="hml-card"
-        style={{ background: "var(--color-surface-raised)", padding: "clamp(1.5rem, 3vw, 2.5rem)", boxShadow: "var(--shadow-lift)" }}
+        style={{
+          background: "var(--color-surface-raised)",
+          border: "1px solid var(--color-border-default)",
+          borderRadius: "var(--radius-card)",
+          padding: "clamp(1.5rem, 3vw, 2.5rem)",
+          boxShadow: "var(--shadow-lift)",
+        }}
       >
-        {/* Top Controls Bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "2.25rem" }}>
-          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+        {/* Top Controls */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "1rem",
+            marginBottom: "2rem",
+            paddingBottom: "1.25rem",
+            borderBottom: "1px solid var(--color-border-subtle)",
+          }}
+        >
+          <div style={{ display: "flex", gap: "0.75rem" }}>
             {paths.map((p) => (
-              <motion.button
+              <button
                 key={p.id}
-                whileHover={{ y: -2 }}
-                whileTap={{ y: 0 }}
-                onClick={() => setSelectedPath(p.id)}
+                onClick={() => {
+                  setSelectedPath(p.id);
+                  setRemediated(false);
+                }}
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
                   padding: "0.6rem 1.25rem",
                   borderRadius: "var(--radius-pill)",
-                  background: selectedPath === p.id ? "#171916" : "#ffffff",
-                  border: `1px solid ${selectedPath === p.id ? "#171916" : "rgba(23, 25, 22, 0.15)"}`,
-                  color: selectedPath === p.id ? "#ffffff" : "#171916",
-                  fontSize: "0.95rem",
+                  border: `1px solid ${selectedPath === p.id ? "var(--color-accent)" : "var(--color-border-default)"}`,
+                  background: selectedPath === p.id ? "var(--color-accent)" : "var(--color-surface-base)",
+                  color: selectedPath === p.id ? "#ffffff" : "var(--color-text-primary)",
                   fontWeight: 700,
+                  fontSize: "0.85rem",
                   cursor: "pointer",
-                  boxShadow: selectedPath === p.id ? "0 4px 12px rgba(23, 25, 22, 0.2)" : "0 1px 3px rgba(23, 25, 22, 0.05)",
-                  transition: "background 0.2s ease, color 0.2s ease",
+                  transition: "all 0.2s ease",
                 }}
               >
-                {selectedPath === p.id && (
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--color-accent)" }} />
-                )}
-                <span>{p.name}</span>
-                <span style={{ fontSize: "0.75rem", opacity: selectedPath === p.id ? 0.7 : 0.5, fontWeight: 500 }}>({p.subtitle})</span>
-              </motion.button>
+                {p.name}: {p.subtitle}
+              </button>
             ))}
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button
             onClick={() => setRemediated(!remediated)}
             style={{
-              display: "inline-flex",
+              padding: "0.6rem 1.25rem",
+              borderRadius: "var(--radius-pill)",
+              border: `1px solid ${remediated ? "#16a34a" : "var(--color-accent)"}`,
+              background: remediated ? "#15803d" : "rgba(234, 88, 12, 0.1)",
+              color: remediated ? "#ffffff" : "var(--color-accent)",
+              fontWeight: 700,
+              fontSize: "0.85rem",
+              cursor: "pointer",
+              display: "flex",
               alignItems: "center",
               gap: "0.5rem",
-              padding: "0.65rem 1.4rem",
-              borderRadius: "var(--radius-pill)",
-              background: remediated ? "rgba(21, 128, 61, 0.1)" : "rgba(234, 88, 12, 0.1)",
-              border: `1px solid ${remediated ? "#15803d" : "#ea580c"}`,
-              color: remediated ? "#15803d" : "#ea580c",
-              fontSize: "0.95rem",
-              fontWeight: 700,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
             }}
           >
             {remediated ? (
               <>
-                <CheckCircle2 size={16} />
-                <span>CVE Remediated (Risk Dropped)</span>
+                <CheckCircle2 size={16} /> Patch Applied (-$200,000 Drop)
               </>
             ) : (
-              <span>Simulate Finding Resolution</span>
+              <>
+                <Shield size={16} /> Simulate Defensive Remediation
+              </>
             )}
-          </motion.button>
+          </button>
         </div>
 
-        {/* Nodes Diagram */}
-        <div className="hml-path-nodes" style={{ background: "var(--color-surface-base)", padding: "1.5rem", borderRadius: "var(--radius-card)", border: "1px solid rgba(23, 25, 22, 0.08)" }}>
+        {/* Hops Chain Visualization */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
           {current.hops.map((hop, index) => (
-            <React.Fragment key={index}>
+            <React.Fragment key={hop.name}>
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: index * 0.08 }}
+                whileHover={{ y: -4 }}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -484,7 +680,7 @@ function InteractivePathSection() {
   );
 }
 
-/* ------------------------------------------------------------- 2, 3, 4, 5. SCROLL-DRIVEN HORIZONTAL SCROLL & PIN */
+/* ------------------------------------------------------------- Scroll-Driven Horizontal Pipeline */
 function ScrollDrivenHorizontalPipeline() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -492,13 +688,12 @@ function ScrollDrivenHorizontalPipeline() {
     offset: ["start start", "end end"],
   });
 
-  // Vertical scroll scrubs horizontal movement from 0% to -64%
+  // Smooth horizontal scrub from 0% to -64%
   const x = useTransform(scrollYProgress, [0, 1], ["0%", "-64%"]);
   const progressPercent = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
     <div id="pipeline" ref={containerRef} className="hml-horizontal-scroll-section">
-      {/* Pinned Sticky Window for Full Viewport */}
       <div className="hml-horizontal-sticky">
         <div className="hml-wrap" style={{ marginBottom: "2rem", paddingTop: "0.5rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1.25rem" }}>
@@ -510,6 +705,7 @@ function ScrollDrivenHorizontalPipeline() {
                 End-to-End Threat Pipeline
               </h2>
             </div>
+
             {/* Scroll-Linked Progress Pill */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", background: "#ffffff", padding: "0.6rem 1.35rem", borderRadius: "var(--radius-pill)", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)" }}>
               <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-primary)", color: "#555951", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
@@ -522,302 +718,130 @@ function ScrollDrivenHorizontalPipeline() {
           </div>
         </div>
 
-        {/* Horizontally Scrubbed Track with Custom Visual Cards */}
+        {/* Horizontally Scrubbed Track with Cards */}
         <motion.div style={{ x }} className="hml-horizontal-track">
-          {/* Card 01: Ingestion & Discovery */}
-          <motion.div
-            whileHover={{ y: -8, scale: 1.01 }}
-            transition={{ duration: 0.25 }}
-            className="hml-pipeline-card"
-          >
-            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #ea580c, #f97316)" }} />
-            <div>
-              <div className="hml-card-top-meta">
-                <span className="hml-stage-chip" style={{ color: "#ea580c", background: "rgba(234, 88, 12, 0.1)", borderColor: "rgba(234, 88, 12, 0.25)" }}>
-                  <Zap size={12} /> STAGE 01 // DISCOVERY
-                </span>
-                <span className="hml-meta-badge">RFC1918 Private Gate</span>
-              </div>
-              <h3 className="hml-card-heading">
-                LAN & Perimeter Ingestion
-              </h3>
-              <p className="hml-card-body">
-                Edge agent performs non-intrusive ARP polling, passive DNS observation, and live LAN device detection across subnet ranges.
-              </p>
-            </div>
-
-            {/* Visual Subnet Telemetry Box */}
-            <div className="hml-card-visual-box">
-              <div className="hml-visual-header">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
-                  <span style={{ color: "#fb923c", fontWeight: 700, letterSpacing: "0.05em" }}>SUBNET 192.168.1.0/24</span>
-                </div>
-                <span className="hml-pulse-tag">● 14 LIVE HOSTS</span>
-              </div>
-              <div className="hml-visual-list">
-                <div className="hml-visual-row">
-                  <span className="flex items-center gap-1.5 text-slate-200">
-                    <Server size={12} className="text-cyan-400" />
-                    <span>192.168.1.1 (Gateway)</span>
+          {PIPELINE_STAGES.map((stage) => (
+            <motion.div
+              key={stage.stage}
+              whileHover={{ y: -8, scale: 1.01 }}
+              transition={{ duration: 0.25 }}
+              className="hml-pipeline-card"
+            >
+              <div className="hml-card-accent-line" style={{ background: stage.gradient }} />
+              <div>
+                <div className="hml-card-top-meta">
+                  <span
+                    className="hml-stage-chip"
+                    style={{
+                      color: stage.accent,
+                      background: `${stage.accent}15`,
+                      borderColor: `${stage.accent}35`,
+                    }}
+                  >
+                    {stage.icon} {stage.stage} // {stage.label}
                   </span>
-                  <span className="hml-tag-cyan">PORT 22, 443</span>
+                  <span className="hml-meta-badge">{stage.meta}</span>
                 </div>
-                <div className="hml-visual-row">
-                  <span className="flex items-center gap-1.5 text-slate-200">
-                    <Server size={12} className="text-rose-400" />
-                    <span>192.168.1.10 (Nginx DMZ)</span>
-                  </span>
-                  <span className="hml-tag-rose">CVE-2024-4321</span>
-                </div>
+                <h3 className="hml-card-heading">{stage.title}</h3>
+                <p className="hml-card-body">{stage.desc}</p>
               </div>
-            </div>
-          </motion.div>
-
-          {/* Card 02: NetworkX Graph */}
-          <motion.div
-            whileHover={{ y: -8, scale: 1.01 }}
-            transition={{ duration: 0.25 }}
-            className="hml-pipeline-card"
-          >
-            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #38c6f4, #0284c7)" }} />
-            <div>
-              <div className="hml-card-top-meta">
-                <span className="hml-stage-chip" style={{ color: "#0284c7", background: "rgba(2, 132, 199, 0.1)", borderColor: "rgba(2, 132, 199, 0.25)" }}>
-                  <Network size={12} /> STAGE 02 // TOPOLOGY
-                </span>
-                <span className="hml-meta-badge">NetworkX DiGraph</span>
-              </div>
-              <h3 className="hml-card-heading">
-                Directed Graph Construction
-              </h3>
-              <p className="hml-card-body">
-                Translates isolated host scans into a unified mathematical attack topology with weighted edge traversal difficulties.
-              </p>
-            </div>
-
-            {/* Visual Mini Graph Connector */}
-            <div className="hml-card-visual-box" style={{ background: "#0c0f14" }}>
-              <div className="hml-graph-pipeline">
-                <div className="hml-node-pill border-rose-500/30 bg-rose-500/10">
-                  <div className="text-[9px] text-rose-400 font-mono font-bold">SOURCE</div>
-                  <span className="text-white text-xs font-bold font-mono">INTERNET</span>
-                </div>
-                <div className="hml-node-arrow">
-                  <div className="hml-arrow-line" />
-                  <span className="hml-arrow-label">HTTPS 443</span>
-                </div>
-                <div className="hml-node-pill border-sky-500/30 bg-sky-500/10">
-                  <div className="text-[9px] text-sky-400 font-mono font-bold">DMZ NODE</div>
-                  <span className="text-white text-xs font-bold font-mono">web-lb-01</span>
-                </div>
-                <div className="hml-node-arrow">
-                  <div className="hml-arrow-line" />
-                  <span className="hml-arrow-label">PORT 5432</span>
-                </div>
-                <div className="hml-node-pill border-orange-500/50 bg-orange-500/15 shadow-[0_0_12px_rgba(234,88,12,0.3)]">
-                  <div className="text-[9px] text-orange-400 font-mono font-bold">👑 CROWN</div>
-                  <span className="text-orange-300 text-xs font-bold font-mono">db-prod-01</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 03: Yen's Solver */}
-          <motion.div
-            whileHover={{ y: -8, scale: 1.01 }}
-            transition={{ duration: 0.25 }}
-            className="hml-pipeline-card"
-          >
-            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #d97706, #f59e0b)" }} />
-            <div>
-              <div className="hml-card-top-meta">
-                <span className="hml-stage-chip" style={{ color: "#d97706", background: "rgba(217, 119, 6, 0.1)", borderColor: "rgba(217, 119, 6, 0.25)" }}>
-                  <Cpu size={12} /> STAGE 03 // SOLVER
-                </span>
-                <span className="hml-meta-badge">Bounded Yen's K-Shortest</span>
-              </div>
-              <h3 className="hml-card-heading">
-                Bounded Yen's Path Solver
-              </h3>
-              <p className="hml-card-body">
-                Enumerates the top 5 shortest attack routes per crown jewel (bounded at max 6 hops), avoiding exponential traversal explosion.
-              </p>
-            </div>
-
-            {/* Visual Path Hierarchy */}
-            <div className="hml-card-visual-box">
-              <div className="space-y-2.5">
-                <div>
-                  <div className="flex justify-between items-center text-xs font-mono mb-1">
-                    <span className="text-rose-400 font-bold flex items-center gap-1">
-                      <Shield size={11} /> #1 Primary Path (88.0%)
-                    </span>
-                    <span className="text-slate-400">3 Hops · CVSS 9.8</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-rose-500 rounded-full w-[88%]" />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between items-center text-xs font-mono mb-1">
-                    <span className="text-orange-400 font-bold flex items-center gap-1">
-                      <Activity size={11} /> #2 Lateral Path (41.0%)
-                    </span>
-                    <span className="text-slate-400">4 Hops · CVSS 7.5</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-orange-400 rounded-full w-[41%]" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 04: Valuation */}
-          <motion.div
-            whileHover={{ y: -8, scale: 1.01 }}
-            transition={{ duration: 0.25 }}
-            className="hml-pipeline-card"
-          >
-            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #15803d, #22c55e)" }} />
-            <div>
-              <div className="hml-card-top-meta">
-                <span className="hml-stage-chip" style={{ color: "#15803d", background: "rgba(21, 128, 61, 0.1)", borderColor: "rgba(21, 128, 61, 0.25)" }}>
-                  <DollarSign size={12} /> STAGE 04 // VALUATION
-                </span>
-                <span className="hml-meta-badge">Deterministic ($ USD)</span>
-              </div>
-              <h3 className="hml-card-heading">
-                Deterministic $ Valuation
-              </h3>
-              <p className="hml-card-body">
-                Applies mathematical risk pricing: Likelihood × Asset Value × Multiplier + Base Cost. Zero fabricated numbers.
-              </p>
-            </div>
-
-            {/* Visual Formula Box */}
-            <div className="hml-card-visual-box" style={{ background: "rgba(225, 29, 72, 0.05)", borderColor: "rgba(225, 29, 72, 0.2)" }}>
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="text-[10px] font-mono uppercase text-rose-500 font-bold tracking-wider">CALCULATED EXPOSURE</div>
-                  <div className="text-2xl font-extrabold text-rose-600 font-mono tracking-tight">$902,900</div>
-                </div>
-                <div className="text-right text-[11px] font-mono text-slate-500 border-l border-rose-200 pl-3">
-                  <div className="text-slate-700 font-semibold">0.88 × $500K DB</div>
-                  <div className="text-slate-400">+ $462.9K Blast</div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Card 05: Playbooks */}
-          <motion.div
-            whileHover={{ y: -8, scale: 1.01 }}
-            transition={{ duration: 0.25 }}
-            className="hml-pipeline-card"
-          >
-            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #7c3aed, #a855f7)" }} />
-            <div>
-              <div className="hml-card-top-meta">
-                <span className="hml-stage-chip" style={{ color: "#7c3aed", background: "rgba(124, 58, 237, 0.1)", borderColor: "rgba(124, 58, 237, 0.25)" }}>
-                  <Terminal size={12} /> STAGE 05 // REMEDIATION
-                </span>
-                <span className="hml-meta-badge">NVIDIA NIM Guardrails</span>
-              </div>
-              <h3 className="hml-card-heading">
-                Defensive Playbook Synthesis
-              </h3>
-              <p className="hml-card-body">
-                Synthesizes contextual Ansible, Shell, and AWS CLI remediations with strict output-side offensive marker screening.
-              </p>
-            </div>
-
-            {/* Visual Code Box */}
-            <div className="hml-card-visual-box">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
-                <span className="flex items-center gap-1.5 text-emerald-400 font-bold text-[11px] font-mono">
-                  <CheckCircle2 size={12} /> PLAYBOOK VERIFIED
-                </span>
-                <span className="text-[10px] font-mono text-slate-400">ansible-playbook</span>
-              </div>
-              <div className="font-mono text-[11px] text-slate-300">
-                <span className="text-purple-400">- name:</span> Patch CVE & Harden DMZ<br />
-                <span className="text-sky-400">  ansible.builtin.iptables:</span> drop
-              </div>
-            </div>
-          </motion.div>
+              {stage.visual}
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </div>
   );
 }
 
-/* ------------------------------------------------------------- Engineering Pillars */
+/* ------------------------------------------------------------- Six Architectural Pillars */
 function PillarsSection() {
   const pillars = [
     {
       icon: <Network size={20} />,
       title: "Directed Graph Topology",
       body: "Constructs an in-memory NetworkX DiGraph capturing entry points, DMZs, firewalls, and internal trust relationships with weighted edge traversal models.",
+      accent: "#38c6f4",
     },
     {
       icon: <Layers size={20} />,
       title: "Bounded Yen's Path Enumeration",
-      body: "Enumerates up to 5 shortest paths per crown jewel (bounded at max 6 hops, top 25 globally), eliminating the computational explosion of simple paths.",
+      body: "Enumerates up to 5 shortest paths per crown jewel (bounded at max 6 hops, top 25 globally), eliminating computational explosion.",
+      accent: "#ea580c",
     },
     {
       icon: <DollarSign size={20} />,
       title: "Deterministic Impact ($ USD)",
       body: "Calculates real dollar risk using mathematical formulas based on asset value and breach base costs. AI never alters financial numbers.",
+      accent: "#e11d48",
     },
     {
       icon: <Shield size={20} />,
       title: "Defensive-Only AI Guardrails",
-      body: "Integrated with NVIDIA NIM (Llama 3.3 70B). Employs strict output-side marker scanning to guarantee zero offensive exploit generation.",
+      body: "Integrated with NVIDIA NIM (Llama 3.3 70B). Strict output-side marker scanning guarantees zero offensive exploit generation.",
+      accent: "#7c3aed",
     },
     {
       icon: <Eye size={20} />,
       title: "Real-Time Telemetry Watch",
-      body: "Edge agent detects LAN devices via ARP and flags MITRE ATT&CK threats (ARP spoofing T1557, rogue hardware T1200, risky ports T1210).",
+      body: "Edge agent detects LAN devices via ARP and flags MITRE ATT&CK threats (ARP spoofing, rogue hardware, risky ports).",
+      accent: "#15803d",
     },
     {
       icon: <Lock size={20} />,
       title: "Zero-Latency Web Guard",
-      body: "Manifest V3 Chrome extension enforces in-browser domain trust verdicts using a transparent two-part scoring algorithm with hard risk caps.",
+      body: "Manifest V3 Chrome extension enforces in-browser domain trust verdicts with a transparent two-part scoring algorithm.",
+      accent: "#d97706",
     },
   ];
 
   return (
     <section id="pillars" className="hml-section hml-wrap">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="hml-section-header"
-      >
+      <div className="hml-section-header">
         <span className="hml-section-tag">System Architecture</span>
         <h2 className="hml-section-title">Six Pillars of Defensive Intelligence</h2>
         <p className="hml-section-desc">
           Built on mathematical rigor, graph theory, and cryptographically verified data boundaries.
         </p>
-      </motion.div>
+      </div>
 
       <div className="hml-grid-3">
-        {pillars.map((p, idx) => (
+        {pillars.map((p) => (
           <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.4, delay: idx * 0.08 }}
-            whileHover={{ y: -4, scale: 1.01 }}
-            className="hml-card"
+            key={p.title}
+            whileHover={{ y: -6 }}
+            style={{
+              padding: "2rem",
+              background: "var(--color-surface-raised)",
+              borderRadius: "var(--radius-card)",
+              border: "1px solid var(--color-border-default)",
+              boxShadow: "var(--shadow-sm)",
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
-            <div className="hml-card-icon">{p.icon}</div>
-            <h3 className="hml-card-title">{p.title}</h3>
-            <p className="hml-card-body">{p.body}</p>
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 10,
+                background: `${p.accent}15`,
+                border: `1px solid ${p.accent}35`,
+                color: p.accent,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: "1.25rem",
+              }}
+            >
+              {p.icon}
+            </div>
+            <h3 style={{ fontSize: "1.15rem", fontWeight: 800, color: "#171916", marginBottom: "0.5rem" }}>
+              {p.title}
+            </h3>
+            <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.6, margin: 0 }}>
+              {p.body}
+            </p>
           </motion.div>
         ))}
       </div>
@@ -825,31 +849,31 @@ function PillarsSection() {
   );
 }
 
-/* ------------------------------------------------------------- Comparison Matrix */
+/* ------------------------------------------------------------- Comparison Section */
 function ComparisonSection() {
-  const comparisons = [
+  const rows = [
     {
-      dimension: "Attack Surface Representation",
-      legacy: "Flat, disconnected list of CVEs without context",
+      dim: "Attack Surface Representation",
+      legacy: "Flat, disconnected list of CVEs without topology context",
       drishti: "Directed topological graph with multi-hop lateral movement chains",
     },
     {
-      dimension: "Prioritization Logic",
-      legacy: "Raw CVSS score (treats isolated internal hosts same as gateways)",
-      drishti: "Graph centrality + reachable distance from INTERNET + crown jewel value",
+      dim: "Prioritization Logic",
+      legacy: "Raw CVSS score (treats isolated servers and crown jewels equally)",
+      drishti: "Graph centrality + reachable distance + deterministic crown jewel value",
     },
     {
-      dimension: "Risk Quantification",
-      legacy: "Abstract high/medium/low ratings without financial meaning",
-      drishti: "Deterministic dollar exposure ($ USD) CISO board-ready metric",
+      dim: "Risk Quantification",
+      legacy: "Abstract high/medium/low severity badges without financial meaning",
+      drishti: "Deterministic dollar exposure ($ USD) board-ready metric",
     },
     {
-      dimension: "AI Integration Safety",
-      legacy: "Unconstrained prompts prone to hallucinations and exploit generation",
+      dim: "AI Integration Safety",
+      legacy: "Unconstrained prompts prone to hallucinations and unverified actions",
       drishti: "Output-side offensive marker scanning with defensive-only verification",
     },
     {
-      dimension: "Scan Scope & Compliance",
+      dim: "Scan Scope & Compliance",
       legacy: "Blind automated port probing across arbitrary subnets",
       drishti: "Strict RFC1918 private scope gate with explicit consent validation",
     },
@@ -857,561 +881,287 @@ function ComparisonSection() {
 
   return (
     <section id="comparison" className="hml-section hml-wrap">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="hml-section-header"
-      >
+      <div className="hml-section-header">
         <span className="hml-section-tag">Competitive Benchmark</span>
-        <h2 className="hml-section-title">Legacy Scanners vs. Drishti Graph Defense</h2>
+        <h2 className="hml-section-title">Legacy Scanners vs. Drishti</h2>
         <p className="hml-section-desc">
           Why traditional vulnerability assessment fails in modern enterprise topologies.
         </p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="hml-table-wrap"
+      <div
+        style={{
+          borderRadius: "var(--radius-card)",
+          border: "1px solid var(--color-border-default)",
+          background: "var(--color-surface-raised)",
+          overflow: "hidden",
+          boxShadow: "var(--shadow-lift)",
+        }}
       >
-        <table className="hml-table">
-          <thead>
-            <tr>
-              <th style={{ width: "25%" }}>Dimension</th>
-              <th style={{ width: "35%" }}>Traditional Scanners</th>
-              <th style={{ width: "40%" }}>Drishti Defensive Platform</th>
-            </tr>
-          </thead>
-          <tbody>
-            {comparisons.map((c, i) => (
-              <tr key={i}>
-                <td style={{ fontWeight: 700, color: "var(--color-text-primary)" }}>{c.dimension}</td>
-                <td style={{ color: "var(--color-text-muted)" }}>{c.legacy}</td>
-                <td className="hml-table-winner">
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <CheckCircle2 size={16} color="var(--color-accent)" />
-                    <span>{c.drishti}</span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </motion.div>
+        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.4fr 1.4fr", background: "var(--color-surface-base)", padding: "1.25rem 1.75rem", borderBottom: "1px solid var(--color-border-default)", fontWeight: 800, fontSize: "0.85rem", color: "#171916" }}>
+          <div>DIMENSION</div>
+          <div style={{ color: "#e11d48" }}>LEGACY SCANNER</div>
+          <div style={{ color: "var(--color-accent)" }}>DRISHTI PLATFORM</div>
+        </div>
+        {rows.map((r, i) => (
+          <div
+            key={r.dim}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.2fr 1.4fr 1.4fr",
+              padding: "1.25rem 1.75rem",
+              borderBottom: i < rows.length - 1 ? "1px solid var(--color-border-subtle)" : "none",
+              fontSize: "0.9rem",
+              alignItems: "center",
+              gap: "1rem",
+            }}
+          >
+            <div style={{ fontWeight: 700, color: "#171916" }}>{r.dim}</div>
+            <div style={{ color: "#8b8f87", lineHeight: 1.5 }}>&times; {r.legacy}</div>
+            <div style={{ color: "#171916", fontWeight: 600, lineHeight: 1.5, display: "flex", alignItems: "flex-start", gap: "6px" }}>
+              <span style={{ color: "#15803d", fontWeight: 800 }}>&check;</span>
+              <span>{r.drishti}</span>
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------- Terminal Playbook Preview */
+/* ------------------------------------------------------------- Playbook Terminal */
 function PlaybookTerminalSection() {
   const [activeTab, setActiveTab] = useState<"ansible" | "shell" | "aws">("ansible");
-  const [copied, setCopied] = useState(false);
 
-  const files = {
-    ansible: {
-      name: "harden_cve_2024_4321.yml",
-      lang: "yaml",
-      target: "PostgreSQL Database (10.0.0.5:5432)",
-      cve: "CVE-2024-4321",
-      lines: [
-        "- name: Remediate PostgreSQL Privilege Escalation (CVE-2024-4321)",
-        "  hosts: databases",
-        "  become: yes",
-        "  tasks:",
-        "    - name: Patch postgresql-16 package to latest stable",
-        "      apt:",
-        "        name: postgresql-16",
-        "        state: latest",
-        "        update_cache: yes",
-        "    - name: Enforce strict scram-sha-256 in pg_hba.conf",
-        "      lineinfile:",
-        "        path: /etc/postgresql/16/main/pg_hba.conf",
-        "        regexp: '^host.*all.*all'",
-        "        line: 'host all all 10.0.0.0/24 scram-sha-256'",
-        "    - name: Restart PostgreSQL service",
-        "      service:",
-        "        name: postgresql",
-        "        state: restarted",
-      ],
-    },
-    shell: {
-      name: "harden_perimeter_ingress.sh",
-      lang: "bash",
-      target: "Edge Gateway (192.168.1.1)",
-      cve: "Perimeter Exposure",
-      lines: [
-        "#!/usr/bin/env bash",
-        "# Drishti Automated Perimeter Hardening Script",
-        "set -euo pipefail",
-        "",
-        "echo '[*] Applying iptables ingress rules to isolate database tier...'",
-        "iptables -A INPUT -p tcp --dport 5432 ! -s 10.0.0.0/24 -j DROP",
-        "iptables -A INPUT -p tcp --dport 22 ! -s 192.168.1.0/24 -j DROP",
-        "",
-        "# Save persistent iptables state",
-        "iptables-save > /etc/iptables/rules.v4",
-        "echo '[+] Ingress rules applied. Direct internet access blocked.'",
-      ],
-    },
-    aws: {
-      name: "aws_security_group_remediation.sh",
-      lang: "bash",
-      target: "AWS VPC Security Group (sg-0123456789abcdef0)",
-      cve: "Overly Permissive Ingress",
-      lines: [
-        "# AWS CLI Security Group Remediation for Crown Jewel DB",
-        "aws ec2 revoke-security-group-ingress \\",
-        "    --group-id sg-0123456789abcdef0 \\",
-        "    --protocol tcp \\",
-        "    --port 5432 \\",
-        "    --cidr 0.0.0.0/0",
-        "",
-        "aws ec2 authorize-security-group-ingress \\",
-        "    --group-id sg-0123456789abcdef0 \\",
-        "    --protocol tcp \\",
-        "    --port 5432 \\",
-        "    --source-security-group-id sg-0987654321fedcba0 \\",
-        "    --group-owner 123456789012",
-      ],
-    },
-  };
+  const playbooks = {
+    ansible: `---
+- name: Remediate Attack Vector (Hop 02 DMZ to Crown DB)
+  hosts: dmz_web_servers
+  become: true
+  tasks:
+    - name: Patch CVE-2024-4321 Vulnerable Dependency
+      ansible.builtin.apt:
+        name: libnginx-mod-http-auth
+        state: latest
+        update_cache: yes
 
-  const current = files[activeTab];
+    - name: Restrict PostgreSQL Egress to Explicit DB Subnet
+      ansible.builtin.iptables:
+        chain: OUTPUT
+        destination: 10.0.0.5
+        protocol: tcp
+        destination_port: 5432
+        jump: ACCEPT
+        comment: "Drishti Defensive Guardrail Policy"
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(current.lines.join("\n"));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    - name: Drop All Other Lateral Pivoting Ports
+      ansible.builtin.iptables:
+        chain: OUTPUT
+        destination: 10.0.0.0/24
+        jump: DROP`,
+    shell: `#!/usr/bin/env bash
+# Drishti Automated Defensive Isolation Script
+# Target: 192.168.1.10 (Compromised Web Node)
+
+set -euo pipefail
+
+echo "[*] Applying host firewall isolation rules..."
+iptables -A OUTPUT -p tcp --dport 5432 -d 10.0.0.5 -j ACCEPT
+iptables -A OUTPUT -d 10.0.0.0/24 -j DROP
+
+echo "[*] Restarting hardened service daemon..."
+systemctl restart nginx.service
+
+echo "[+] Remediation verified. Path likelihood reduced to 0.04."`,
+    aws: `# AWS Security Group Hardening Rule via AWS CLI
+aws ec2 revoke-security-group-ingress \\
+    --group-id sg-0123456789abcdef0 \\
+    --protocol tcp \\
+    --port 5432 \\
+    --cidr 192.168.1.0/24
+
+aws ec2 authorize-security-group-ingress \\
+    --group-id sg-0123456789abcdef0 \\
+    --protocol tcp \\
+    --port 5432 \\
+    --source-group sg-0fedcba9876543210 \\
+    --description "Drishti Enforced Least-Privilege DB Access"`,
   };
 
   return (
     <section id="playbooks" className="hml-section hml-wrap">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="hml-section-header"
-      >
-        <span className="hml-section-tag">Automated Remediation</span>
-        <h2 className="hml-section-title">Context-Aware Defensive Playbooks</h2>
+      <div className="hml-section-header">
+        <span className="hml-section-tag">Zero-Exploit Synthesis</span>
+        <h2 className="hml-section-title">Automated Defensive Playbooks</h2>
         <p className="hml-section-desc">
-          AI generates production-ready Ansible, Shell, or Cloud CLI fixes tailored to your actual hostnames and CVEs.
+          Generate hardened configuration scripts ready for deployment. Every playbook is scanned to ensure it contains only defensive remediation commands.
         </p>
-      </motion.div>
+      </div>
 
-      {/* Terminal Main Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
+      <div
         style={{
-          borderRadius: "16px",
+          borderRadius: "var(--radius-card)",
           background: "#0f110e",
           border: "1px solid rgba(255, 255, 255, 0.12)",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.25)",
           overflow: "hidden",
+          boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.5)",
         }}
       >
-        {/* Terminal Header Bar */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             padding: "0.85rem 1.25rem",
-            background: "#181a17",
+            background: "rgba(255, 255, 255, 0.04)",
             borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-            flexWrap: "wrap",
-            gap: "0.75rem",
           }}
         >
-          {/* macOS window dots */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
-            <div style={{ display: "flex", gap: "6px" }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f56" }} />
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ffbd2e" }} />
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#27c93f" }} />
-            </div>
-            <span style={{ fontSize: "0.8rem", fontFamily: "var(--font-family-mono)", color: "#a1a59c", fontWeight: 600 }}>
-              {current.name}
-            </span>
-          </div>
-
-          {/* Interactive Format Switcher Tabs */}
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button
-              onClick={() => setActiveTab("ansible")}
-              style={{
-                padding: "0.35rem 0.85rem",
-                borderRadius: "var(--radius-pill)",
-                border: "none",
-                background: activeTab === "ansible" ? "var(--color-accent)" : "rgba(255, 255, 255, 0.06)",
-                color: activeTab === "ansible" ? "#ffffff" : "#a1a59c",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: "0.78rem",
-                transition: "all 0.2s ease",
-              }}
-            >
-              Ansible Playbook
-            </button>
-            <button
-              onClick={() => setActiveTab("shell")}
-              style={{
-                padding: "0.35rem 0.85rem",
-                borderRadius: "var(--radius-pill)",
-                border: "none",
-                background: activeTab === "shell" ? "var(--color-accent)" : "rgba(255, 255, 255, 0.06)",
-                color: activeTab === "shell" ? "#ffffff" : "#a1a59c",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: "0.78rem",
-                transition: "all 0.2s ease",
-              }}
-            >
-              Shell Script
-            </button>
-            <button
-              onClick={() => setActiveTab("aws")}
-              style={{
-                padding: "0.35rem 0.85rem",
-                borderRadius: "var(--radius-pill)",
-                border: "none",
-                background: activeTab === "aws" ? "var(--color-accent)" : "rgba(255, 255, 255, 0.06)",
-                color: activeTab === "aws" ? "#ffffff" : "#a1a59c",
-                cursor: "pointer",
-                fontWeight: 700,
-                fontSize: "0.78rem",
-                transition: "all 0.2s ease",
-              }}
-            >
-              AWS CLI
-            </button>
+            <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#ef4444" }} />
+            <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#f59e0b" }} />
+            <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#22c55e" }} />
           </div>
 
-          {/* Copy Button */}
-          <button
-            onClick={handleCopy}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              padding: "0.35rem 0.85rem",
-              borderRadius: "6px",
-              background: copied ? "rgba(34, 197, 94, 0.15)" : "rgba(255, 255, 255, 0.08)",
-              border: `1px solid ${copied ? "#22c55e" : "rgba(255, 255, 255, 0.12)"}`,
-              color: copied ? "#4ade80" : "#f2efe7",
-              fontSize: "0.75rem",
-              fontFamily: "var(--font-family-mono)",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            {copied ? "✓ Copied!" : "Copy Code"}
-          </button>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            {(["ansible", "shell", "aws"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  padding: "0.35rem 0.85rem",
+                  borderRadius: "6px",
+                  border: `1px solid ${activeTab === tab ? "var(--color-accent)" : "transparent"}`,
+                  background: activeTab === tab ? "rgba(234, 88, 12, 0.15)" : "transparent",
+                  color: activeTab === tab ? "#fb923c" : "#8b8f87",
+                  fontFamily: "var(--font-family-mono)",
+                  fontSize: "0.75rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  textTransform: "uppercase",
+                }}
+              >
+                {tab === "ansible" ? "Ansible YAML" : tab === "shell" ? "Bash Script" : "AWS CLI"}
+              </button>
+            ))}
+          </div>
+
+          <span style={{ fontSize: "0.75rem", color: "#4ade80", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
+            &bull; SCANNER: DEFENSIVE PASS
+          </span>
         </div>
 
-        {/* Target Asset Meta Strip */}
-        <div
+        <pre
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "0.6rem 1.5rem",
-            background: "rgba(234, 88, 12, 0.06)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-            fontSize: "0.75rem",
-            fontFamily: "var(--font-family-mono)",
-            color: "#c5c2ba",
-            flexWrap: "wrap",
-            gap: "0.5rem",
-          }}
-        >
-          <div>
-            <span style={{ color: "#fb923c", fontWeight: 700 }}>TARGET: </span>
-            <span>{current.target}</span>
-          </div>
-          <div>
-            <span style={{ color: "#ff8598", fontWeight: 700 }}>MITIGATES: </span>
-            <span>{current.cve}</span>
-          </div>
-        </div>
-
-        {/* Code Content with Line Numbers */}
-        <div
-          style={{
+            margin: 0,
             padding: "1.5rem",
-            fontFamily: "var(--font-family-mono)",
-            fontSize: "0.86rem",
-            lineHeight: 1.7,
             color: "#f2efe7",
+            fontFamily: "var(--font-family-mono)",
+            fontSize: "0.85rem",
+            lineHeight: 1.6,
             overflowX: "auto",
           }}
         >
-          <table style={{ borderCollapse: "collapse", width: "100%" }}>
-            <tbody>
-              {current.lines.map((line, idx) => (
-                <tr key={idx}>
-                  <td
-                    style={{
-                      width: "35px",
-                      userSelect: "none",
-                      color: "#555951",
-                      textAlign: "right",
-                      paddingRight: "1.25rem",
-                      fontSize: "0.75rem",
-                      verticalAlign: "top",
-                    }}
-                  >
-                    {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
-                  </td>
-                  <td style={{ whiteSpace: "pre", color: line.startsWith("#") ? "#6b7280" : line.includes("name:") || line.includes("hosts:") ? "#fb923c" : line.includes("echo") ? "#4ade80" : "#f2efe7" }}>
-                    {line}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Verified Guardrail Bottom Bar */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "0.6rem 1.5rem",
-            background: "#141613",
-            borderTop: "1px solid rgba(255, 255, 255, 0.06)",
-            fontSize: "0.72rem",
-            fontFamily: "var(--font-family-mono)",
-            color: "#8b8f87",
-            flexWrap: "wrap",
-            gap: "0.5rem",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ color: "#4ade80" }}>●</span>
-            <span>NVIDIA NIM (Llama 3.3 70B) Defensive Filter: ACTIVE</span>
-          </div>
-          <span>0 Offensive Markers · Verified Defensive Remediation</span>
-        </div>
-      </motion.div>
+          <code>{playbooks[activeTab]}</code>
+        </pre>
+      </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------- FAQ Section */
+/* ------------------------------------------------------------- Frequently Asked Questions */
 function FaqSection() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   const faqs = [
     {
-      num: "01",
-      q: "How does Drishti calculate financial dollar exposure?",
-      badge: "MATHEMATICAL ENGINE",
-      a: "Drishti uses a deterministic mathematical formula: Path Impact = Likelihood × Target Asset Business Value × Asset Multiplier + Likelihood × Breach Base Cost. The total exposure sums the maximum impact per unique crown jewel across all bounded paths, ensuring no double-counting.",
-      widget: (
-        <div style={{ marginTop: "1rem", padding: "1rem", background: "rgba(234, 88, 12, 0.06)", borderRadius: "10px", border: "1px solid rgba(234, 88, 12, 0.18)", fontFamily: "var(--font-family-mono)", fontSize: "0.8rem", color: "#171916" }}>
-          <div style={{ color: "var(--color-accent)", fontWeight: 700, marginBottom: "0.3rem" }}>FORMULA SPECIFICATION:</div>
-          <code style={{ display: "block", color: "#171916", fontWeight: 600 }}>
-            Exposure = Σ max(Likelihood × Asset_Value × Multiplier + Base_Cost)
-          </code>
-          <div style={{ marginTop: "0.4rem", fontSize: "0.72rem", color: "#6b7280" }}>
-            Deterministic across runs · Zero statistical drift · Board-ready ($ USD) metrics
-          </div>
-        </div>
-      ),
+      q: "How does Drishti avoid hallucinating breach impact numbers?",
+      badge: "DETERMINISTIC FORMULAS",
+      a: "Financial exposure is computed using fixed mathematical formulas: Likelihood × Asset Valuation × Multiplier + Base Cost. The AI model only generates human-readable descriptions and code remediations — it is never permitted to calculate or alter risk metrics.",
     },
     {
-      num: "02",
-      q: "How does Drishti ensure AI safety and prevent exploit generation?",
-      badge: "NVIDIA NIM GUARDRAILS",
-      a: "All LLM completions pass through a strict output-side scanner that checks for offensive markers ('reverse shell', 'weaponize', 'exfiltrate', 'ransomware'). If an offensive pattern is detected, the completion is refused immediately. The AI is strictly restricted to defensive remediation and explanation.",
-      widget: (
-        <div style={{ marginTop: "1rem", padding: "0.85rem 1.1rem", background: "#0f110e", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.1)", fontFamily: "var(--font-family-mono)", fontSize: "0.75rem", color: "#f2efe7" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "#4ade80", fontWeight: 700, marginBottom: "0.3rem" }}>
-            <span>●</span>
-            <span>SCANNER VERDICT: DEFENSIVE ONLY</span>
-          </div>
-          <div style={{ color: "#a1a59c" }}>
-            Offensive Exploit Generation Blocked · Remediation Verification: PASS (100%)
-          </div>
-        </div>
-      ),
+      q: "Does Drishti ever execute active offensive exploits?",
+      badge: "DEFENSIVE ONLY",
+      a: "Never. Drishti operates under a strict defensive posture. All synthesized code passes through an output-side scanner that blocks metasploit modules, reverse shells, and exploit payloads. Only defensive configurations and patches are produced.",
     },
     {
-      num: "03",
-      q: "Can Drishti scan arbitrary public IP addresses?",
+      q: "Can Drishti scan public internet IP addresses without authorization?",
       badge: "SCOPE ENFORCEMENT",
-      a: "No. Drishti enforces strict RFC1918 private address verification and requires explicit 'consent: true' in request payloads. Scans targeting public IPs, AWS metadata endpoints (169.254.169.254), or unauthorized subnets are rejected with HTTP 422.",
-      widget: (
-        <div style={{ marginTop: "1rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-          <span style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", background: "rgba(21, 128, 61, 0.1)", border: "1px solid rgba(21, 128, 61, 0.25)", color: "#15803d", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
-            ✓ 10.0.0.0/8 (RFC1918)
-          </span>
-          <span style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", background: "rgba(21, 128, 61, 0.1)", border: "1px solid rgba(21, 128, 61, 0.25)", color: "#15803d", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
-            ✓ 172.16.0.0/12 (RFC1918)
-          </span>
-          <span style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", background: "rgba(21, 128, 61, 0.1)", border: "1px solid rgba(21, 128, 61, 0.25)", color: "#15803d", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
-            ✓ 192.168.0.0/16 (RFC1918)
-          </span>
-          <span style={{ padding: "0.35rem 0.75rem", borderRadius: "6px", background: "rgba(225, 29, 72, 0.1)", border: "1px solid rgba(225, 29, 72, 0.25)", color: "#e11d48", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 700 }}>
-            ✗ Public IPs Blocked (HTTP 422)
-          </span>
-        </div>
-      ),
+      a: "No. Drishti enforces strict RFC1918 private address validation and requires explicit tenant authorization. Scanning unauthorized public internet subnets is hard-blocked at the agent network layer.",
     },
     {
-      num: "04",
-      q: "What database backends are supported?",
+      q: "Which database backends are supported for graph state storage?",
       badge: "STORAGE ARCHITECTURE",
-      a: "Drishti supports PostgreSQL with transactional advisory locks for enterprise production, and local SQLite for development. All entity models use 36-character UUID strings for seamless portability across environments.",
-      widget: (
-        <div style={{ marginTop: "1rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
-          <div style={{ padding: "0.75rem", background: "var(--color-surface-base)", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.08)" }}>
-            <div style={{ fontSize: "0.7rem", fontFamily: "var(--font-family-mono)", fontWeight: 700, color: "var(--color-accent)" }}>ENTERPRISE PROD</div>
-            <div style={{ fontSize: "0.85rem", fontWeight: 800, color: "#171916" }}>PostgreSQL + Advisory Locks</div>
-          </div>
-          <div style={{ padding: "0.75rem", background: "var(--color-surface-base)", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.08)" }}>
-            <div style={{ fontSize: "0.7rem", fontFamily: "var(--font-family-mono)", fontWeight: 700, color: "#555951" }}>LOCAL DEV</div>
-            <div style={{ fontSize: "0.85rem", fontWeight: 800, color: "#171916" }}>SQLite (AIOSQLite Async)</div>
-          </div>
-        </div>
-      ),
+      a: "Drishti supports PostgreSQL with transactional advisory locks for enterprise multi-user deployments, as well as SQLite (AIOSQLite Async) for local edge testing. All graph entities use 36-character UUIDs for full portability.",
     },
   ];
 
   return (
     <section id="faq" className="hml-section hml-wrap">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="hml-section-header"
-      >
-        <span className="hml-section-tag">Frequently Asked Questions</span>
-        <h2 className="hml-section-title">Everything You Need to Know</h2>
+      <div className="hml-section-header">
+        <span className="hml-section-tag">Verification & Trust</span>
+        <h2 className="hml-section-title">Frequently Asked Questions</h2>
         <p className="hml-section-desc">
-          Technical specifications, compliance boundaries, and mathematical modeling details.
+          Everything you need to know about Drishti&apos;s mathematical models, safety guardrails, and architecture.
         </p>
-      </motion.div>
+      </div>
 
-      <div className="hml-faq-list" style={{ maxWidth: "56rem", marginInline: "auto", display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {faqs.map((f, i) => {
+      <div style={{ maxWidth: "48rem", marginInline: "auto", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {faqs.map((faq, i) => {
           const isOpen = openIdx === i;
           return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.15 }}
-              transition={{ duration: 0.4, delay: i * 0.06 }}
+            <div
+              key={faq.q}
               style={{
-                borderRadius: "14px",
-                background: "#ffffff",
-                border: `1px solid ${isOpen ? "rgba(234, 88, 12, 0.35)" : "rgba(23, 25, 22, 0.1)"}`,
-                boxShadow: isOpen ? "0 10px 30px rgba(234, 88, 12, 0.08)" : "0 2px 10px rgba(23, 25, 22, 0.03)",
+                borderRadius: "var(--radius-card)",
+                border: "1px solid var(--color-border-default)",
+                background: "var(--color-surface-raised)",
                 overflow: "hidden",
-                transition: "border-color 0.25s ease, box-shadow 0.25s ease",
+                boxShadow: "var(--shadow-sm)",
               }}
             >
               <button
-                className="hml-faq-trigger"
                 onClick={() => setOpenIdx(isOpen ? null : i)}
                 style={{
                   width: "100%",
-                  padding: "1.25rem 1.5rem",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  padding: "1.25rem 1.5rem",
                   background: "transparent",
                   border: "none",
-                  cursor: "pointer",
                   textAlign: "left",
-                  gap: "1rem",
+                  cursor: "pointer",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                  <span
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "8px",
-                      background: isOpen ? "var(--color-accent)" : "rgba(23, 25, 22, 0.06)",
-                      color: isOpen ? "#ffffff" : "#171916",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontFamily: "var(--font-family-mono)",
-                      fontSize: "0.8rem",
-                      fontWeight: 800,
-                      flexShrink: 0,
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    {f.num}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <span style={{ fontSize: "0.7rem", fontFamily: "var(--font-family-mono)", color: "var(--color-accent)", fontWeight: 700, padding: "0.2rem 0.5rem", background: "rgba(234, 88, 12, 0.1)", borderRadius: "4px" }}>
+                    {faq.badge}
                   </span>
-                  <div>
-                    <span style={{ fontSize: "1.08rem", fontWeight: 800, color: "#171916", letterSpacing: "-0.015em" }}>
-                      {f.q}
-                    </span>
-                    <span style={{ display: "block", fontSize: "0.68rem", fontFamily: "var(--font-family-mono)", color: "#8b8f87", fontWeight: 700, marginTop: "0.2rem", letterSpacing: "0.04em" }}>
-                      {f.badge}
-                    </span>
-                  </div>
+                  <span style={{ fontSize: "1rem", fontWeight: 700, color: "#171916" }}>
+                    {faq.q}
+                  </span>
                 </div>
-
-                <div
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    background: isOpen ? "rgba(234, 88, 12, 0.1)" : "rgba(23, 25, 22, 0.04)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  <ChevronDown
-                    size={16}
-                    style={{
-                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
-                      color: isOpen ? "var(--color-accent)" : "#555951",
-                    }}
-                  />
-                </div>
+                <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronDown size={18} color="#8b8f87" />
+                </motion.div>
               </button>
 
-              <AnimatePresence initial={false}>
+              <AnimatePresence>
                 {isOpen && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ overflow: "hidden" }}
+                    transition={{ duration: 0.25 }}
                   >
-                    <div style={{ padding: "0 1.5rem 1.5rem 1.5rem", borderTop: "1px solid rgba(23, 25, 22, 0.06)", paddingTop: "1.25rem" }}>
-                      <p style={{ margin: 0, color: "#555951", fontSize: "0.95rem", lineHeight: 1.65 }}>
-                        {f.a}
-                      </p>
-                      {f.widget}
+                    <div style={{ padding: "0 1.5rem 1.25rem", color: "#555951", fontSize: "0.92rem", lineHeight: 1.6, borderTop: "1px solid var(--color-border-subtle)", paddingTop: "0.85rem" }}>
+                      {faq.a}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.div>
+            </div>
           );
         })}
       </div>
@@ -1419,68 +1169,52 @@ function FaqSection() {
   );
 }
 
-/* ------------------------------------------------------------- CTA Band */
+/* ------------------------------------------------------------- Call to Action Band */
 function CtaBandSection() {
   return (
-    <section className="hml-wrap" style={{ paddingBottom: "4rem" }}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 20 }}
-        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.5 }}
-        className="hml-cta-band"
-      >
-        <div style={{ maxWidth: "42rem", marginInline: "auto" }}>
-          <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 2.75rem)", fontWeight: 800, marginBottom: "1rem", color: "var(--color-text-primary)" }}>
-            Ready to Defend Your Attack Surface?
-          </h2>
-          <p style={{ color: "var(--color-text-muted)", fontSize: "1.1rem", marginBottom: "2rem" }}>
-            Launch the interactive security console to explore the Acme Corporation sample network or deploy the edge agent on your private LAN.
-          </p>
-          <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link to="/signup" className="hml-btn-accent">
-                Get Started Free <ArrowRight size={16} />
-              </Link>
-            </motion.div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link to="/login" className="hml-btn-outline">
-                Sign In to Existing Tenant
-              </Link>
-            </motion.div>
-          </div>
+    <section style={{ padding: "clamp(4rem, 8vw, 6rem) 1.5rem", background: "var(--color-surface-dark)", textAlign: "center", position: "relative", overflow: "hidden" }}>
+      <div style={{ maxWidth: "44rem", marginInline: "auto", position: "relative", zIndex: 2 }}>
+        <h2 style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 800, color: "#ffffff", letterSpacing: "-0.03em", marginBottom: "1rem" }}>
+          Ready to Map Your Attack Surface?
+        </h2>
+        <p style={{ color: "#a1a59c", fontSize: "1.1rem", marginBottom: "2rem", lineHeight: 1.6 }}>
+          Run your first graph-theoretic threat topology audit in under 60 seconds. Zero agent installations required for initial reconnaissance.
+        </p>
+        <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
+          <Link to="/signup" className="hml-btn-accent">
+            Launch Interactive Console <ArrowRight size={16} />
+          </Link>
+          <a
+            href="https://github.com/soumyachk101/Drishti-Innofusion"
+            target="_blank"
+            rel="noreferrer"
+            className="hml-btn-outline"
+            style={{ borderColor: "rgba(255, 255, 255, 0.25)", color: "#ffffff" }}
+          >
+            Star on GitHub
+          </a>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
 
-/* ------------------------------------------------------------- Footer */
+/* ------------------------------------------------------------- Footer Section */
 function FooterSection() {
   return (
-    <footer className="hml-footer hml-wrap">
-      <div className="hml-footer-inner">
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div style={{ width: 22, height: 22, borderRadius: 5, background: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Shield size={12} color="#ffffff" />
-          </div>
-          <span style={{ fontWeight: 800, color: "var(--color-text-primary)", letterSpacing: "-0.01em" }}>DRISHTI PLATFORM</span>
-          <span style={{ color: "var(--color-border-hover)" }}>•</span>
-          <span style={{ color: "var(--color-text-muted)" }}>Defensive Cybersecurity Engineering</span>
+    <footer style={{ padding: "2.5rem 1.5rem", background: "#0b0d0a", borderTop: "1px solid rgba(255, 255, 255, 0.08)", color: "#8b8f87", fontSize: "0.85rem", fontFamily: "var(--font-family-mono)" }}>
+      <div className="hml-wrap" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <Shield size={16} color="var(--color-accent)" />
+          <span style={{ fontWeight: 800, color: "#ffffff" }}>DRISHTI</span>
+          <span>&copy; {new Date().getFullYear()} Innofusion. All rights reserved.</span>
         </div>
-
-        <div className="hml-footer-links">
-          <a href="#topology">Topology</a>
-          <a href="#pipeline">Pipeline</a>
-          <a href="#pillars">Architecture</a>
-          <a href="#comparison">Comparison</a>
-          <a href="#playbooks">Playbooks</a>
-          <a href="#faq">FAQ</a>
-          <Link to="/login">Sign In</Link>
+        <div style={{ display: "flex", gap: "1.5rem" }}>
+          <a href="#topology" style={{ color: "#8b8f87", textDecoration: "none" }}>Topology</a>
+          <a href="#pipeline" style={{ color: "#8b8f87", textDecoration: "none" }}>Pipeline</a>
+          <a href="#playbooks" style={{ color: "#8b8f87", textDecoration: "none" }}>Playbooks</a>
+          <a href="#faq" style={{ color: "#8b8f87", textDecoration: "none" }}>FAQ</a>
         </div>
-      </div>
-      <div style={{ marginTop: "1.5rem", textAlign: "center", fontSize: "0.85rem", color: "var(--color-text-muted)" }}>
-        © 2026 Drishti Cyber Defense Systems. Bounded Yen's Shortest Path & Dollar Financial Exposure Architecture.
       </div>
     </footer>
   );
