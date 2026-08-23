@@ -13,18 +13,20 @@
 
 ### Tech Stack
 
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/) &nbsp;
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/) &nbsp;
-[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-003B57?style=flat-square&logo=data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 2L2 7v10l10 5 10-5V7L12 2z'/></svg>)](https://www.sqlalchemy.org/) &nbsp;
-[![NetworkX](https://img.shields.io/badge/NetworkX-3.4-E74C3C?style=flat-square&logo=python&logoColor=white)](https://networkx.org/) &nbsp;
-[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev/) &nbsp;
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) &nbsp;
-[![Tailwind](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/) &nbsp;
-[![ReactFlow](https://img.shields.io/badge/ReactFlow-11.11-BFBFBF?style=flat-square&logo=react&logoColor=white)](https://reactflow.dev/) &nbsp;
-[![Zustand](https://img.shields.io/badge/Zustand-4.5-443E38?style=flat-square&logo=data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 2L2 7v10l10 5 10-5V7L12 2z'/></svg>)](https://docs.pmnd.rs/zustand) &nbsp;
-[![TanStack](https://img.shields.io/badge/TanStack_Query-5.51-FF4154?style=flat-square&logo=data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><circle cx='12' cy='12' r='10'/></svg>)](https://tanstack.com/query) &nbsp;
-[![Vitest](https://img.shields.io/badge/Vitest-2.0-729B1B?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/) &nbsp;
-[![pytest](https://img.shields.io/badge/pytest-232%2B_tests-0A9EDC?style=flat-square&logo=data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><circle cx='12' cy='12' r='10'/></svg>)](https://pytest.org/)
+<div align="center">
+
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-003B57?style=flat-square)](https://www.sqlalchemy.org/)
+[![NetworkX](https://img.shields.io/badge/NetworkX-3.4-E74C3C?style=flat-square)](https://networkx.org/)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![ReactFlow](https://img.shields.io/badge/ReactFlow-11.11-000000?style=flat-square)](https://reactflow.dev/)
+[![Zustand](https://img.shields.io/badge/Zustand-4.5-443E38?style=flat-square)](https://docs.pmnd.rs/zustand)
+[![TanStack](https://img.shields.io/badge/TanStack_Query-5.51-FF4154?style=flat-square)](https://tanstack.com/query)
+[![Vitest](https://img.shields.io/badge/Vitest-2.0-729B1B?style=flat-square)](https://vitest.dev/)
+[![pytest](https://img.shields.io/badge/pytest-232%2B_tests-0A9EDC?style=flat-square)](https://pytest.org/)
 
 </div>
 
