@@ -18,14 +18,20 @@ import {
   DollarSign,
   Network,
   Eye,
+  Terminal,
+  Cpu,
+  Server,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "../../auth";
 import "./landing.css";
 import "./landing-cinema.css";
 import heroBg from "../../assets/hero-bg.jpg";
+import { EntryAnimation } from "./EntryAnimation";
 
 export default function Landing() {
   const { user } = useAuth();
+  const [replayKey, setReplayKey] = useState(0);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 120,
@@ -36,30 +42,37 @@ export default function Landing() {
   if (user) return <Navigate to="/app" replace />;
 
   return (
-    <div className="hml">
-      {/* 1. SCROLL PROGRESS — Fixed at top with spring smoothing */}
-      <motion.div className="hml-scroll-progress-bar" style={{ scaleX }} />
+    <EntryAnimation key={replayKey} forcePlay={replayKey > 0}>
+      <div className="hml">
+        {/* 1. SCROLL PROGRESS — Fixed at top with spring smoothing */}
+        <motion.div className="hml-scroll-progress-bar" style={{ scaleX }} />
 
-      <TopStatusStrip />
-      <Navbar />
-      <main>
-        <HeroSection scrollYProgress={scrollYProgress} />
-        <InteractivePathSection />
-        {/* 2, 3, 4, 5. TRUE SCROLL-DRIVEN HORIZONTAL SCROLL & PIN ANIMATION */}
-        <ScrollDrivenHorizontalPipeline />
-        <PillarsSection />
-        <ComparisonSection />
-        <PlaybookTerminalSection />
-        <FaqSection />
-        <CtaBandSection />
-      </main>
-      <FooterSection />
-    </div>
+        {/* Unified Full-Viewport Hero Section */}
+        <div className="hml-hero-master-wrap">
+          <HeroBackdrop scrollYProgress={scrollYProgress} />
+          <TopStatusStrip onReplay={() => setReplayKey((k) => k + 1)} />
+          <Navbar />
+          <HeroSection />
+        </div>
+
+        <main>
+          <InteractivePathSection />
+          {/* 2, 3, 4, 5. TRUE SCROLL-DRIVEN HORIZONTAL SCROLL & PIN ANIMATION */}
+          <ScrollDrivenHorizontalPipeline />
+          <PillarsSection />
+          <ComparisonSection />
+          <PlaybookTerminalSection />
+          <FaqSection />
+          <CtaBandSection />
+        </main>
+        <FooterSection />
+      </div>
+    </EntryAnimation>
   );
 }
 
 /* ------------------------------------------------------------- Top Status Strip */
-function TopStatusStrip() {
+function TopStatusStrip({ onReplay }: { onReplay?: () => void }) {
   const [time, setTime] = useState(() =>
     new Date().toLocaleTimeString("en-IN", {
       timeZone: "Asia/Kolkata",
@@ -93,6 +106,27 @@ function TopStatusStrip() {
         <span>ENGINE: NETWORKX 3.3 (BOUNDED YEN'S K-SHORTEST)</span>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        {onReplay && (
+          <button
+            onClick={onReplay}
+            style={{
+              background: "rgba(56, 198, 244, 0.08)",
+              border: "1px solid rgba(56, 198, 244, 0.3)",
+              color: "#38c6f4",
+              borderRadius: "4px",
+              padding: "2px 8px",
+              fontSize: "10px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              fontFamily: "var(--font-family-mono)",
+            }}
+            title="Replay entry scan animation"
+          >
+            <Activity size={10} /> REPLAY SCAN
+          </button>
+        )}
         <span>STATUS: <span style={{ color: "var(--color-status-success)", fontWeight: 700 }}>OPERATIONAL</span></span>
         <span>IST: {time} (KOLKATA)</span>
       </div>
@@ -154,11 +188,24 @@ function Navbar() {
   );
 }
 
-/* ------------------------------------------------------------- 6. PARALLAX Hero Section */
-function HeroSection({ scrollYProgress }: { scrollYProgress: any }) {
-  const heroImageY = useTransform(scrollYProgress, [0, 0.3], [0, 80]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 1.05]);
+/* ------------------------------------------------------------- 6. PARALLAX Hero Backdrop & Section */
+function HeroBackdrop({ scrollYProgress }: { scrollYProgress: any }) {
+  const heroBgY = useTransform(scrollYProgress, [0, 0.4], [0, 80]);
 
+  return (
+    <div className="hml-hero-bg-backdrop">
+      <motion.img
+        src={heroBg}
+        alt="Drishti Intelligence Topology Backdrop"
+        className="hml-hero-bg-img"
+        style={{ y: heroBgY }}
+      />
+      <div className="hml-hero-bg-overlay" />
+    </div>
+  );
+}
+
+function HeroSection() {
   return (
     <section className="hml-hero hml-wrap">
       <motion.div
@@ -168,8 +215,8 @@ function HeroSection({ scrollYProgress }: { scrollYProgress: any }) {
         className="hml-pill-tag"
       >
         <span className="hml-pill-dot"></span>
-        <span>Graph-Theoretic Defensive Security</span>
-        <span style={{ color: "var(--color-text-muted)" }}>•</span>
+        <span>Defensive Attack-Path Intelligence</span>
+        <span style={{ color: "rgba(255, 255, 255, 0.35)" }}>|</span>
         <span style={{ color: "var(--color-accent)", fontWeight: 700 }}>Zero-Hallucination Impact</span>
       </motion.div>
 
@@ -177,18 +224,20 @@ function HeroSection({ scrollYProgress }: { scrollYProgress: any }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="hml-hero-title"
+        className="hml-hero-title text-white"
+        style={{ color: "#ffffff" }}
       >
-        Autonomous Attack Surface Defense & Dollar Exposure Modeling
+        See Your Network Through the Eyes of an Attacker.
       </motion.h1>
 
       <motion.p
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="hml-hero-desc"
+        className="hml-hero-desc text-slate-200"
+        style={{ color: "#e2e8f0" }}
       >
-        Drishti models entire enterprise networks as directed graphs, enumerates multi-hop attack vectors using Yen's algorithm, and deterministically calculates financial exposure before adversaries can exploit it.
+        Drishti maps real routes from the internet to your crown-jewel assets, prices every path in <span className="text-orange-400 font-bold">$ dollars</span>, and synthesizes human-reviewed Ansible playbooks. Never attacks.
       </motion.p>
 
       <motion.div
@@ -207,65 +256,6 @@ function HeroSection({ scrollYProgress }: { scrollYProgress: any }) {
             Explore Attack Surface Map
           </a>
         </motion.div>
-      </motion.div>
-
-      {/* Hero Showcase with Parallax Image Blend */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 30 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.45 }}
-        className="hml-hero-stage"
-      >
-        <div className="hml-hero-img-wrap">
-          <motion.img
-            src={heroBg}
-            alt="Drishti Threat Intelligence HUD"
-            className="hml-hero-img"
-            style={{ y: heroImageY, scale: heroScale }}
-          />
-
-          <div className="hml-hero-hud">
-            <div className="hml-hud-header">
-              <div className="hml-hud-title">
-                <Activity size={18} color="var(--color-accent)" />
-                <span style={{ fontWeight: 700 }}>LIVE TOPOLOGY AUDIT</span>
-                <span style={{ color: "#8b8f87" }}>/ ACME_CORP_SAMPLE</span>
-              </div>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <span className="hml-hud-badge hml-hud-badge-danger">5 CHAINED ATTACK PATHS</span>
-                <span className="hml-hud-badge" style={{ background: "rgba(234, 88, 12, 0.2)", color: "#fb923c", border: "1px solid rgba(234, 88, 12, 0.4)" }}>
-                  POSTGRESQL ADVISORY LOCK
-                </span>
-              </div>
-            </div>
-
-            <div className="hml-hud-stats">
-              <motion.div whileHover={{ y: -3 }} className="hml-stat-card">
-                <div className="hml-stat-label">Total Financial Exposure</div>
-                <div className="hml-stat-val hml-stat-val-danger">$902,900</div>
-                <div className="hml-stat-sub">Deterministic calculation ($ USD)</div>
-              </motion.div>
-
-              <motion.div whileHover={{ y: -3 }} className="hml-stat-card">
-                <div className="hml-stat-label">Critical Crown Jewel</div>
-                <div className="hml-stat-val">Main DB</div>
-                <div className="hml-stat-sub">10.0.0.5 · Criticality 1.0</div>
-              </motion.div>
-
-              <motion.div whileHover={{ y: -3 }} className="hml-stat-card">
-                <div className="hml-stat-label">Post-Remediation Impact</div>
-                <div className="hml-stat-val hml-stat-val-accent">$702,900</div>
-                <div className="hml-stat-sub">-$200,000 net risk reduction</div>
-              </motion.div>
-
-              <motion.div whileHover={{ y: -3 }} className="hml-stat-card">
-                <div className="hml-stat-label">Defense Guardrail</div>
-                <div className="hml-stat-val" style={{ color: "#4ade80" }}>PASS (100%)</div>
-                <div className="hml-stat-sub">Output-side offensive scanner active</div>
-              </motion.div>
-            </div>
-          </div>
-        </div>
       </motion.div>
     </section>
   );
@@ -502,8 +492,8 @@ function ScrollDrivenHorizontalPipeline() {
     offset: ["start start", "end end"],
   });
 
-  // Vertical scroll scrubs horizontal movement from 0% to -62%
-  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-62%"]);
+  // Vertical scroll scrubs horizontal movement from 0% to -64%
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-64%"]);
   const progressPercent = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   return (
@@ -521,9 +511,9 @@ function ScrollDrivenHorizontalPipeline() {
               </h2>
             </div>
             {/* Scroll-Linked Progress Pill */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", background: "#ffffff", padding: "0.6rem 1.35rem", borderRadius: "var(--radius-pill)", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", background: "#ffffff", padding: "0.6rem 1.35rem", borderRadius: "var(--radius-pill)", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)" }}>
               <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-primary)", color: "#555951", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                Scrub Engine
+                Pipeline Progress
               </span>
               <div style={{ width: "90px", height: "6px", background: "#eae5dc", borderRadius: "999px", overflow: "hidden" }}>
                 <motion.div style={{ width: progressPercent, height: "100%", background: "var(--color-accent)" }} />
@@ -534,159 +524,227 @@ function ScrollDrivenHorizontalPipeline() {
 
         {/* Horizontally Scrubbed Track with Custom Visual Cards */}
         <motion.div style={{ x }} className="hml-horizontal-track">
-          {/* Card 01: Ingestion */}
-          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          {/* Card 01: Ingestion & Discovery */}
+          <motion.div
+            whileHover={{ y: -8, scale: 1.01 }}
+            transition={{ duration: 0.25 }}
+            className="hml-pipeline-card"
+          >
+            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #ea580c, #f97316)" }} />
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "var(--color-accent)", background: "rgba(234, 88, 12, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
-                  STAGE 01 // DISCOVERY
+              <div className="hml-card-top-meta">
+                <span className="hml-stage-chip" style={{ color: "#ea580c", background: "rgba(234, 88, 12, 0.1)", borderColor: "rgba(234, 88, 12, 0.25)" }}>
+                  <Zap size={12} /> STAGE 01 // DISCOVERY
                 </span>
-                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>RFC1918 Private Gate</span>
+                <span className="hml-meta-badge">RFC1918 Private Gate</span>
               </div>
-              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+              <h3 className="hml-card-heading">
                 LAN & Perimeter Ingestion
               </h3>
-              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
-                Edge agent performs ARP table polling, subnet broadcasts, and unauthenticated port discovery across internal assets.
+              <p className="hml-card-body">
+                Edge agent performs non-intrusive ARP polling, passive DNS observation, and live LAN device detection across subnet ranges.
               </p>
             </div>
 
             {/* Visual Subnet Telemetry Box */}
-            <div style={{ background: "#0f110e", borderRadius: "12px", padding: "1rem", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#f2efe7", fontFamily: "var(--font-family-mono)", fontSize: "0.75rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem", borderBottom: "1px solid rgba(255, 255, 255, 0.1)", paddingBottom: "0.4rem" }}>
-                <span style={{ color: "#fb923c", fontWeight: 700 }}>SUBNET 192.168.1.0/24</span>
-                <span style={{ color: "#4ade80", fontSize: "0.7rem" }}>● 14 LIVE NODES</span>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span>192.168.1.1 (Gateway)</span>
-                  <span style={{ color: "#a1a59c" }}>PORT 22, 443</span>
+            <div className="hml-card-visual-box">
+              <div className="hml-visual-header">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
+                  <span style={{ color: "#fb923c", fontWeight: 700, letterSpacing: "0.05em" }}>SUBNET 192.168.1.0/24</span>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span>192.168.1.10 (Nginx DMZ)</span>
-                  <span style={{ color: "#ff8598" }}>CVE-2024-4321</span>
+                <span className="hml-pulse-tag">● 14 LIVE HOSTS</span>
+              </div>
+              <div className="hml-visual-list">
+                <div className="hml-visual-row">
+                  <span className="flex items-center gap-1.5 text-slate-200">
+                    <Server size={12} className="text-cyan-400" />
+                    <span>192.168.1.1 (Gateway)</span>
+                  </span>
+                  <span className="hml-tag-cyan">PORT 22, 443</span>
+                </div>
+                <div className="hml-visual-row">
+                  <span className="flex items-center gap-1.5 text-slate-200">
+                    <Server size={12} className="text-rose-400" />
+                    <span>192.168.1.10 (Nginx DMZ)</span>
+                  </span>
+                  <span className="hml-tag-rose">CVE-2024-4321</span>
                 </div>
               </div>
             </div>
           </motion.div>
 
           {/* Card 02: NetworkX Graph */}
-          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <motion.div
+            whileHover={{ y: -8, scale: 1.01 }}
+            transition={{ duration: 0.25 }}
+            className="hml-pipeline-card"
+          >
+            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #38c6f4, #0284c7)" }} />
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "#2563eb", background: "rgba(37, 99, 235, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
-                  STAGE 02 // TOPOLOGY
+              <div className="hml-card-top-meta">
+                <span className="hml-stage-chip" style={{ color: "#0284c7", background: "rgba(2, 132, 199, 0.1)", borderColor: "rgba(2, 132, 199, 0.25)" }}>
+                  <Network size={12} /> STAGE 02 // TOPOLOGY
                 </span>
-                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>NetworkX DiGraph</span>
+                <span className="hml-meta-badge">NetworkX DiGraph</span>
               </div>
-              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+              <h3 className="hml-card-heading">
                 Directed Graph Construction
               </h3>
-              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
-                Translates isolated host scans into a unified directed topological graph with weighted edge traversal difficulties.
+              <p className="hml-card-body">
+                Translates isolated host scans into a unified mathematical attack topology with weighted edge traversal difficulties.
               </p>
             </div>
 
-            {/* Visual SVG Mini Graph */}
-            <div style={{ background: "#f8f7f4", borderRadius: "12px", padding: "1rem", border: "1px solid rgba(23, 25, 22, 0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ textAlign: "center", padding: "0.5rem", background: "#ffffff", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.1)", fontSize: "0.75rem", fontWeight: 700 }}>
-                <div style={{ color: "#e11d48", fontSize: "0.65rem" }}>ENTRY</div>
-                <span>INTERNET</span>
-              </div>
-              <span style={{ color: "var(--color-accent)", fontWeight: 800, fontSize: "1rem" }}>→</span>
-              <div style={{ textAlign: "center", padding: "0.5rem", background: "#ffffff", borderRadius: "8px", border: "1px solid rgba(23, 25, 22, 0.1)", fontSize: "0.75rem", fontWeight: 700 }}>
-                <div style={{ color: "#555951", fontSize: "0.65rem" }}>HOP 01</div>
-                <span>web-lb-01</span>
-              </div>
-              <span style={{ color: "var(--color-accent)", fontWeight: 800, fontSize: "1rem" }}>→</span>
-              <div style={{ textAlign: "center", padding: "0.5rem", background: "#ffffff", borderRadius: "8px", border: "1px solid rgba(234, 88, 12, 0.4)", fontSize: "0.75rem", fontWeight: 700 }}>
-                <div style={{ color: "#ea580c", fontSize: "0.65rem" }}>CROWN</div>
-                <span>db-prod-01</span>
+            {/* Visual Mini Graph Connector */}
+            <div className="hml-card-visual-box" style={{ background: "#0c0f14" }}>
+              <div className="hml-graph-pipeline">
+                <div className="hml-node-pill border-rose-500/30 bg-rose-500/10">
+                  <div className="text-[9px] text-rose-400 font-mono font-bold">SOURCE</div>
+                  <span className="text-white text-xs font-bold font-mono">INTERNET</span>
+                </div>
+                <div className="hml-node-arrow">
+                  <div className="hml-arrow-line" />
+                  <span className="hml-arrow-label">HTTPS 443</span>
+                </div>
+                <div className="hml-node-pill border-sky-500/30 bg-sky-500/10">
+                  <div className="text-[9px] text-sky-400 font-mono font-bold">DMZ NODE</div>
+                  <span className="text-white text-xs font-bold font-mono">web-lb-01</span>
+                </div>
+                <div className="hml-node-arrow">
+                  <div className="hml-arrow-line" />
+                  <span className="hml-arrow-label">PORT 5432</span>
+                </div>
+                <div className="hml-node-pill border-orange-500/50 bg-orange-500/15 shadow-[0_0_12px_rgba(234,88,12,0.3)]">
+                  <div className="text-[9px] text-orange-400 font-mono font-bold">👑 CROWN</div>
+                  <span className="text-orange-300 text-xs font-bold font-mono">db-prod-01</span>
+                </div>
               </div>
             </div>
           </motion.div>
 
           {/* Card 03: Yen's Solver */}
-          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <motion.div
+            whileHover={{ y: -8, scale: 1.01 }}
+            transition={{ duration: 0.25 }}
+            className="hml-pipeline-card"
+          >
+            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #d97706, #f59e0b)" }} />
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "#d97706", background: "rgba(217, 119, 6, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
-                  STAGE 03 // SOLVER
+              <div className="hml-card-top-meta">
+                <span className="hml-stage-chip" style={{ color: "#d97706", background: "rgba(217, 119, 6, 0.1)", borderColor: "rgba(217, 119, 6, 0.25)" }}>
+                  <Cpu size={12} /> STAGE 03 // SOLVER
                 </span>
-                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>Bounded Yen's K-Shortest</span>
+                <span className="hml-meta-badge">Bounded Yen's K-Shortest</span>
               </div>
-              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+              <h3 className="hml-card-heading">
                 Bounded Yen's Path Solver
               </h3>
-              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
-                Enumerates the top 5 shortest attack vectors per crown jewel (bounded at max 6 hops), avoiding exponential path explosion.
+              <p className="hml-card-body">
+                Enumerates the top 5 shortest attack routes per crown jewel (bounded at max 6 hops), avoiding exponential traversal explosion.
               </p>
             </div>
 
             {/* Visual Path Hierarchy */}
-            <div style={{ background: "#0f110e", borderRadius: "12px", padding: "0.9rem 1rem", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#f2efe7", fontFamily: "var(--font-family-mono)", fontSize: "0.75rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
-                <span style={{ color: "#ff8598", fontWeight: 700 }}>#1 Shortest Path (88.0%)</span>
-                <span style={{ color: "#a1a59c" }}>3 Hops</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#fb923c", fontWeight: 700 }}>#2 Alternate Path (41.0%)</span>
-                <span style={{ color: "#a1a59c" }}>4 Hops</span>
+            <div className="hml-card-visual-box">
+              <div className="space-y-2.5">
+                <div>
+                  <div className="flex justify-between items-center text-xs font-mono mb-1">
+                    <span className="text-rose-400 font-bold flex items-center gap-1">
+                      <Shield size={11} /> #1 Primary Path (88.0%)
+                    </span>
+                    <span className="text-slate-400">3 Hops · CVSS 9.8</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-rose-500 rounded-full w-[88%]" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between items-center text-xs font-mono mb-1">
+                    <span className="text-orange-400 font-bold flex items-center gap-1">
+                      <Activity size={11} /> #2 Lateral Path (41.0%)
+                    </span>
+                    <span className="text-slate-400">4 Hops · CVSS 7.5</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-orange-400 rounded-full w-[41%]" />
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
 
           {/* Card 04: Valuation */}
-          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <motion.div
+            whileHover={{ y: -8, scale: 1.01 }}
+            transition={{ duration: 0.25 }}
+            className="hml-pipeline-card"
+          >
+            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #15803d, #22c55e)" }} />
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "#15803d", background: "rgba(21, 128, 61, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
-                  STAGE 04 // VALUATION
+              <div className="hml-card-top-meta">
+                <span className="hml-stage-chip" style={{ color: "#15803d", background: "rgba(21, 128, 61, 0.1)", borderColor: "rgba(21, 128, 61, 0.25)" }}>
+                  <DollarSign size={12} /> STAGE 04 // VALUATION
                 </span>
-                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>Deterministic ($ USD)</span>
+                <span className="hml-meta-badge">Deterministic ($ USD)</span>
               </div>
-              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+              <h3 className="hml-card-heading">
                 Deterministic $ Valuation
               </h3>
-              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
-                Applies mathematical risk valuation: Likelihood × Asset Value × Multiplier + Base Cost. Zero hallucinated numbers.
+              <p className="hml-card-body">
+                Applies mathematical risk pricing: Likelihood × Asset Value × Multiplier + Base Cost. Zero fabricated numbers.
               </p>
             </div>
 
             {/* Visual Formula Box */}
-            <div style={{ background: "#fff5f5", borderRadius: "12px", padding: "0.9rem 1rem", border: "1px solid rgba(225, 29, 72, 0.2)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontSize: "0.68rem", fontFamily: "var(--font-family-mono)", color: "#e11d48", fontWeight: 700 }}>CALCULATED EXPOSURE</div>
-                <div style={{ fontSize: "1.35rem", fontWeight: 800, color: "#e11d48" }}>$902,900</div>
-              </div>
-              <div style={{ textAlign: "right", fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", color: "#555951" }}>
-                <div>0.88 × $500K</div>
-                <div>+ $500K Base</div>
+            <div className="hml-card-visual-box" style={{ background: "rgba(225, 29, 72, 0.05)", borderColor: "rgba(225, 29, 72, 0.2)" }}>
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="text-[10px] font-mono uppercase text-rose-500 font-bold tracking-wider">CALCULATED EXPOSURE</div>
+                  <div className="text-2xl font-extrabold text-rose-600 font-mono tracking-tight">$902,900</div>
+                </div>
+                <div className="text-right text-[11px] font-mono text-slate-500 border-l border-rose-200 pl-3">
+                  <div className="text-slate-700 font-semibold">0.88 × $500K DB</div>
+                  <div className="text-slate-400">+ $462.9K Blast</div>
+                </div>
               </div>
             </div>
           </motion.div>
 
           {/* Card 05: Playbooks */}
-          <motion.div whileHover={{ y: -6 }} className="hml-horizontal-card" style={{ width: "420px", flex: "0 0 420px", borderRadius: "18px", padding: "1.75rem", background: "#ffffff", border: "1px solid rgba(23, 25, 22, 0.12)", boxShadow: "0 12px 36px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <motion.div
+            whileHover={{ y: -8, scale: 1.01 }}
+            transition={{ duration: 0.25 }}
+            className="hml-pipeline-card"
+          >
+            <div className="hml-card-accent-line" style={{ background: "linear-gradient(90deg, #7c3aed, #a855f7)" }} />
             <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-family-mono)", fontWeight: 800, color: "#7c3aed", background: "rgba(124, 58, 237, 0.1)", padding: "0.3rem 0.75rem", borderRadius: "var(--radius-pill)" }}>
-                  STAGE 05 // REMEDIATION
+              <div className="hml-card-top-meta">
+                <span className="hml-stage-chip" style={{ color: "#7c3aed", background: "rgba(124, 58, 237, 0.1)", borderColor: "rgba(124, 58, 237, 0.25)" }}>
+                  <Terminal size={12} /> STAGE 05 // REMEDIATION
                 </span>
-                <span style={{ fontSize: "0.72rem", color: "#8b8f87", fontWeight: 600 }}>NVIDIA NIM Guardrails</span>
+                <span className="hml-meta-badge">NVIDIA NIM Guardrails</span>
               </div>
-              <h3 style={{ fontSize: "1.3rem", fontWeight: 800, color: "#171916", margin: "0 0 0.5rem 0" }}>
+              <h3 className="hml-card-heading">
                 Defensive Playbook Synthesis
               </h3>
-              <p style={{ fontSize: "0.9rem", color: "#555951", lineHeight: 1.55, margin: "0 0 1rem 0" }}>
-                Synthesizes contextual Ansible, Shell, or AWS CLI remediations with strict output-side offensive marker scanning.
+              <p className="hml-card-body">
+                Synthesizes contextual Ansible, Shell, and AWS CLI remediations with strict output-side offensive marker screening.
               </p>
             </div>
 
             {/* Visual Code Box */}
-            <div style={{ background: "#0f110e", borderRadius: "12px", padding: "0.9rem 1rem", border: "1px solid rgba(255, 255, 255, 0.1)", color: "#f2efe7", fontFamily: "var(--font-family-mono)", fontSize: "0.72rem" }}>
-              <div style={{ color: "#4ade80", fontWeight: 700, marginBottom: "0.2rem" }}>✓ DEFENSIVE PLAYBOOK READY</div>
-              <div style={{ color: "#a1a59c" }}>ansible-playbook -i hosts patch-cve.yml</div>
+            <div className="hml-card-visual-box">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2">
+                <span className="flex items-center gap-1.5 text-emerald-400 font-bold text-[11px] font-mono">
+                  <CheckCircle2 size={12} /> PLAYBOOK VERIFIED
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">ansible-playbook</span>
+              </div>
+              <div className="font-mono text-[11px] text-slate-300">
+                <span className="text-purple-400">- name:</span> Patch CVE & Harden DMZ<br />
+                <span className="text-sky-400">  ansible.builtin.iptables:</span> drop
+              </div>
             </div>
           </motion.div>
         </motion.div>
