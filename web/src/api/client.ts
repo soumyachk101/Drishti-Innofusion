@@ -234,6 +234,7 @@ export const api = {
   liveThreats: () => get<LiveThreat[]>("/api/live/threats"),
   liveBlock: (id: string) => post<BlockFix>(`/api/live/block/${id}`),
   liveClear: () => del<{ cleared: number }>("/api/live/threats"),
+  resolveLiveThreat: (id: string) => post<{ resolved: boolean; threat_id: string }>(`/api/live/threats/${id}/resolve`),
   liveCheck: (domain: string) =>
     post<{ id: string; domain: string; band: string; score: number; is_threat: boolean }>(
       "/api/live/check",

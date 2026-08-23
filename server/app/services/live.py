@@ -603,6 +603,65 @@ def _hosts_match(host_a: str | None, host_b: str | None) -> bool:
     return na in nb or nb in na
 
 
+_DOMAIN_TO_APP_NAME = {
+    "whatsapp.com": "WhatsApp",
+    "whatsapp.net": "WhatsApp",
+    "spotify.com": "Spotify",
+    "spotifycdn.com": "Spotify",
+    "netflix.com": "Netflix",
+    "nflxvideo.net": "Netflix",
+    "youtube.com": "YouTube",
+    "googlevideo.com": "YouTube",
+    "youtu.be": "YouTube",
+    "instagram.com": "Instagram",
+    "cdninstagram.com": "Instagram",
+    "facebook.com": "Facebook",
+    "messenger.com": "Messenger",
+    "github.com": "GitHub",
+    "githubusercontent.com": "GitHub",
+    "discord.com": "Discord",
+    "discord.gg": "Discord",
+    "discordapp.com": "Discord",
+    "slack.com": "Slack",
+    "zoom.us": "Zoom",
+    "telegram.org": "Telegram",
+    "figma.com": "Figma",
+    "notion.so": "Notion",
+    "openai.com": "ChatGPT",
+    "chatgpt.com": "ChatGPT",
+    "claude.ai": "Claude AI",
+    "anthropic.com": "Claude AI",
+    "google.com": "Google Chrome",
+    "googleapis.com": "Google Services",
+    "gstatic.com": "Google Services",
+    "apple.com": "Apple Services",
+    "icloud.com": "Apple iCloud",
+    "apple-cloudkit.com": "Apple iCloud",
+    "microsoft.com": "Microsoft 365",
+    "office.com": "Microsoft Office",
+    "live.com": "Microsoft Services",
+    "teams.microsoft.com": "Microsoft Teams",
+    "amazon.com": "Amazon",
+    "amazon.in": "Amazon",
+    "primevideo.com": "Prime Video",
+    "twitter.com": "X (Twitter)",
+    "x.com": "X (Twitter)",
+    "linkedin.com": "LinkedIn",
+    "reddit.com": "Reddit",
+    "twitch.tv": "Twitch",
+}
+
+
+def _infer_apps_from_domains(domains: set[str]) -> set[str]:
+    apps: set[str] = set()
+    for d in domains:
+        d_lower = d.lower().strip()
+        for dom_key, app_name in _DOMAIN_TO_APP_NAME.items():
+            if dom_key == d_lower or d_lower.endswith("." + dom_key):
+                apps.add(app_name)
+    return apps
+
+
 def list_devices(db: Session, org_id: str) -> list[NetworkDeviceOut]:
     rows = db.scalars(
         select(NetworkDevice)
@@ -615,7 +674,7 @@ def list_devices(db: Session, org_id: str) -> list[NetworkDeviceOut]:
     recent_obs = db.scalars(
         select(LiveObservation).where(
             LiveObservation.org_id == org_id,
-            LiveObservation.last_seen > (utcnow() - timedelta(minutes=5))
+            LiveObservation.last_seen > (utcnow() - timedelta(minutes=15))
         )
     ).all()
     obs_by_host: dict[str, list[str]] = {}
@@ -648,9 +707,13 @@ def list_devices(db: Session, org_id: str) -> list[NetworkDeviceOut]:
         active_apps_set: set[str] = set()
         now_time = utcnow()
         for k, (apps, ts) in _ACTIVE_APPS_BY_HOST.items():
-            if (now_time - ts).total_seconds() < 300:
+            if (now_time - ts).total_seconds() < 600:
                 if _hosts_match(k, r.ip) or (r.hostname and _hosts_match(k, r.hostname)) or (r.is_self and k in ("manual", "localhost", "127.0.0.1", "")):
                     active_apps_set.update(apps)
+
+        # Automatically infer running apps from observed network domains
+        inferred_apps = _infer_apps_from_domains(active_domains_set)
+        active_apps_set.update(inferred_apps)
 
         out.append(NetworkDeviceOut(
             id=r.id, ip=r.ip, mac=r.mac, hostname=r.hostname, vendor=r.vendor,
@@ -685,6 +748,19 @@ def clear(db: Session, org_id: str) -> int:
     db.execute(delete(LiveObservation).where(LiveObservation.org_id == org_id))
     db.commit()
     return n
+
+
+def resolve_threat(db: Session, org_id: str, threat_id: str) -> bool:
+    """Resolve/dismiss a specific live threat observation by id or domain."""
+    from sqlalchemy import delete
+    cleaned = _clean_domain(threat_id)
+    stmt = delete(LiveObservation).where(
+        LiveObservation.org_id == org_id,
+        (LiveObservation.id == threat_id) | (LiveObservation.domain == threat_id) | (LiveObservation.domain == cleaned)
+    )
+    result = db.execute(stmt)
+    db.commit()
+    return bool(result.rowcount > 0)
 
 
 def block_fix(db: Session, org_id: str, obs_id: str, domain_hint: str | None = None) -> BlockFixOut:

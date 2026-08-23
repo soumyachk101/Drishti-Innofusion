@@ -536,6 +536,33 @@ function ForceNode({ data }: NodeProps) {
  {n.device.mac}
  </div>
  )}
+
+ {/* Active App & Website Telemetry Badges directly on map node */}
+ {n.device && ((n.device.active_apps && n.device.active_apps.length > 0) || (n.device.active_domains && n.device.active_domains.length > 0)) && (
+ <div
+ className="mt-1 flex max-w-[145px] flex-wrap items-center justify-center gap-1"
+ style={{ opacity: dim ? 0 : 1 }}
+ >
+ {n.device.active_apps?.slice(0, 2).map((app) => (
+ <span
+ key={app}
+ className="inline-flex items-center gap-1 rounded border border-orange-500/40 bg-orange-500/15 px-1.5 py-0.5 text-[8.5px] font-semibold text-orange-600 shadow-sm backdrop-blur-sm"
+ >
+ <span className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse" />
+ {app}
+ </span>
+ ))}
+ {n.device.active_domains?.slice(0, 1).map((dom) => (
+ <span
+ key={dom}
+ className="inline-flex max-w-[125px] items-center gap-1 truncate rounded border border-sky-500/30 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[8px] text-sky-600 shadow-sm backdrop-blur-sm"
+ title={dom}
+ >
+ 🌐 {dom}
+ </span>
+ ))}
+ </div>
+ )}
  </button>
  );
 }

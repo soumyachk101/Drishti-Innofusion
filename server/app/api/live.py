@@ -79,6 +79,17 @@ def clear_threats(
     return {"cleared": live.clear(db, org.id)}
 
 
+@router.delete("/live/threats/{threat_id}")
+@router.post("/live/threats/{threat_id}/resolve")
+def resolve_threat(
+    threat_id: str,
+    org: Organization = Depends(get_current_org),
+    db: Session = Depends(get_db),
+) -> dict:
+    resolved = live.resolve_threat(db, org.id, threat_id)
+    return {"resolved": resolved, "threat_id": threat_id}
+
+
 @router.post("/live/devices", response_model=DeviceBatchResponse)
 def observe_devices(
     body: DeviceBatch,

@@ -33,6 +33,7 @@ import {
   X,
   Zap,
   Check,
+  CheckCircle2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -1617,10 +1618,23 @@ function RadarGrid({
 function ThreatDetail({ threat: t, onClose }: { threat: LiveThreat; onClose: () => void }) {
   const hex = hexFor(t.band);
   const toast = useToast();
+  const qc = useQueryClient();
   const [tab, setTab] = useState<"summary" | "technical" | "remediation">("summary");
   const block = useMutation({
     mutationFn: () => api.liveBlock(encodeURIComponent(t.domain || t.id)),
     onError: (e) => toast.show(e instanceof ApiError ? e.message : "Couldn't generate a block command", "error"),
+  });
+
+  const resolveThreat = useMutation({
+    mutationFn: () => api.resolveLiveThreat(encodeURIComponent(t.domain || t.id)),
+    onSuccess: () => {
+      toast.show(`Threat for ${t.domain} marked as Solved & Resolved`, "success");
+      qc.invalidateQueries({ queryKey: ["live", "threats"] });
+      qc.invalidateQueries({ queryKey: ["live", "devices"] });
+      qc.invalidateQueries({ queryKey: ["live", "network-threats"] });
+      onClose();
+    },
+    onError: () => toast.show("Couldn't resolve threat", "error"),
   });
 
   const vj = t.verdict_json || {};
@@ -1649,9 +1663,20 @@ function ThreatDetail({ threat: t, onClose }: { threat: LiveThreat; onClose: () 
             {t.source_host && <span>· Host: <b className="font-mono text-ink-secondary">{t.source_host}</b></span>}
           </div>
         </div>
-        <button onClick={onClose} className="text-ink-muted hover:text-ink p-1" aria-label="Close">
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => resolveThreat.mutate()}
+            disabled={resolveThreat.isPending}
+            className="flex items-center gap-1 rounded bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 text-[11px] font-semibold text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+            title="Mark this threat as resolved / solved"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            <span>{resolveThreat.isPending ? "Solving..." : "Solved"}</span>
+          </button>
+          <button onClick={onClose} className="text-ink-muted hover:text-ink p-1" aria-label="Close">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* Navigation Sub-Tabs */}
@@ -1787,15 +1812,31 @@ function ThreatDetail({ threat: t, onClose }: { threat: LiveThreat; onClose: () 
           <Button loading={block.isPending} onClick={() => block.mutate()} className="w-full">
             <Terminal className="h-4 w-4" /> {block.data ? "Regenerate AI Block Commands" : "Generate Live AI Block Commands"}
           </Button>
-          {block.data && !block.data.refused && <BlockView fix={block.data} />}
+          {block.data && !block.data.refused && (
+            <BlockView
+              fix={block.data}
+              onResolve={() => resolveThreat.mutate()}
+              resolving={resolveThreat.isPending}
+            />
+          )}
         </div>
       )}
 
       {/* Bottom CTA if on overview tab */}
-      {tab === "summary" && t.band !== "Trusted" && (
-        <div className="pt-2 border-t border-hairline">
-          <Button loading={block.isPending} onClick={() => { setTab("remediation"); block.mutate(); }} className="w-full">
-            <Terminal className="h-4 w-4" /> Generate AI Block Command
+      {tab === "summary" && (
+        <div className="pt-2 border-t border-hairline flex flex-col gap-2">
+          {t.band !== "Trusted" && (
+            <Button loading={block.isPending} onClick={() => { setTab("remediation"); block.mutate(); }} className="w-full">
+              <Terminal className="h-4 w-4" /> Generate AI Block Command
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            loading={resolveThreat.isPending}
+            onClick={() => resolveThreat.mutate()}
+            className="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-semibold"
+          >
+            <CheckCircle2 className="h-4 w-4 mr-1.5" /> Mark Threat Resolved &amp; Solved
           </Button>
         </div>
       )}
@@ -1804,7 +1845,15 @@ function ThreatDetail({ threat: t, onClose }: { threat: LiveThreat; onClose: () 
 }
 
 
-function BlockView({ fix }: { fix: BlockFix }) {
+function BlockView({
+  fix,
+  onResolve,
+  resolving,
+}: {
+  fix: BlockFix;
+  onResolve?: () => void;
+  resolving?: boolean;
+}) {
   const toast = useToast();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -1904,6 +1953,28 @@ function BlockView({ fix }: { fix: BlockFix }) {
           <pre className="overflow-x-auto p-3 font-mono text-[12px] leading-relaxed text-[#f2efe7] selection:bg-accent-500 selection:text-white">
             {activeCmd.command}
           </pre>
+        </div>
+      )}
+
+      {/* Resolution & Status Actions Box */}
+      {onResolve && (
+        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3.5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4" /> Containment Verification
+            </span>
+            <span className="text-[10px] font-mono text-ink-muted">Action Ready</span>
+          </div>
+          <p className="text-[11px] text-ink-secondary">
+            After running the block rule on your firewall or hosts file, mark this threat as solved to dismiss it from active risk feeds.
+          </p>
+          <Button
+            loading={resolving}
+            onClick={onResolve}
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 shadow-sm justify-center"
+          >
+            <CheckCircle2 className="h-4 w-4 mr-1.5" /> Mark Threat Resolved &amp; Solved
+          </Button>
         </div>
       )}
 

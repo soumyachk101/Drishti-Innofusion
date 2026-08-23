@@ -157,6 +157,54 @@ _MDNS_APP_MAP = {
     "_homekit": "Apple HomeKit",
 }
 
+_DOMAIN_APP_MAP = {
+    "whatsapp.com": "WhatsApp",
+    "whatsapp.net": "WhatsApp",
+    "spotify.com": "Spotify",
+    "spotifycdn.com": "Spotify",
+    "netflix.com": "Netflix",
+    "nflxvideo.net": "Netflix",
+    "youtube.com": "YouTube",
+    "googlevideo.com": "YouTube",
+    "youtu.be": "YouTube",
+    "instagram.com": "Instagram",
+    "cdninstagram.com": "Instagram",
+    "facebook.com": "Facebook",
+    "messenger.com": "Messenger",
+    "github.com": "GitHub",
+    "githubusercontent.com": "GitHub",
+    "discord.com": "Discord",
+    "discord.gg": "Discord",
+    "discordapp.com": "Discord",
+    "slack.com": "Slack",
+    "zoom.us": "Zoom",
+    "telegram.org": "Telegram",
+    "figma.com": "Figma",
+    "notion.so": "Notion",
+    "openai.com": "ChatGPT",
+    "chatgpt.com": "ChatGPT",
+    "claude.ai": "Claude AI",
+    "anthropic.com": "Claude AI",
+    "google.com": "Google Chrome",
+    "googleapis.com": "Google Services",
+    "gstatic.com": "Google Services",
+    "apple.com": "Apple Services",
+    "icloud.com": "Apple iCloud",
+    "apple-cloudkit.com": "Apple iCloud",
+    "microsoft.com": "Microsoft 365",
+    "office.com": "Microsoft Office",
+    "live.com": "Microsoft Services",
+    "teams.microsoft.com": "Microsoft Teams",
+    "amazon.com": "Amazon",
+    "amazon.in": "Amazon",
+    "primevideo.com": "Prime Video",
+    "twitter.com": "X (Twitter)",
+    "x.com": "X (Twitter)",
+    "linkedin.com": "LinkedIn",
+    "reddit.com": "Reddit",
+    "twitch.tv": "Twitch",
+}
+
 
 def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
     import threading
@@ -264,6 +312,13 @@ def run_dns(reporter: Reporter, interval: float = 2.0) -> None:
             dom = registrable(qname)
             if dom and client_ip and client_ip not in ("8.8.8.8", "8.8.4.4", "1.1.1.1"):
                 reporter.report(dom, source_host=client_ip)
+                # Auto-infer application from domain
+                dom_lower = dom.lower()
+                for dom_key, app_name in _DOMAIN_APP_MAP.items():
+                    if dom_key == dom_lower or dom_lower.endswith("." + dom_key):
+                        reporter.sync_active(set([dom]), active_apps=[app_name], source_host=client_ip)
+                        log(f"Discovered Active App on {client_ip}: {app_name} ({dom})")
+                        break
         except Exception:
             return
 
@@ -283,7 +338,7 @@ def run_conn(reporter: Reporter, interval: float) -> None:
     from urllib.parse import urlparse
     
     log(f"polling open browser tabs and active applications every {interval}s…")
-    browsers = ["Google Chrome", "Brave Browser", "Safari"]
+    browsers = ["Google Chrome", "Brave Browser", "Safari", "Arc", "Microsoft Edge", "Firefox"]
     app_domain_map = {
         "WhatsApp": "whatsapp.com",
         "Discord": "discord.com",
