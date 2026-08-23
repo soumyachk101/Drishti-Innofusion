@@ -1,454 +1,557 @@
-<!-- Hero Section -->
-<div align="center">
+# 👁️ Drishti
 
-# <span style="font-size:48px;">👁️</span> Drishti
+> **See the invisible. Price the risk. Fix it first.**
 
-![Status](https://img.shields.io/badge/Status-Production_Ready-success?style=flat-square)
-![Version](https://img.shields.io/badge/Version-v0.1.0-blue?style=flat-square)
-![Stance](https://img.shields.io/badge/Stance-Defensive_Only-red?style=flat-square)
-
-*AI-powered attack-path intelligence platform.* Maps how an attacker reads your network, traces every route from the internet to crown-jewel assets, prices each path in **dollars**, and drafts human-reviewed Ansible fixes. Never attacks.
+Drishti is a defensive cybersecurity platform that maps your network, prices every attack path in real dollars, and generates Ansible playbooks to close the gaps — before adversaries find them. Built on a graph-theoretic attack-surface engine, Drishti turns infrastructure chaos into actionable, prioritized remediation.
 
 ---
 
-### Tech Stack
-
 <div align="center">
 
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-003B57?style=flat-square)](https://www.sqlalchemy.org/)
-[![NetworkX](https://img.shields.io/badge/NetworkX-3.4-E74C3C?style=flat-square)](https://networkx.org/)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![ReactFlow](https://img.shields.io/badge/ReactFlow-11.11-000000?style=flat-square)](https://reactflow.dev/)
-[![Zustand](https://img.shields.io/badge/Zustand-4.5-443E38?style=flat-square)](https://docs.pmnd.rs/zustand)
-[![TanStack](https://img.shields.io/badge/TanStack_Query-5.51-FF4154?style=flat-square)](https://tanstack.com/query)
-[![Vitest](https://img.shields.io/badge/Vitest-2.0-729B1B?style=flat-square)](https://vitest.dev/)
-[![pytest](https://img.shields.io/badge/pytest-232%2B_tests-0A9EDC?style=flat-square)](https://pytest.org/)
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![NetworkX](https://img.shields.io/badge/NetworkX-3.4-2C5AA0)
+![Tailwind](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss&logoColor=white)
+
+**Defensive only. Maps, prices, and remediates. Never attacks.**
 
 </div>
 
 ---
 
-## ✨ Core Capabilities
+## 📑 Table of Contents
 
-<div align="center">
-
-| | | | |
-|---|---|---|---|
-| 🕸️ **Risk Engine** | 💰 **Dollar Pricing** | 🛠️ **Remediation Studio** | 📡 **Live Watch** |
-| NetworkX directed graph with Yen's k-shortest paths. Computes every INTERNET → asset attack route. | Every path and node priced in $ using CVSS-weighted blast-radius model. | 3-column studio drafting Ansible playbooks — human reviewed, never auto-deployed. | Real-time LAN device discovery via DNS, mDNS, ARP with live telemetry streaming. |
-| | | | |
-| 🔍 **Deep Scan** | 🌐 **URL Trust** | 🤖 **AI Assistant** | 🔔 **Telegram Alerts** |
-| Autonomous nmap deep-scan scheduler with trigger-based execution. | Heuristic + ML URL reputation scoring — blocks high-risk navigation. | Multi-provider LLM (Groq Llama 3.3 / Claude / NVIDIA) with mock mode. | Real-time push notifications for high/critical findings. |
-| | | | |
-| 🔌 **Chrome Extension** | 📊 **Findings Dashboard** | 📋 **Reports + NetConfig** | 🔄 **Live Recompute** |
-| "Web Guard" MV3 browser extension for real-time URL warning/blocking. | Severity-ranked vulnerability table with CVE enrichment from NVD. | Auto-generated network config export and full org security reports. | Resolve a finding → total org exposure recomputes instantly. |
-
-</div>
-
-> 💡 **Live demo:** On the seeded Acme Retail network, resolving a critical finding drops total exposure from **$902,900 → $702,900** — verified by the test suite.
+- [What Drishti Does](#-what-drishti-does)
+- [Architecture Overview](#-architecture-overview)
+- [System Architecture (C4)](#-system-architecture-c4)
+- [Data Flow](#-data-flow)
+- [Backend Deep Dive](#-backend-deep-dive)
+- [Attack Graph Engine](#-attack-graph-engine)
+- [Risk Scoring Model](#-risk-scoring-model)
+- [Recompute & Exposure Tracking](#-recompute--exposure-tracking)
+- [Authentication & Security](#-authentication--security)
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Tech Stack](#-tech-stack)
+- [Repository Map](#-repository-map)
+- [Testing](#-testing)
+- [Demo Network — Acme Retail](#-demo-network--acme-retail)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
 
 ---
 
-## 🏗️ System Architecture
+## 🎯 What Drishti Does
 
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'edgeLabelBackground':'#16213e', 'tertiaryColor': '#0f3460', 'primaryTextColor': '#e0e0e0', 'lineColor': '#38c6f4', 'secondaryColor': '#1a1a2e', 'tertiaryColor': '#0f3460'}}}%%
-flowchart TB
- classDef layer fill:#0f3460,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0,rx:16
- classDef external fill:#1a1a2e,stroke:#e94560,stroke-width:1.5px,color:#ff6b6b,stroke-dasharray:5 5
- classDef agent fill:#0a3d62,stroke:#38c6f4,stroke-width:1.5px,color:#38c6f4
- classDef server fill:#16213e,stroke:#38c6f4,stroke-width:2.5px,color:#e0e0e0
- classDef frontend fill:#1a1a2e,stroke:#e94560,stroke-width:2px,color:#e0e0e0
- classDef arrow stroke:#38c6f4,stroke-width:2px,color:#38c6f4
+| Capability | What It Means |
+|---|---|
+| **Network Discovery** | Agents auto-discover devices via DNS, connection tables, and mDNS — zero manual entry |
+| **Attack Graph** | NetworkX builds a directed graph of every asset; Yen's algorithm finds all Internet→crown-jewel paths |
+| **Risk Pricing** | CVSS × criticality × blast radius → dollar exposure per asset and per attack path |
+| **Breach Simulation** | Step through how an attacker would traverse your network, hop by hop |
+| **Live Watch** | Real-time device telemetry with a force-directed topology map |
+| **AI Remediation** | LLM-assisted remediation plans + Ansible playbook generation |
+| **URL Trust** | Heuristic + ML scoring for URL reputation with WHOIS lookup |
+| **Deep Scan** | Autonomous nmap scanning triggered on schedule or on demand |
+| **Telegram Alerts** | Real-time push notifications for critical findings |
+| **Chrome Guard** | MV3 extension that blocks malicious URLs at the browser |
 
- subgraph EXT_SYS [🔌 External Systems]
- direction LR
- NVD["🏛️ NVD API<br/><i>CVE Enrichment</i>"]
- FEED["📡 Threat Feeds<br/><i>CISA / NVD</i>"]
- LLM["🧠 LLM Providers<br/><i>Groq · Claude · NVIDIA</i>"]
- TG["💬 Telegram Bot<br/><i>Push Alerts</i>"]
- GSB["🛡️ Google Safe<br/>Browsing"]
- VT["🔬 VirusTotal"]
- end
+---
 
- subgraph EDGE [📡 Edge Layer]
- direction TB
- AGENT_WATCH["👁️ Live Watch<br/><code>drishti_watch.py</code><br/><i>DNS · mDNS · ARP · WiFi</i>"]
- AGENT_INGEST["📦 Edge Agent<br/><code>drishti_agent.py</code><br/><i>Snapshot + Ingest</i>"]
- WEB_EXT["🧩 Chrome Extension<br/><b>Web Guard MV3</b><br/><i>URL Block + Warn</i>"]
- end
+## 🏗️ Architecture Overview
 
- subgraph BACKEND [🖥️ Drishti Server :8000]
- direction TB
- ROUTERS["🔀 16 API Routers<br/><code>/api/{auth,ingest,graph,paths,<br/>findings,ai,live,netconfig,<br/>urltrust,report,scan,...}</code>"]
- RISK_ENG["🕸️ Risk Engine<br/><code>NetworkX DiGraph</code>"]
- PATH_FIND["🔍 Attack Path Finder<br/><code>Yen's k-Shortest</code>"]
- IMPACT["💰 Impact Calculator<br/><code>$ CVSS × Blast Radius</code>"]
- RECOMP["🔄 Recompute Engine<br/><code>Live Delta</code>"]
- URLT["🌐 URL Trust Analyzer<br/><code>Heuristic + ML</code>"]
- DEEP["🔬 Deep Scan<br/><code>Autonomous nmap</code>"]
- AUTO["⏰ Auto-Scan Scheduler<br/><code>APScheduler</code>"]
- AI_SVC["🤖 AI Service<br/><code>Multi-provider LLM</code>"]
- LIVE_SVC["📡 Live Watch Service"]
- TELE_SVC["🔔 Telegram Alerts"]
- HARD["🔧 Hardening Engine<br/><code>Ansible Playbooks</code>"]
- end
+Drishti is a multi-tier, defensive security platform with four runtime planes:
 
- subgraph DATA [💾 Data Layer]
- direction LR
- DB[(🗄️ PostgreSQL<br/><i>+ Alembic Migrations</i>)]
- CACHE[(⚡ Redis Cache<br/><i>Verdicts + Sessions</i>)]
- end
-
- subgraph FRONTEND [🌐 Drishti Web :5173]
- direction TB
- LANDING["🏠 Landing Page<br/><i>Marketing + Hero</i>"]
- AUTH_UI["🔐 Auth Shell<br/><i>Login · Signup · JWT</i>"]
- DASH["📊 Dashboard<br/><i>Exposure Overview</i>"]
- ATTACK_MAP["🕸️ Attack Map<br/><code>ReactFlow</code> Graph"]
- PATHS_UI["🔍 Paths Explorer<br/><i>Breach Simulation</i>"]
- FINDINGS["🚨 Findings<br/><i>Severity Table</i>"]
- REMEDIATION["🛠️ Remediation Studio<br/><i>3-Column Ansible UI</i>"]
- LIVE_UI["📡 Live Watch<br/><i>Force-Directed Map</i>"]
- URL_UI["🌐 URL Analyzer<br/><i>Trust Scoring UI</i>"]
- REPORTS["📋 Reports<br/><i>NetConfig Export</i>"]
- end
-
- class EXT_SYS,FRONTEND layer
- class EDGE agent
- class BACKEND server
- class DATA,DB,CACHE external
- class ROUTERS,RISK_ENG,PATH_FIND,IMPACT,RECOMP,URLT,DEEP,AUTO,AI_SVC,LIVE_SVC,TELE_SVC,HARD server
- class AGENT_WATCH,AGENT_INGEST,WEB_EXT agent
-
- AGENT_WATCH -.->|"📡 mDNS / DNS"| LIVE_SVC
- AGENT_INGEST -.->|"📦 POST /api/ingest"| ROUTERS
- WEB_EXT -.->|"🔒 POST /api/url-analyzer"| ROUTERS
-
- ROUTERS --> RISK_ENG
- ROUTERS --> PATH_FIND
- ROUTERS --> IMPACT
- ROUTERS --> RECOMP
- ROUTERS --> URLT
- ROUTERS --> AI_SVC
- ROUTERS --> LIVE_SVC
- ROUTERS --> TELE_SVC
- ROUTERS --> HARD
- ROUTERS --> DEEP
- DEEP --> AUTO
- AUTO --> DEEP
-
- RISK_ENG --> PATH_FIND
- PATH_FIND --> IMPACT
- RECOMP --> RISK_ENG
- URLT --> CACHE
-
- RISK_ENG --> DB
- PATH_FIND --> DB
- IMPACT --> DB
- AI_SVC --> LLM
- URLT --> GSB
- URLT --> VT
- LIVE_SVC --> FEED
- TELE_SVC --> TG
- DEEP --> DB
-
- LANDING --> AUTH_UI --> DASH --> ATTACK_MAP --> PATHS_UI --> FINDINGS --> REMEDIATION --> LIVE_UI --> URL_UI --> REPORTS
- AUTH_UI -.->|"🔑 JWT"| ROUTERS
- DASH -.-> ROUTERS
- ATTACK_MAP -.-> ROUTERS
- PATHS_UI -.-> ROUTERS
- FINDINGS -.-> ROUTERS
- REMEDIATION -.-> ROUTERS
- LIVE_UI -.-> ROUTERS
- URL_UI -.-> ROUTERS
- REPORTS -.-> ROUTERS
+```
+┌─────────────────────────────────────────────────────────┐
+│ 👤 Security Analyst │
+│ ┌───────────────────────────────────────────────────┐ │
+│ │ 🌐 Web UI (React + Vite + ReactFlow) │ │
+│ │ Port 5173 · 12 feature modules │ │
+│ └────────────────────┬──────────────────────────────┘ │
+└───────────────────────┼─────────────────────────────────┘
+ │ HTTPS (JWT Bearer)
+ ▼
+┌─────────────────────────────────────────────────────────┐
+│ 🖥️ Backend API (FastAPI + SQLAlchemy) │
+│ Port 8000 · 16 REST routers · 10 ORM models │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│ │ Risk │ │ Attack │ │ Deep │ │ URL │ │
+│ │ Engine │ │ Paths │ │ Scan │ │ Trust │ │
+│ └──────────┘ └──────────┘ └──────────┘ └──────────┘ │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│ │ Live │ │ Intel │ │ Hardening│ │ Telegram │ │
+│ │ Watch │ │ Feeds │ │ (Ansible)│ │ Alerts │ │
+│ └──────────┘ └──────────┘ └──────────┘ └──────────┘ │
+└────────┬──────────────┬──────────────┬─────────────────┘
+ │ │ │
+ ┌────▼────┐ ┌────▼────┐ ┌────▼────┐
+ │ SQLite │ │ Redis │ │ NVD │
+ │ (Dev) │ │(Cache) │ │ API │
+ └─────────┘ └─────────┘ └─────────┘
+ ▲
+ │ ingest / polling
+ ┌────┴──────────────────────────────┐
+ │ 👁️ Edge Agent (Python stdlib) │
+ │ Device discovery · mDNS · DNS │
+ │ Connection tables · Live watch │
+ └───────────────────────────────────┘
+ ▲
+ │
+ ┌────┴──────────────────────────────┐
+ │ 🧩 Chrome Extension (MV3) │
+ │ URL blocking · Warning page │
+ └───────────────────────────────────┘
 ```
 
 ---
 
-## 🔗 Data Flow — End to End
+## 🏛️ System Architecture (C4)
+
+### C1 — System Context
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'edgeLabelBackground':'#16213e', 'tertiaryColor': '#0f3460', 'primaryTextColor': '#e0e0e0', 'lineColor': '#38c6f4', 'secondaryColor': '#1a1a2e', 'tertiaryColor': '#0f3460'}}}%%
-flowchart LR
- classDef input fill:#0a3d62,stroke:#38c6f4,stroke-width:2px,color:#38c6f4,rx:12
- classDef process fill:#16213e,stroke:#e94560,stroke-width:2px,color:#e0e0e0,rx:12
- classDef output fill:#1a1a2e,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0,rx:12
- classDef store fill:#0f3460,stroke:#f4d03f,stroke-width:2px,color:#f4d03f,rx:12
- classDef arrow stroke:#38c6f4,stroke-width:2px
-
- subgraph INPUT [📥 INPUT SOURCES]
- direction TB
- IN1["📦 Agent Ingest<br/><i>Assets + Vulns</i>"]
- IN2["🔬 User Scan<br/><i>Auto / Deep Scan</i>"]
- IN3["👁️ Live Discovery<br/><i>DNS · mDNS · ARP</i>"]
- IN4["🌐 URL Check<br/><i>Extension + Web UI</i>"]
- IN5["💬 AI Chat<br/><i>User Query</i>"]
- end
-
- subgraph PROCESS [⚙️ PROCESSING PIPELINE]
- direction TB
- P1["🔐 Validate + Auth<br/><i>JWT + Bearer Token</i>"]
- P2["📥 Ingest Service<br/><i>Asset + Vuln CRUD</i>"]
- P3["🕸️ Risk Engine<br/><i>NetworkX Graph Build</i>"]
- P4["🔍 Attack Paths<br/><i>Yen's k-Shortest</i>"]
- P5["💰 Impact Pricing<br/><i>$ CVSS × Blast Radius</i>"]
- P6["🔄 Recompute<br/><i>Live Delta</i>"]
- P7["🌐 URL Analyzer<br/><i>Heuristic + ML</i>"]
- P8["🤖 AI Service<br/><i>Multi-provider LLM</i>"]
- P9["🔔 Telegram Notify<br/><i>High/Critical Alerts</i>"]
- end
-
- subgraph STORAGE [💾 STORAGE]
- direction LR
- S1[(🗄️ Postgres<br/>SQLite dev)]
- S2[(⚡ Redis<br/>Verdict Cache)]
- end
-
- subgraph OUTPUT [📤 OUTPUT]
- direction TB
- O1["📡 JSON Response<br/><i>REST API</i>"]
- O2["🖥️ Web UI Update<br/><i>React + TanStack Query</i>"]
- O3["🧩 Ext Block / Warn<br/><i>Chrome Redirect</i>"]
- O4["💬 Telegram Push<br/><i>Bot Notification</i>"]
- O5["📋 Ansible Playbook<br/><i>Remediation</i>"]
- end
-
- class IN1,IN2,IN3,IN4,IN5 input
- class P1,P2,P3,P4,P5,P6,P7,P8,P9 process
- class S1,S2 store
- class O1,O2,O3,O4,O5 output
-
- IN1 --> P1 --> P2 --> S1
- P2 --> P3 --> P4 --> P5 --> S1
- IN2 --> P1 --> P2
- IN3 --> P1 --> S1
- IN4 --> P1 --> P7 --> S2 --> O3
- IN5 --> P1 --> P8 --> O2
- S1 --> P6 --> S1
- P3 --> P9 --> O4
- P4 --> O5
-```
-
----
-
-## ⚔️ Risk Engine — Attack Path Graph
-
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'edgeLabelBackground':'#16213e', 'tertiaryColor': '#0f3460', 'primaryTextColor': '#e0e0e0', 'lineColor': '#38c6f4', 'secondaryColor': '#1a1a2e', 'tertiaryColor': '#0f3460'}}}%%
-flowchart TD
- classDef internet fill:#e94560,stroke:#ff6b6b,stroke-width:3px,color:#fff,rx:20,font-size:16px
- classDef edge fill:#0a3d62,stroke:#38c6f4,stroke-width:2px,color:#38c6f4,rx:12
- classDef server fill:#16213e,stroke:#e94560,stroke-width:2px,color:#e0e0e0,rx:12
- classDef jewel fill:#f4d03f,stroke:#e94560,stroke-width:3px,color:#1a1a2e,rx:12,font-weight:bold
- classDef vuln fill:#e74c3c,stroke:#ff6b6b,stroke-width:1px,color:#fff,rx:8
- classDef path fill:#0f3460,stroke:#38c6f4,stroke-width:1.5px,color:#38c6f4,rx:10,stroke-dasharray:4 2
-
- N0(["🌐 INTERNET<br/>━━━━━━━━━━━<br/><i>Attack Source</i>"]):::internet
-
- N1(["🛡️ Firewall<br/>━━━━━━━━━━━<br/>WAN Edge<br/>pfSense"]):::edge
- PRICE1["$0<br/><i>Entry Point</i>"]
-
- N2(["🖥️ DMZ Web Server<br/>━━━━━━━━━━━<br/>Apache 2.4.49"]):::server
- VULN2["⚠️ CVE-2021-41773<br/>CVSS 7.5<br/>Path Traversal"]:::vuln
- PRICE2["$45,000"]
-
- N3(["⚖️ Load Balancer<br/>━━━━━━━━━━━<br/>nginx 1.24"]):::edge
- PRICE3["$12,000"]
-
- N4(["📱 App Server<br/>━━━━━━━━━━━<br/>Node.js API"]):::server
- VULN4["🔴 CVE-2023-XXXX<br/>CVSS 9.8<br/>RCE"]:::vuln
- PRICE4["$180,000"]
-
- N5(["🗄️ Database<br/>━━━━━━━━━━━<br/>PostgreSQL 15<br/>👑 CROWN JEWEL"]):::jewel
- PRICE5["$500,000"]
-
- N6(["📊 Monitoring<br/>━━━━━━━━━━━<br/>Prometheus"]):::edge
- PRICE6["$8,000"]
-
- subgraph PATHS [📊 Computed Attack Paths]
- direction TB
- PATH1["⚡ Path 1<br/>━━━━━━━━━━━<br/>INTERNET → FW → DMZ<br/>Cost: <b>$45,000</b><br/>1 exploit · ⚠️ Medium"]:::path
- PATH2["🔥 Path 2<br/>━━━━━━━━━━━<br/>INTERNET → FW → DMZ → LB → APP<br/>Cost: <b>$180,000</b><br/>2 exploits · 🔴 High"]:::path
- PATH3["💀 Path 3 — CRITICAL<br/>━━━━━━━━━━━<br/>INTERNET → FW → DMZ → APP → DB<br/>Cost: <b>$500,000</b><br/>3 exploits · 👑 Crown Jewel"]:::path
- PATH4["⚡ Path 4<br/>━━━━━━━━━━━<br/>INTERNET → FW → MON<br/>Cost: <b>$8,000</b><br/>1 exploit · ⚠️ Low"]:::path
- end
-
- N0 ==>|"HTTPS :443"| N1
- N1 == Port 80/443 ==> N2
- N1 == HTTPS :443 ==> N3
- N3 == HTTP :3000 ==> N4
- N4 == TCP 5432 ==> N5
- N1 == SNMP 161 ==> N6
-
- N2 -.->|"Exploit"| PATH1
- N4 -.->|"Exploit Chain"| PATH2
- N5 -.->|"Full Breach"| PATH3
- N6 -.->|"Exploit"| PATH4
-```
-
----
-
-## 🌐 Network Topology — Live Watch
-
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'edgeLabelBackground':'#16213e', 'tertiaryColor': '#0f3460', 'primaryTextColor': '#e0e0e0', 'lineColor': '#38c6f4', 'secondaryColor': '#1a1a2e', 'tertiaryColor': '#0f3460'}}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
 graph TB
- classDef internet fill:#e94560,stroke:#ff6b6b,stroke-width:3px,color:#fff,rx:20
- classDef infra fill:#0a3d62,stroke:#38c6f4,stroke-width:2px,color:#38c6f4,rx:12
- classDef device fill:#16213e,stroke:#f4d03f,stroke-width:1.5px,color:#e0e0e0,rx:10
- classDef deviceOnline fill:#16213e,stroke:#2ecc71,stroke-width:1.5px,color:#2ecc71,rx:10
- classDef deviceWarn fill:#16213e,stroke:#f39c12,stroke-width:1.5px,color:#f39c12,rx:10
- classDef deviceOff fill:#16213e,stroke:#e74c3c,stroke-width:1.5px,color:#e74c3c,rx:10
- classDef discovery fill:#0f3460,stroke:#9b59b6,stroke-width:1.5px,color:#9b59b6,rx:10
-
- ATTACK(["🌍 Internet<br/>Attacker Surface"]):::internet
-
- subgraph PERIMETER [🔒 Perimeter — 192.168.0.0/16]
- RTR(["📡 Router<br/>192.168.1.1<br/>OpenWrt 23.05"]):::infra
- FW(["🛡️ Firewall<br/>192.168.1.2<br/>pfSense 2.7"]):::infra
+ subgraph EXTERNAL [" "]
+ direction TB
+ ANALYST["👤 Security Analyst<br/><i>Pricing, triage, remediation</i>"]
+ NVD["🌐 NVD API<br/><i>CVE database</i>"]
+ TELEGRAM["💬 Telegram<br/><i>Push alerts</i>"]
+ DNS["🔍 DNS / mDNS<br/><i>Device discovery</i>"]
+ NMAP["🔎 nmap<br/><i>Deep scanner</i>"]
  end
 
- subgraph LAN [🏢 LAN — 192.168.1.0/24]
- SRV1(["🖥️ App Server<br/>192.168.1.10<br/>🟢 ONLINE"]):::deviceOnline
- SRV2(["🗄️ DB Server<br/>192.168.1.20<br/>🟢 ONLINE"]):::deviceOnline
- SRV3(["📁 NAS / Files<br/>192.168.1.30<br/>🟡 DEGRADED"]):::deviceWarn
- WS1(["💻 Workstation<br/>192.168.1.100<br/>🟢 ONLINE"]):::deviceOnline
- WS2(["💻 Dev Machine<br/>192.168.1.101<br/>🔴 OFFLINE"]):::deviceOff
- PRT1(["🖨️ Printer<br/>192.168.1.50<br/>🟡 DEGRADED"]):::deviceWarn
- MOB1(["📱 iPhone<br/>192.168.1.200<br/>🟢 ONLINE"]):::deviceOnline
+ subgraph DRISHTI ["👁️ Drishti Platform"]
+ direction LR
+ WEB["🌐 Web UI<br/>React + TypeScript"]
+ API["🖥️ Backend API<br/>FastAPI"]
+ AGENT["👁️ Edge Agent<br/>Python stdlib"]
+ EXT["🧩 Chrome Extension<br/>Manifest V3"]
  end
 
- subgraph IOT [🏠 IoT — 192.168.2.0/24]
- CAM1(["📷 Camera 01<br/>192.168.2.10<br/>🟡 DEGRADED"]):::deviceWarn
- CAM2(["📷 Camera 02<br/>192.168.2.11<br/>🟢 ONLINE"]):::deviceOnline
- TSTAT(["🌡️ Thermostat<br/>192.168.2.20<br/>🔴 OFFLINE"]):::deviceOff
+ ANALYST -->|HTTPS + JWT| WEB
+ WEB -->|REST / JSON| API
+ AGENT -->|POST /ingest| API
+ EXT -->|POST /urltrust| API
+ API -->|CVE lookup| NVD
+ API -->|Push notifications| TELEGRAM
+ AGENT -->|mDNS / DNS queries| DNS
+ API -->|subprocess| NMAP
+
+ style ANALYST fill:#1a1a2e,stroke:#38c6f4,color:#e0e0e0
+ style WEB fill:#0f3460,stroke:#e94560,color:#fff
+ style API fill:#0f3460,stroke:#e94560,color:#fff
+ style AGENT fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style EXT fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+```
+
+### C2 — Container Diagram
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+graph LR
+ subgraph CLIENT ["Client Tier"]
+ WEB["🌐 Web SPA<br/>React 18 · Vite 5<br/>ReactFlow · Recharts"]
+ EXT["🧩 Chrome Extension<br/>MV3 · Service Worker<br/>Block page + caching"]
  end
 
- subgraph AGENT_METHODS [👁️ Agent Discovery Methods]
- DNS_M["🔍 DNS Queries<br/><i>Passive monitoring</i>"]
- MDNS_M["📡 mDNS Discovery<br/><i>_http._tcp.local</i>"]
- ARP_M["📋 ARP Table<br/><i>Subnet scan</i>"]
- WIFI_M["📶 WiFi Scan<br/><i>Cross-platform</i>"]
+ subgraph SERVER ["Server Tier — FastAPI 0.115"]
+ ROUTERS["📡 16 REST Routers<br/>api/v1/*.py + api/*.py"]
+ SERVICES["⚙️ 14 Service Modules<br/>services/*.py"]
+ MODELS["🗄️ 10 ORM Models<br/>SQLAlchemy 2.0 + Alembic"]
+ AUTH["🔐 Auth Layer<br/>JWT 15m/7d + bcrypt"]
+ CORE["🛡️ Core<br/>Rate-limit · Errors · Deps"]
  end
 
- ATTACK --> RTR
- RTR <--> FW
- FW <--> SRV1 & SRV2 & SRV3 & WS1 & WS2 & PRT1 & MOB1
- FW <--> CAM1 & CAM2 & TSTAT
+ subgraph AGENT ["Edge Tier"]
+ WATCH["drishti_watch.py<br/>Live daemon<br/>DNS/mDNS/conn/devices"]
+ INGEST["drishti_agent.py<br/>Snapshot ingester<br/>Fixture replay"]
+ end
 
- DNS_M -.->|"resolves"| WS1 & SRV1
- MDNS_M -.->|"discovers"| CAM1 & SRV1
- ARP_M -.->|"scans"| SRV1 & SRV2
- WIFI_M -.->|"finds"| MOB1 & WS2
+ subgraph DATA ["Data Tier"]
+ DB["🗄️ SQLite / PostgreSQL<br/>21 tables · Alembic migrations"]
+ CACHE["⚡ Redis<br/>Session cache · Rate limits"]
+ end
+
+ subgraph EXTERNAL ["External Services"]
+ NVD_SVC["NVD API<br/>CVE enrichment"]
+ TG["Telegram Bot API<br/>Alert push"]
+ LLM["LLM Provider<br/>AI remediation + chat"]
+ end
+
+ WEB -->|HTTPS + JWT| ROUTERS
+ EXT -->|HTTPS + Bearer| ROUTERS
+ ROUTERS --> AUTH
+ ROUTERS --> SERVICES
+ SERVICES --> MODELS
+ MODELS --> DB
+ SERVICES --> CACHE
+ AGENT -->|ingest| ROUTERS
+
+ SERVICES -.->|CVE lookup| NVD_SVC
+ SERVICES -.->|notify| TG
+ SERVICES -.->|AI calls| LLM
+
+ style WEB fill:#0f3460,stroke:#e94560,color:#fff
+ style EXT fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style ROUTERS fill:#0f3460,stroke:#e94560,color:#fff
+ style SERVICES fill:#0f3460,stroke:#e94560,color:#fff
+ style MODELS fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style DB fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+ style AGENT fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+```
+
+### C3 — Backend Service Layer
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+graph TB
+ subgraph API_LAYER ["📡 API Routers (16 endpoints)"]
+ HEALTH["health"]
+ AUTH_R["auth"]
+ ORG_R["org"]
+ INGEST_R["ingest"]
+ ASSETS_R["assets"]
+ FINDINGS_R["findings"]
+ GRAPH_R["graph"]
+ PATHS_R["paths"]
+ AI_R["ai"]
+ DASH_R["dashboard"]
+ REPORT_R["report"]
+ LIVE_R["live"]
+ NET_R["netconfig"]
+ URL_R["urltrust"]
+ SCAN_R["scan"]
+ ADMIN_R["admin"]
+ end
+
+ subgraph SERVICE_LAYER ["⚙️ Service Layer"]
+ RISK["risk_engine.py<br/>NetworkX DiGraph<br/>Node pricing"]
+ ATK["attack_paths.py<br/>Yen's k-shortest<br/>Path enumeration"]
+ IMPACT["impact.py<br/>Dollar scoring<br/>CVSS × blast radius"]
+ RECOMP["recompute.py<br/>Exposure delta<br/>Live recompute"]
+ INGEST_S["ingest.py<br/>Agent payload<br/>processing"]
+ URLTRUST["urltrust/<br/>Heuristic + ML<br/>scoring"]
+ DEEPSCAN["deepscan/<br/>nmap scanner<br/>CVE integration"]
+ NETCONF["netconfig/<br/>Cisco config<br/>generation"]
+ LIVE_S["live.py<br/>Watch orchestration"]
+ INTEL["intel.py<br/>Threat feed<br/>integration"]
+ AUTOSCAN["autoscan.py<br/>Scheduled scans"]
+ HARD["hardening.py<br/>Ansible playbooks"]
+ TG_ALERT["telegram_alerts.py<br/>Push notifications"]
+ AI_SVC["ai/<br/>LLM chat + remediation"]
+ ACCOUNTS["accounts.py<br/>User management"]
+ DASH_SVC["dashboard_service.py<br/>Metrics aggregation"]
+ end
+
+ subgraph DATA_LAYER ["🗄️ Data Layer"]
+ ORG_M["org.py"]
+ ASSET_M["asset.py"]
+ VULN_M["vuln.py"]
+ FINDING_M["finding.py"]
+ PATH_M["path.py"]
+ SCAN_M["scan.py"]
+ REM_M["remediation.py"]
+ LIVE_M["live.py"]
+ NET_M["netconfig.py"]
+ URL_M["urltrust.py"]
+ end
+
+ API_LAYER --> SERVICE_LAYER
+ SERVICE_LAYER --> DATA_LAYER
+
+ style HEALTH fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style AUTH_R fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style RISK fill:#0f3460,stroke:#e94560,color:#fff
+ style ATK fill:#0f3460,stroke:#e94560,color:#fff
+ style AI_SVC fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+ style DEEPSCAN fill:#16213e,stroke:#f4d03f,color:#1a1a2e
 ```
 
 ---
 
-## 🔐 Authentication & Security Flow
+## 🔄 Data Flow
+
+### End-to-End: From Discovery to Remediation
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'edgeLabelBackground':'#16213e', 'tertiaryColor': '#0f3460', 'primaryTextColor': '#e0e0e0', 'lineColor': '#38c6f4', 'secondaryColor': '#1a1a2e', 'tertiaryColor': '#0f3460'}}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+flowchart TD
+ subgraph DISCOVERY ["Phase 1 — Discovery"]
+ direction LR
+ D1["👁️ Agent<br/>dns/conn/devices scan"]
+ D2["🔎 Deep Scan<br/>nmap + NVD CVE"]
+ D3["🧩 Extension<br/>URL telemetry"]
+ end
+
+ subgraph INGEST ["Phase 2 — Ingestion"]
+ I1["📥 POST /api/v1/ingest<br/>JSON payload"]
+ I2["🔍 Validate + Transform<br/>Pydantic schemas"]
+ I3["💾 Persist<br/>SQLAlchemy ORM"]
+ end
+
+ subgraph ANALYSIS ["Phase 3 — Graph Analysis"]
+ direction TB
+ A1["🕸️ Build NetworkX DiGraph<br/>Nodes = assets<br/>Edges = reachability"]
+ A2["🔍 Yen's k-Shortest<br/>All Internet→jewel paths"]
+ A3["💰 Price Every Path<br/>CVSS × blast radius × $"]
+ A4["📊 Aggregate Exposure<br/>Total $ at risk"]
+ end
+
+ subgraph TRIGGER ["Phase 4 — Event-Driven Recompute"]
+ T1["✅ Finding resolved"]
+ T2["🆕 New finding"]
+ T3["💎 Asset added/removed"]
+ T4["🔧 Vuln patched"]
+ T5["🗑️ Asset removed"]
+ end
+
+ subgraph OUTPUT ["Phase 5 — Output"]
+ direction LR
+ O1["📊 Dashboard<br/>Exposure KPIs"]
+ O2["🕸️ Attack Map<br/>ReactFlow visualization"]
+ O3["🔍 Breach Sim<br/>Step-by-step paths"]
+ O4["🚨 Findings<br/>Severity-ranked table"]
+ O5["🛠️ Remediation<br/>Ansible playbooks"]
+ O6["💬 Telegram<br/>Push alerts"]
+ O7["📡 Live Watch<br/>Force-directed map"]
+ end
+
+ D1 -->|HTTPS POST| I1
+ D2 -->|scheduled| I2
+ D3 -->|HTTPS POST| I1
+
+ I1 --> I2 --> I3
+ I3 --> A1 --> A2 --> A3 --> A4
+
+ T1 & T2 & T3 & T4 & T5 -.->|trigger| A1
+
+ A4 --> O1 & O2 & O3 & O4 & O5 & O6 & O7
+
+ style D1 fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style A1 fill:#0f3460,stroke:#e94560,color:#fff
+ style T1 fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+```
+
+### Request Lifecycle: Auth → Data → Response
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
 sequenceDiagram
- actor U as 👤 User
- actor EXT as 🧩 Extension
- participant UI as 🌐 Web UI
- participant API as 🖥️ FastAPI Server
- participant DB as 🗄️ Database
- participant CACHE as ⚡ Redis Cache
- participant LLM as 🧠 LLM Provider
- participant TG as 💬 Telegram Bot
+ actor U as 👤 Analyst
+ participant W as 🌐 Web UI
+ participant A as 🖥️ API Gateway
+ participant S as ⚙️ Service Layer
+ participant D as 🗄️ Database
+ participant G as 🕸️ Graph Engine
 
- %% ── Login Flow ──
- rect rgb(15, 52, 96)
- Note over U,API: 🔐 AUTHENTICATION
- U->>UI: Enter email + password
- UI->>API: POST /api/auth/login<br/>{email, password}
- API->>DB: bcrypt verify + lookup
- DB-->>API: User record + org
- API->>API: Create JWT<br/>(access: 15m, refresh: 7d)
- API-->>UI: {access_token, refresh_token}
- UI->>UI: Store tokens<br/>(memory + localStorage)
- end
+ U->>W: Login (email + password)
+ W->>A: POST /api/v1/auth/login
+ A->>A: Verify bcrypt hash
+ A-->>W: JWT access (15m) + refresh (7d)
+ W->>A: GET /api/v1/dashboard + Bearer token
+ A->>A: Validate JWT + org membership
+ A->>S: get_dashboard(org_id)
+ S->>D: Query assets + findings
+ D-->>S: Asset/finding rows
+ S->>G: build_graph(assets)
+ G->>G: NetworkX DiGraph + Yen's k-shortest
+ G-->>S: Attack paths + dollar prices
+ S-->>A: Aggregated metrics + paths
+ A-->>W: JSON response
+ W->>U: Render dashboard with KPIs
+```
 
- %% ── API Call Flow ──
- rect rgb(26, 26, 46)
- Note over UI,DB: 📡 API REQUEST / RESPONSE
- U->>UI: Navigate to Dashboard
- UI->>API: GET /api/dashboard<br/>Authorization: Bearer {token}
- API->>API: Validate JWT<br/>(python-jose)
- API->>API: Rate limit check
- API->>DB: Query org-scoped data
- DB-->>API: Exposure metrics
- API-->>UI: JSON response
- UI->>UI: TanStack Query cache update
- end
+---
 
- %% ── Token Refresh ──
- rect rgb(10, 61, 98)
- Note over UI,API: 🔄 TOKEN REFRESH
- UI->>API: GET /api/findings (401)
- UI->>API: POST /api/auth/refresh
- API->>API: Validate refresh token
- API-->>UI: {access_token: new}
- UI->>API: Retry GET /api/findings<br/>with new token
- API-->>UI: {findings: [...]}
+## ⚙️ Backend Deep Dive
+
+### Backend Service Topology
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+graph TB
+ subgraph SECURITY ["🔐 Security & Auth"]
+ AUTH["auth.py<br/>JWT + bcrypt<br/>login/refresh/me"]
+ DEPS["deps.py<br/>get_current_user<br/>rate limiting"]
+ ERRORS["errors.py<br/>HTTPException handlers<br/>envelope format"]
  end
 
- %% ── AI Chat Flow ──
- rect rgb(15, 52, 96)
- Note over UI,LLM: 🤖 AI ASSISTANT
- U->>UI: "Explain finding #12"
- UI->>API: POST /api/ai/chat<br/>Bearer {token}
- API->>API: Auth + rate limit
- API->>LLM: Stream completion<br/>(Groq Llama 3.3 / Claude)
- LLM-->>API: Streamed tokens
- API-->>UI: {response: "..."}
+ subgraph BUSINESS ["⚙️ Business Logic — 14 Services"]
+ RISK["risk_engine.py<br/>Graph construction<br/>Node pricing"]
+ ATK["attack_paths.py<br/>Yen's k-shortest<br/>Path enumeration"]
+ IMPACT["impact.py<break/>Dollar value<br/>CVSS × blast radius"]
+ RECOMP["recompute.py<br/>Exposure recompute<br/>on events"]
+ INGEST_S["ingest.py<br/>Agent payload<br/>normalization"]
+ URLTRUST["urltrust/<br/>6-module scoring<br/>heuristic + ML"]
+ DEEPSCAN["deepscan/<br/>nmap integration<br/>CVE lookup"]
+ NETCONF["netconfig/<br/>Cisco config<br/>generation"]
+ LIVE["live.py<br/>Device orchestration<br/>mDNS + DNS"]
+ INTEL["intel.py<br/>Threat feeds<br/>enrichment"]
+ AUTOSCAN["autoscan.py<br/>Scheduled scans<br/>APScheduler"]
+ HARD["hardening.py<br/>Ansible<br/>playbooks"]
+ TG["telegram_alerts.py<br/>Bot notifications"]
+ AI["ai/<br/>LLM client +<br/>prompts + service"]
+ ACC["accounts.py<br/>User + org<br/>management"]
+ DASH["dashboard_service.py<br/>Metrics<br/>aggregation"]
  end
 
- %% ── Extension Flow ──
- rect rgb(10, 61, 98)
- Note over EXT,API: 🧩 EXTENSION AUTH
- EXT->>API: POST /api/auth/login<br/>(from options page)
- API-->>EXT: {access_token}
- EXT->>EXT: chrome.storage.local.set
+ subgraph SEED ["🌱 Demo Data"]
+ ACME["acme.py<br/>Acme Retail<br/>network seed"]
+ FIXTURES["fixtures/<br/>JSON scan<br/>data"]
  end
 
- %% ── URL Analysis Flow ──
- rect rgb(26, 26, 46)
- Note over EXT,EXT: 🌐 URL ANALYSIS (Extension)
- EXT->>EXT: chrome.webNavigation<br/>onBeforeNavigate fires
- EXT->>EXT: Check allowlist + cache
- EXT->>API: POST /api/url-analyzer/analyze<br/>Bearer {token}
- API->>CACHE: Check verdict cache (TTL 10m)
- alt Cache Hit
- CACHE-->>API: {band, score, reasons}
- else Cache Miss
- API->>API: Heuristic + ML scoring
- API->>CACHE: Store result (TTL 10m)
- end
- API-->>EXT: {band: "High Risk"}
- alt band == "High Risk"
- EXT->>EXT: 🔴 Redirect → warning.html
- else band == "Caution"
- EXT->>EXT: 🟡 Amber badge
- else band == "Trusted"
- EXT->>EXT: 🟢 Teal badge → continue
- end
+ SECURITY --> BUSINESS
+ BUSINESS --> SEED
+
+ style AUTH fill:#0f3460,stroke:#e94560,color:#fff
+ style RISK fill:#0f3460,stroke:#e94560,color:#fff
+ style ATK fill:#0f3460,stroke:#e94560,color:#fff
+ style AI fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+ style DEEPSCAN fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+```
+
+---
+
+## 🕸️ Attack Graph Engine
+
+The core of Drishti. Every asset becomes a node, every reachability relationship becomes a directed edge, and graph algorithms find what matters.
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+flowchart TD
+ subgraph INPUT ["📥 Input: Assets + Topology"]
+ A1["🌐 Internet<br/>(Entry point)"]
+ A2["🔀 DMZ<br/>web.acme-retail.dev<br/>CVSS 7.5 · $45K"]
+ A3["⚙️ App Server<br/>api.acme-retail.dev<br/>CVSS 9.8 · $180K"]
+ A4["💎 Crown Jewel<br/>db.acme-retail.dev<br/>CVSS 9.1 · $500K"]
+ A5["📧 Mail Server<br/>mail.acme-retail.dev<br/>CVSS 6.1 · $15K"]
+ A6["🔐 VPN Gateway<br/>vpn.acme-retail.dev<br/>CVSS 7.8 · $90K"]
+ A7["📊 Monitor<br/>monitor.acme-retail.dev<br/>CVSS 4.3 · $8K"]
  end
 
- %% ── Alert Flow ──
- rect rgb(233, 69, 96)
- Note over API,TG: 🔔 TELEGRAM ALERTS
- API->>API: Scan for high/critical findings
- API->>TG: Send notification
- TG-->>U: 📱 "Critical: CVE-2023-XXXX on app server"
+ subgraph GRAPH ["🕸️ NetworkX DiGraph"]
+ NODES["Nodes: 7 assets<br/>+ Internet"]
+ EDGES["Edges: Reachability<br/>DMZ→App→DB<br/>VPN→App<br/>VPN→Monitor"]
+ PRICING["Node Price = Σ(CVSS×0.4,<br/>Criticality×0.3,<br/>Exposure×0.2,<br/>Blast×0.1)"]
  end
+
+ subgraph ALGO ["🔬 Graph Algorithms"]
+ YEN["Yen's k-Shortest<br/>All Internet→DB paths<br/>k = configurable"]
+ BLOCK["Network Min-Cut<br/>Critical route<br/>identification"]
+ BLAST["Blast Radius<br/>Downstream impact<br/>per compromised node"]
+ end
+
+ subgraph OUTPUT ["📤 Output"]
+ PATHS_OUT["Attack Paths<br/>Internet→DMZ→App→DB<br/>3 hops · $725K exposure"]
+ SCORE_OUT["Risk Scores<br/>Per-node + per-path<br/>Dollar + severity"]
+ REM_OUT["Remediation<br/>Priority-ranked<br/>by $ impact"]
+ end
+
+ A1 & A2 & A3 & A4 & A5 & A6 & A7 --> NODES
+ NODES --> EDGES --> PRICING
+ PRICING --> YEN --> BLOCK --> BLAST
+ BLAST --> PATHS_OUT & SCORE_OUT & REM_OUT
+
+ style A4 fill:#0f3460,stroke:#f4d03f,stroke-width:3px,color:#f4d03f
+ style A2 fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style YEN fill:#0f3460,stroke:#e94560,color:#fff
+ style PATHS_OUT fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+```
+
+### Attack Path Enumeration
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+flowchart LR
+ subgraph SOURCE ["Source"]
+ INTERNET["🌐 Internet<br/>(Untrusted)"]
+ end
+
+ subgraph PATH1 ["Path 1 — Primary (3 hops)"]
+ P1S["🌐 Internet"]
+ P1A["DMZ Web<br/>7.5 CVSS"]
+ P1B["App Server<br/>9.8 CVSS"]
+ P1C["💎 Database<br/>9.1 CVSS · $500K"]
+ end
+
+ subgraph PATH2 ["Path 2 — Alternative (2 hops)"]
+ P2S["🌐 Internet"]
+ P2A["🔐 VPN Gateway<br/>7.8 CVSS"]
+ P2B["💎 Database<br/>9.1 CVSS · $500K"]
+ end
+
+ subgraph PATH3 ["Path 3 — Lateral (3 hops)"]
+ P3S["🌐 Internet"]
+ P3A["📧 Mail Server<br/>6.1 CVSS"]
+ P3B["📊 Monitor<br/>4.3 CVSS"]
+ P3C["🔐 VPN Gateway<br/>7.8 CVSS"]
+ end
+
+ subgraph RESULTS ["Results"]
+ R1["🥇 Path 1: $725K · CRITICAL"]
+ R2["🥈 Path 2: $590K · CRITICAL"]
+ R3["🥉 Path 3: $118K · HIGH"]
+ end
+
+ INTERNET --> P1S --> P1A --> P1B --> P1C --> R1
+ INTERNET --> P2S --> P2A --> P2B --> R2
+ INTERNET --> P3S --> P3A --> P3B --> P3C --> R3
+
+ style P1C fill:#0f3460,stroke:#f4d03f,stroke-width:3px,color:#f4d03f
+ style P2B fill:#0f3460,stroke:#f4d03f,stroke-width:3px,color:#f4d03f
+ style R1 fill:#e94560,stroke:#ff6b6b,color:#fff
+ style R2 fill:#e94560,stroke:#ff6b6b,color:#fff
+ style R3 fill:#0f3460,stroke:#f4d03f,color:#f4d03f
+```
+
+---
+
+## 📊 Risk Scoring Model
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+flowchart LR
+ classDef input fill:#16213e,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0,rx:12
+ classDef weight fill:#e94560,stroke:#ff6b6b,stroke-width:1.5px,color:#fff,rx:8
+ classDef calc fill:#0f3460,stroke:#f4d03f,stroke-width:2px,color:#f4d03f,rx:12
+ classDef out fill:#16213e,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0,rx:10
+
+ subgraph INPUTS ["📥 Inputs"]
+ F1["📋 CVSS Base Score<br/>0.0 – 10.0"]:::input
+ F2["💎 Asset Criticality<br/>1× – 5× multiplier"]:::input
+ F3["🌐 Exposure Score<br/>Public vs Segmented"]:::input
+ F4["💥 Blast Radius<br/>Downstream impact"]:::input
+ end
+
+ subgraph WEIGHTS ["⚖️ Weighted Formula"]
+ W1["40%"]:::weight
+ W2["30%"]:::weight
+ W3["20%"]:::weight
+ W4["10%"]:::weight
+ end
+
+ subgraph FORMULAS ["🧮 Calculations"]
+ NODE["Node Price =<br/>(CVSS × 0.40) +<br/>(Criticality × 0.30) +<br/>(Exposure × 0.20) +<br/>(Blast × 0.10)"]:::calc
+ PATH["Path Cost = Σ(Exploit Cost)<br/>+ BlastRadius × CrownJewel"]:::calc
+ end
+
+ subgraph OUTPUT ["📤 Output"]
+ O1["🎯 Node Score<br/>0 – 10"]
+ O2["💰 Dollar Price<br/>$0 – $1M+"]
+ O3["⚠️ Severity<br/>Critical / High / Med / Low"]
+ end
+
+ F1 --> W1
+ F2 --> W2
+ F3 --> W3
+ F4 --> W4
+ W1 & W2 & W3 & W4 --> NODE
+ NODE --> PATH
+ PATH --> O1 & O2 & O3
 ```
 
 ---
@@ -456,13 +559,13 @@ sequenceDiagram
 ## 🔄 Recompute & Exposure Tracking
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'edgeLabelBackground':'#16213e', 'tertiaryColor': '#0f3460', 'primaryTextColor': '#e0e0e0', 'lineColor': '#38c6f4', 'secondaryColor': '#1a1a2e', 'tertiaryColor': '#0f3460'}}}%%
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
 flowchart TD
  classDef trigger fill:#e94560,stroke:#ff6b6b,stroke-width:2px,color:#fff,rx:12
  classDef step fill:#16213e,stroke:#38c6f4,stroke-width:1.5px,color:#e0e0e0,rx:10
  classDef result fill:#0f3460,stroke:#f4d03f,stroke-width:2px,color:#f4d03f,rx:10
 
- subgraph TRIGGERS [⚡ Trigger Events]
+ subgraph TRIGGERS ["⚡ Trigger Events"]
  direction LR
  T1["✅ Finding<br/>Resolved"]:::trigger
  T2["🆕 New Finding<br/>Created"]:::trigger
@@ -471,24 +574,24 @@ flowchart TD
  T5["🗑️ Asset<br/>Removed"]:::trigger
  end
 
- subgraph PIPELINE [⚙️ Recompute Pipeline — 7 Steps]
+ subgraph PIPELINE ["⚙️ Recompute Pipeline — 7 Steps"]
  direction TB
- S1["1️⃣ Load Org Assets<br/><i>All nodes in org graph</i>"]:::step
- S2["2️⃣ Rebuild NetworkX<br/><i>Directed DiGraph</i>"]:::step
- S3["3️⃣ Yen's k-Shortest<br/><i>All INTERNET → jewel paths</i>"]:::step
- S4["4️⃣ Price Each Path<br/><i>$ CVSS × blast radius</i>"]:::step
- S5["5️⃣ Min-Cut Analysis<br/><i>Critical routes</i>"]:::step
- S6["6️⃣ Aggregate Exposure<br/><i>Total $ at risk</i>"]:::step
- S7["7️⃣ Store + Emit<br/><i>Updated metrics</i>"]:::step
+ S1["1️⃣ Load Org Assets<br/>All nodes in org graph"]:::step
+ S2["2️⃣ Rebuild NetworkX<br/>Directed DiGraph"]:::step
+ S3["3️⃣ Yen's k-Shortest<br/>All INTERNET → jewel paths"]:::step
+ S4["4️⃣ Price Each Path<br/>$ CVSS × blast radius"]:::step
+ S5["5️⃣ Min-Cut Analysis<br/>Critical routes"]:::step
+ S6["6️⃣ Aggregate Exposure<br/>Total $ at risk"]:::step
+ S7["7️⃣ Store + Emit<br/>Updated metrics"]:::step
  end
 
- subgraph RESULTS [📊 Results Dashboard]
+ subgraph RESULTS ["📊 Results Dashboard"]
  direction LR
- R1["💰 Total Exposure<br/><b>$702,900</b>"]:::result
- R2["📈 Top Risk Path<br/><b>3 hops</b>"]:::result
- R3("👑 Crown Jewels<br/><b>2 flagged</b>"):::result
- R4["📉 Trend<br/><b>↓ 22%</b>"):::result
- R5["🚨 Open Findings<br/><b>23</b>"):::result
+ R1["💰 Total Exposure"]:::result
+ R2["📈 Top Risk Path"]:::result
+ R3["👑 Crown Jewels"]:::result
+ R4["📉 Trend"]:::result
+ R5["🚨 Open Findings"]:::result
  end
 
  T1 & T2 & T3 & T4 & T5 --> S1
@@ -498,51 +601,180 @@ flowchart TD
 
 ---
 
-## 🔬 Risk Scoring Model
+## 🔐 Authentication & Security
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'edgeLabelBackground':'#16213e', 'tertiaryColor': '#0f3460', 'primaryTextColor': '#e0e0e0', 'lineColor': '#38c6f4', 'secondaryColor': '#1a1a2e', 'tertiaryColor': '#0f3460'}}}%%
-flowchart LR
- classDef factor fill:#16213e,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0,rx:12
- classDef weight fill:#e94560,stroke:#ff6b6b,stroke-width:1.5px,color:#fff,rx:8
- classDef formula fill:#0f3460,stroke:#f4d03f,stroke-width:2px,color:#f4d03f,rx:12
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+sequenceDiagram
+ actor U as 👤 User
+ participant W as 🌐 Web UI
+ participant A as 🖥️ API
+ participant DB as 🗄️ Database
 
- subgraph INPUTS [📥 Scoring Inputs]
- direction TB
- F1["📋 CVSS Base Score<br/>0.0 – 10.0"]:::factor
- F2["💎 Asset Criticality<br/>1× – 5× multiplier"]:::factor
- F3["🌐 Exposure Score<br/>Public vs Segmented"]:::factor
- F4["💥 Blast Radius<br/>Downstream impact"]:::factor
+ U->>W: Enter credentials
+ W->>A: POST /api/v1/auth/login<br/>{email, password}
+ A->>DB: SELECT user WHERE email
+ DB-->>A: User record
+ A->>A: bcrypt.verify(password, hash)
+ alt Valid credentials
+ A->>A: Create JWT (15m access + 7d refresh)
+ A-->>W: {access_token, refresh_token, org}
+ W->>W: Store tokens (memory / httpOnly cookie)
+ W->>A: GET /api/v1/dashboard<br/>Authorization: Bearer <token>
+ A->>A: JWT decode + verify signature
+ A->>A: Check org membership
+ A-->>W: Protected data
+ else Invalid
+ A-->>W: 401 Unauthorized
+ W->>U: Show error
  end
 
- subgraph WEIGHTS [⚖️ Weights]
+ Note over A,W: Every request carries Bearer JWT<br/>Rate-limited per org
+ Note over A,DB: Passwords: bcrypt 12 rounds<br/>Never returned in responses
+```
+
+---
+
+## 🚀 Deployment Architecture
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+graph TB
+ subgraph DEV ["Development"]
  direction LR
- W1["40%"]:::weight
- W2["30%"]:::weight
- W3["20%"]:::weight
- W4["10%"]:::weight
+ UVICORN["uvicorn<br/>--reload"]
+ VITE["vite dev<br/>HMR"]
+ REDIS_D["redis-server"]
+ SQLITE_D["drishti.db"]
  end
 
- subgraph CALC [🧮 Formula]
- direction TB
- FORMULA["Node Price = (CVSS × 0.40) +<br/>(Criticality × 0.30) +<br/>(Exposure × 0.20) +<br/>(BlastRadius × 0.10)"]:::formula
- PATH_COST["Path Cost = Σ(Exploit Cost)<br/>+ Blast Radius × Crown Jewel"]:::formula
- end
-
- subgraph OUTPUT [📤 Output]
+ subgraph PROD ["Production (Docker)"]
  direction LR
- O1["🎯 Node Score"]
- O2["💰 $ Price"]
- O3["⚠️ Severity<br/>Critical/High/Med/Low"]
+ API_P["FastAPI<br/>Gunicorn + Uvicorn<br/>workers × N"]
+ WEB_P["Nginx<br/>Serves SPA<br/>reverse proxy /api"]
+ REDIS_P["Redis<br/>Session + cache"]
+ DB_P["PostgreSQL<br/>Primary + read replica"]
+ SCHED["APScheduler<br/>Deep scan cron"]
  end
 
- F1 --> W1
- F2 --> W2
- F3 --> W3
- F4 --> W4
- W1 & W2 & W3 & W4 --> FORMULA
- FORMULA --> PATH_COST
- PATH_COST --> O1 & O2 & O3
+ subgraph CI ["CI/CD"]
+ GH["GitHub Actions"]
+ DOCKER["Docker Build"]
+ TEST["pytest + Vitest"]
+ DEPLOY["Deploy"]
+ end
+
+ GH -->|push| TEST
+ TEST -->|pass| DOCKER
+ DOCKER -->|image| DEPLOY
+ DEPLOY --> API_P
+ DEPLOY --> WEB_P
+
+ UVICORN --> API_P
+ VITE --> WEB_P
+
+ style UVICORN fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style API_P fill:#0f3460,stroke:#e94560,color:#fff
+ style WEB_P fill:#0f3460,stroke:#e94560,color:#fff
+ style GH fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+```
+
+---
+
+## ✨ Features
+
+### Feature Map
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+graph TB
+ subgraph VISUALIZE ["📊 Visualize"]
+ DASH["📈 Dashboard<br/>KPI cards · exposure<br/>trends · severity split"]
+ GRAPH_MAP["🕸️ Attack Map<br/>ReactFlow force graph<br/>blast radius coloring"]
+ LIVE_MAP["📡 Live Watch<br/>Real-time topology<br/>mDNS discovery"]
+ end
+
+ subgraph ANALYZE ["🔬 Analyze"]
+ BREACH["🔍 Breach Simulation<br/>Yen's paths<br/>step-by-step walkthrough"]
+ FINDINGS_TBL["🚨 Findings<br/>Severity-ranked<br/>filterable · searchable"]
+ URLTRUST_UI["🌐 URL Analyzer<br/>Reputation score<br/>WHOIS · heuristic · ML"]
+ end
+
+ subgraph ACT ["🛠️ Act"]
+ REMED["🛠️ Remediation Studio<br/>3-column layout<br/>Ansible playbook gen"]
+ AI_CHAT["💬 AI Assistant<br/>LLM-powered chat<br/>remediation advice"]
+ REPORT_GEN["📋 Reports<br/>Full org export<br/>NetConfig download"]
+ end
+
+ subgraph DETECT ["👁️ Detect"]
+ DEEP_SCAN["🔎 Deep Scan<br/>nmap autonomous<br/>NVD CVE lookup"]
+ AUTO_SCAN["⏰ Auto Scan<br/>Scheduled triggers<br/>APScheduler"]
+ THREAT_FEED["🌡️ Threat Intel<br/>Live feed integration<br/>enrichment"]
+ end
+
+ subgraph ALERT ["🔔 Alert"]
+ TG_BOT["💬 Telegram<br/>Critical finding<br/>push alerts"]
+ BLOCK_PAGE["🧩 Chrome Guard<br/>URL blocking<br/>warning page"]
+ end
+
+ subgraph MANAGE ["⚙️ Manage"]
+ AUTH_MGMT["🔐 Auth<br/>JWT · org mgmt<br/>multi-tenant"]
+ SETTINGS["⚙️ Settings<br/>Org config<br/>preferences"]
+ end
+
+ VISUALIZE --> ANALYZE --> ACT --> DETECT --> ALERT --> MANAGE
+
+ style DASH fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style GRAPH_MAP fill:#0f3460,stroke:#e94560,color:#fff
+ style BREACH fill:#0f3460,stroke:#e94560,color:#fff
+ style REMED fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+ style DEEP_SCAN fill:#16213e,stroke:#f4d03f,color:#1a1a2e
+ style TG_BOT fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+```
+
+### Backend Architecture: Data Flow in Detail
+
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
+flowchart TD
+ subgraph REQUEST ["Incoming Request"]
+ CLIENT["Client<br/>(Web / Agent / Extension)"]
+ MIDDLEWARE["FastAPI Middleware<br/>CORS · Rate Limit · Auth"]
+ end
+
+ subgraph ROUTING ["Router Layer"]
+ R1["16 REST Routers<br/>Route → Service"]
+ end
+
+ subgraph SERVICE ["Service Execution"]
+ S1["Service Method<br/>(e.g. get_attack_paths)"]
+ S2["Graph Engine<br/>NetworkX + Yen's"]
+ S3["External Calls<br/>NVD · Telegram · LLM"]
+ end
+
+ subgraph DB_LAYER ["Database Layer"]
+ D1["Pydantic Schema<br/>DTO validation"]
+ D2["SQLAlchemy ORM<br/>10 models · 21 tables"]
+ D3["Alembic Migrations<br/>Schema versioning"]
+ end
+
+ subgraph RESPONSE ["Response"]
+ RSP["JSON Response<br/>Pydantic serialized"]
+ WS["WebSocket (optional)<br/>Live telemetry"]
+ end
+
+ CLIENT --> MIDDLEWARE --> R1 --> S1
+ S1 --> S2
+ S1 --> S3
+ S1 --> D1 --> D2 --> D3
+ D2 --> S1
+ S1 --> RSP --> CLIENT
+ S1 -.->|optional| WS --> CLIENT
+
+ style S1 fill:#0f3460,stroke:#e94560,color:#fff
+ style S2 fill:#0f3460,stroke:#f4d03f,color:#1a1a2e
+ style D2 fill:#16213e,stroke:#38c6f4,color:#e0e0e0
+ style MIDDLEWARE fill:#16213e,stroke:#38c6f4,color:#e0e0e0
 ```
 
 ---
@@ -666,7 +898,7 @@ drishti/
 │ ├── 🗄️ db.py # SQLAlchemy engine + session factory
 │ ├── 🔧 db_init.py # Schema column reconciliation
 │ │
-│ ├── 📁 api/v1/ # 16 REST Routers
+│ ├── 📁 api/ # 16 REST Routers
 │ │ ├── health.py # Health check
 │ │ ├── auth.py # JWT login / refresh / me
 │ │ ├── org.py # Organization CRUD
@@ -681,7 +913,8 @@ drishti/
 │ │ ├── live.py # Real-time telemetry
 │ │ ├── netconfig.py # Network config export
 │ │ ├── urltrust.py # URL reputation
-│ │ └── scan.py # Deep scan triggers
+│ │ ├── scan.py # Deep scan triggers
+│ │ └── v1/ # v1 API namespace (14 routers)
 │ │
 │ ├── 📁 models/ # 10 SQLAlchemy ORM Models
 │ │ ├── org.py # Organization + membership
@@ -695,21 +928,39 @@ drishti/
 │ │ ├── netconfig.py # Network config
 │ │ └── urltrust.py # URL trust entries
 │ │
-│ ├── 📁 schemas/ # Pydantic DTOs
-│ ├── 📁 services/ # 9 Business-Logic Modules
+│ ├── 📁 schemas/ # Pydantic DTOs (12 schemas)
+│ ├── 📁 services/ # 14 Business-Logic Modules
 │ │ ├── risk_engine.py # NetworkX graph engine
 │ │ ├── attack_paths.py # Yen's k-shortest paths
 │ │ ├── impact.py # $ pricing model
 │ │ ├── recompute.py # Live exposure delta
 │ │ ├── ingest.py # Agent payload processing
 │ │ ├── urltrust/ # URL scoring (heuristic + ML)
+│ │ │ ├── analyzer.py
+│ │ │ ├── checks.py
+│ │ │ ├── scoring.py
+│ │ │ ├── providers.py
+│ │ │ ├── network.py
+│ │ │ └── summary.py
 │ │ ├── deepscan/ # Autonomous nmap scanner
+│ │ │ ├── scanner.py
+│ │ │ ├── parser.py
+│ │ │ ├── cve_lookup.py
+│ │ │ └── integration.py
 │ │ ├── netconfig/ # Network config generation
+│ │ │ ├── detectors.py
+│ │ │ ├── facts.py
+│ │ │ └── service.py
 │ │ ├── live.py # Live watch orchestration
 │ │ ├── live_threats.py # Threat feed integration
 │ │ ├── autoscan.py # Scheduled deep-scan triggers
 │ │ ├── hardening.py # Ansible playbook generation
-│ │ └── telegram_alerts.py # Telegram push notifications
+│ │ ├── telegram_alerts.py # Telegram push notifications
+│ │ └── ai/ # LLM integration
+│ │ ├── client.py
+│ │ ├── service.py
+│ │ ├── prompts.py
+│ │ └── ai_remediate.py
 │ │
 │ ├── 📁 core/ # Core Infrastructure
 │ │ ├── security.py # JWT + bcrypt helpers
@@ -742,6 +993,7 @@ drishti/
 │ │ ├── 📁 components/ # Shared UI components
 │ │ ├── 📁 lib/ # Utilities + helpers
 │ │ └── 📁 styles/ # Tailwind + global CSS
+│ │
 │ ├── package.json
 │ ├── vite.config.ts
 │ └── Dockerfile
@@ -791,6 +1043,36 @@ python agent/drishti_watch.py --once \
  --token agent-demo-token
 ```
 
+| Test Suite | Coverage |
+|---|---|
+| `test_scoring.py` | Risk scoring + pricing model |
+| `test_paths.py` | Attack path enumeration (Yen's) |
+| `test_blast_radius.py` | Blast radius computation |
+| `test_impact.py` | Dollar impact calculations |
+| `test_recompute.py` | Exposure recompute pipeline |
+| `test_deepscan.py` | nmap scan integration |
+| `test_autoscan.py` | Scheduled scan triggers |
+| `test_live.py` | Live telemetry API |
+| `test_live_devices.py` | Device discovery |
+| `test_agent_discovery.py` | Agent topology discovery |
+| `test_agent.py` | Agent ingestion |
+| `test_ingest.py` | Payload processing |
+| `test_urltrust.py` | URL trust scoring |
+| `test_urltrust_network.py` | URL network analysis |
+| `test_auth_security.py` | JWT + bcrypt + rate limit |
+| `test_accounts.py` | User + org management |
+| `test_assets.py` | Asset CRUD |
+| `test_contracts.py` | API contract tests |
+| `test_report.py` | Report generation |
+| `test_netconfig.py` | Network config export |
+| `test_ai.py` | LLM integration |
+| `test_config.py` | Config validation |
+| `test_deps.py` | Dependency injection |
+| `test_db_init.py` | Database migration |
+| `test_main.py` | App startup |
+| `test_live_threats.py` | Threat feed integration |
+| `test_read_service.py` | Read service layer |
+
 ---
 
 ## 📊 Demo Network — Acme Retail
@@ -820,6 +1102,7 @@ Login: `analyst@acme-retail.dev` / `drishti-demo`
 | [DATA_MODEL.md](Drishti%20Docs/DATA_MODEL.md) | ER diagram, 21-table dictionary |
 | [API_REFERENCE.md](Drishti%20Docs/API_REFERENCE.md) | Every endpoint (method, auth, request/response) |
 | [SECURITY_MODEL.md](Drishti%20Docs/SECURITY_MODEL.md) | Defensive-only stance, consent gating, auth internals |
+| [UIUX.md](Drishti%20Docs/UIUX.md) | Design system specification |
 
 ---
 
