@@ -34,6 +34,8 @@ import {
   Zap,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -329,6 +331,11 @@ function NetworkThreatsSection() {
     medium: threats.filter((t) => t.severity === "medium").length,
   };
 
+  const [expandAll, setExpandAll] = useState(false);
+  const [threatLimit, setThreatLimit] = useState(5);
+
+  const displayedThreats = useMemo(() => threats.slice(0, threatLimit), [threats, threatLimit]);
+
   return (
     <Panel
       eyebrow="Detection · live on the wire"
@@ -337,6 +344,22 @@ function NetworkThreatsSection() {
       bodyClassName="px-5 pb-5 pt-4"
       meta={
         <div className="flex flex-wrap items-center justify-end gap-2">
+          {threats.length > 0 && (
+            <button
+              onClick={() => setExpandAll((v) => !v)}
+              className="flex items-center gap-1 rounded-md border border-hairline px-2.5 py-1 text-[11px] text-ink-muted hover:text-ink hover:border-accent-500/40 transition-colors"
+            >
+              {expandAll ? (
+                <>
+                  <ChevronUp className="h-3 w-3" /> Collapse all
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-3 w-3" /> Expand all
+                </>
+              )}
+            </button>
+          )}
           {bySev.critical > 0 && (
             <span
               className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase"
@@ -382,7 +405,7 @@ function NetworkThreatsSection() {
           </div>
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {demoActive && (
             <div className="flex flex-wrap items-center gap-2 rounded-node border border-dashed border-accent-500/40 bg-accent-500/5 px-3 py-1.5 text-[11px] text-accent-300">
               <Zap className="h-3.5 w-3.5" /> Demo attack active — clearly-labelled test threats.
@@ -392,62 +415,106 @@ function NetworkThreatsSection() {
               <span className="text-ink-muted">· Click <b>Clear demo</b> when done.</span>
             </div>
           )}
-          {threats.map((t) => (
-            <ThreatRow key={t.id} t={t} />
+          {displayedThreats.map((t) => (
+            <ThreatRow key={t.id} t={t} forceExpand={expandAll} />
           ))}
+
+          {/* Progressive 5-item Load More Button */}
+          {threatLimit < threats.length && (
+            <div className="flex flex-col items-center justify-center gap-2 pt-2 border-t border-hairline/30">
+              <span className="text-[11px] font-mono text-ink-muted">
+                Showing {displayedThreats.length} of {threats.length} active threats
+              </span>
+              <button
+                onClick={() => setThreatLimit((l) => Math.min(l + 5, threats.length))}
+                className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-4 py-1.5 text-xs font-semibold text-ink-primary hover:bg-surface-3 hover:border-accent-500/40 transition-all shadow-xs"
+              >
+                <RefreshCw className="h-3 w-3 text-accent-400" />
+                Load more threats (+{Math.min(5, threats.length - threatLimit)} remaining)
+              </button>
+            </div>
+          )}
         </div>
       )}
     </Panel>
   );
 }
 
-function ThreatRow({ t }: { t: NetworkThreat }) {
+function ThreatRow({ t, forceExpand }: { t: NetworkThreat; forceExpand?: boolean }) {
+  const [open, setOpen] = useState(false);
+  const isExpanded = forceExpand ?? open;
   const meta = THREAT_KIND[t.kind] ?? { icon: ShieldAlert, label: t.kind };
   const Icon = meta.icon;
   const color = sevHex(t.severity);
   const demo = isDemoThreat(t);
+
   return (
     <div
-      className="rounded-node border border-hairline bg-surface-2 p-3"
+      className="rounded-node border border-hairline bg-surface-2 transition-all hover:border-hairline-soft overflow-hidden"
       style={{ borderLeft: `3px solid ${color}` }}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <Icon className="h-4 w-4 shrink-0" style={{ color }} />
-        <span className="font-medium text-small text-ink">{t.title}</span>
-        <span
-          className="rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase"
-          style={{ backgroundColor: `${color}22`, color }}
-        >
-          {t.severity}
-        </span>
-        {demo && (
-          <span className="rounded-sm border border-dashed border-accent-500/50 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-accent-400">
-            demo
+      {/* Clickable Header Row */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between p-3 text-left hover:bg-surface-3/60 transition-colors"
+      >
+        <div className="flex flex-wrap items-center gap-2 min-w-0 pr-2">
+          <Icon className="h-4 w-4 shrink-0" style={{ color }} />
+          <span className="font-medium text-small text-ink truncate">{t.title}</span>
+          <span
+            className="rounded-sm px-1.5 py-0.5 text-[9px] font-semibold uppercase shrink-0"
+            style={{ backgroundColor: `${color}22`, color }}
+          >
+            {t.severity}
           </span>
-        )}
-        {t.mitre && (
-          <span className="ml-auto font-mono text-[10px] text-ink-muted" title="MITRE ATT&CK technique">
-            {t.mitre}
-          </span>
-        )}
-      </div>
-      <p className="mt-1.5 text-[12px] text-ink-secondary">{t.detail}</p>
-      {t.evidence.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {t.evidence.map((e, i) => (
-            <span
-              key={i}
-              className="rounded-sm border border-hairline px-1.5 py-0.5 font-mono text-[10px] text-ink-muted"
-            >
-              {e}
+          {demo && (
+            <span className="rounded-sm border border-dashed border-accent-500/50 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-accent-400 shrink-0">
+              demo
             </span>
-          ))}
+          )}
+          {t.evidence.length > 0 && !isExpanded && (
+            <span className="rounded bg-surface-1 px-1.5 py-0.5 font-mono text-[9.5px] text-ink-muted shrink-0 border border-hairline/40">
+              {t.evidence.length} signal{t.evidence.length === 1 ? "" : "s"}
+            </span>
+          )}
         </div>
-      )}
-      {t.recommendation && (
-        <div className="mt-2 flex items-start gap-1.5 text-[11px] text-ink-secondary">
-          <ShieldCheck className="mt-0.5 h-3 w-3 shrink-0 text-risk-safe" />
-          <span>{t.recommendation}</span>
+
+        <div className="flex items-center gap-2 shrink-0 ml-auto">
+          {t.mitre && (
+            <span className="hidden sm:inline-block font-mono text-[10px] text-ink-muted" title="MITRE ATT&CK technique">
+              {t.mitre}
+            </span>
+          )}
+          <ChevronDown
+            className={`h-4 w-4 text-ink-muted transition-transform duration-200 ${
+              isExpanded ? "rotate-180 text-accent-400" : ""
+            }`}
+          />
+        </div>
+      </button>
+
+      {/* Expandable Body */}
+      {isExpanded && (
+        <div className="px-3 pb-3 pt-1 border-t border-hairline/40 space-y-2 bg-black/[0.015]">
+          <p className="text-[12px] leading-relaxed text-ink-secondary">{t.detail}</p>
+          {t.evidence.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              {t.evidence.map((e, i) => (
+                <span
+                  key={i}
+                  className="rounded-sm border border-hairline bg-surface-1 px-2 py-0.5 font-mono text-[10px] text-ink-muted shadow-xs"
+                >
+                  {e}
+                </span>
+              ))}
+            </div>
+          )}
+          {t.recommendation && (
+            <div className="flex items-start gap-1.5 rounded-md bg-risk-safe/10 border border-risk-safe/20 p-2 text-[11px] text-ink-secondary">
+              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-risk-safe" />
+              <span>{t.recommendation}</span>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -551,6 +618,7 @@ function DevicesSection() {
   const [picked, setPicked] = useState<NetworkDevice | null>(null);
   const [view, setView] = useState<"map" | "grid">("map");
   const [subnetOpen, setSubnetOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(12);
   // engine risk_score per device once deep-scanned → recolors its node/tile
   const [scanRisk, setScanRisk] = useState<Record<string, number>>({});
   const q = useQuery({
@@ -574,6 +642,9 @@ function DevicesSection() {
   const coverage = coverageQ.data ?? [];
   const threats = threatsQ.data ?? [];
   const online = devices.filter((d) => d.online).length;
+
+  // Progressive slicing for optimal DOM load performance
+  const displayedDevices = useMemo(() => devices.slice(0, visibleCount), [devices, visibleCount]);
 
   // rollup of REAL data only: sum matched CVEs across scanned devices, and how
   // many devices remain unscanned (never counted as 0).
@@ -659,100 +730,118 @@ function DevicesSection() {
       )}
 
       {view === "grid" && (
-      <motion.div 
-        initial="hidden" 
-        animate="show" 
-        variants={{
-          hidden: { opacity: 0 },
-          show: {
-            opacity: 1,
-            transition: { staggerChildren: 0.05 }
-          }
-        }}
-        className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
-      >
-        {devices.map((d) => {
-          const Icon = deviceIcon(d);
-          const accent =
-            scanRisk[d.id] != null ? RISK_HEX[riskBucket(scanRisk[d.id])] : deviceAccent(d);
-          const activeAppCount = d.active_apps?.length ?? 0;
-          const activeDomCount = d.active_domains?.length ?? 0;
-          return (
-            <motion.button
-              variants={{
-                hidden: { opacity: 0, y: 15 },
-                show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-              }}
-              key={d.id}
-              onClick={() => setPicked(d)}
-              className={`group rounded-node border bg-surface-2 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-hairline-soft ${
-                d.online ? "border-hairline" : "border-hairline/40 opacity-50"
-              }`}
-              style={{ borderLeft: `3px solid ${accent}` }}
-            >
-              <div className="flex items-center gap-2">
-                <Icon className="h-4 w-4 shrink-0" style={{ color: accent }} />
-                <span className="truncate font-mono text-small font-semibold text-ink">{d.ip}</span>
-                {d.online && (
-                  <span className="ml-auto flex items-center gap-1">
-                    <span className="h-2 w-2 rounded-full bg-risk-safe animate-pulse" title="online" />
-                    <span className="text-[9px] font-medium text-risk-safe">LIVE</span>
-                  </span>
-                )}
-              </div>
-              <div className="mt-1.5">
-                <VulnBadge d={d} />
-              </div>
-              <div className="mt-1 truncate font-mono text-[10px] text-ink-muted">{d.mac}</div>
-              <div className="mt-1 flex items-center gap-1">
-                {d.is_gateway && (
-                  <span className="rounded-sm bg-risk-medium/15 px-1.5 py-0.5 text-[9px] font-medium text-risk-medium">
-                    GATEWAY
-                  </span>
-                )}
-                {d.is_self && (
-                  <span className="rounded-sm bg-risk-safe/15 px-1.5 py-0.5 text-[9px] font-medium text-risk-safe">
-                    THIS DEVICE
-                  </span>
-                )}
-                <span className="truncate text-[10px] text-ink-muted">
-                  {d.vendor ?? "unknown vendor"}
-                </span>
-              </div>
+        <div className="space-y-4">
+          <motion.div key={visibleCount} 
+            initial="hidden" 
+            animate="show" 
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: { staggerChildren: 0.04 }
+              }
+            }}
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+          >
+            {displayedDevices.map((d) => {
+              const Icon = deviceIcon(d);
+              const accent =
+                scanRisk[d.id] != null ? RISK_HEX[riskBucket(scanRisk[d.id])] : deviceAccent(d);
+              const activeAppCount = d.active_apps?.length ?? 0;
+              const activeDomCount = d.active_domains?.length ?? 0;
+              return (
+                <motion.button
+                  variants={{
+                    hidden: { opacity: 0, y: 12 },
+                    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+                  }}
+                  key={d.id}
+                  onClick={() => setPicked(d)}
+                  className={`group rounded-node border bg-surface-2 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-hairline-soft ${
+                    d.online ? "border-hairline" : "border-hairline/40 opacity-50"
+                  }`}
+                  style={{ borderLeft: `3px solid ${accent}` }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4 shrink-0" style={{ color: accent }} />
+                    <span className="truncate font-mono text-small font-semibold text-ink">{d.ip}</span>
+                    {d.online && (
+                      <span className="ml-auto flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-full bg-risk-safe animate-pulse" title="online" />
+                        <span className="text-[9px] font-medium text-risk-safe">LIVE</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-1.5">
+                    <VulnBadge d={d} />
+                  </div>
+                  <div className="mt-1 truncate font-mono text-[10px] text-ink-muted">{d.mac}</div>
+                  <div className="mt-1 flex items-center gap-1">
+                    {d.is_gateway && (
+                      <span className="rounded-sm bg-risk-medium/15 px-1.5 py-0.5 text-[9px] font-medium text-risk-medium">
+                        GATEWAY
+                      </span>
+                    )}
+                    {d.is_self && (
+                      <span className="rounded-sm bg-risk-safe/15 px-1.5 py-0.5 text-[9px] font-medium text-risk-safe">
+                        THIS DEVICE
+                      </span>
+                    )}
+                    <span className="truncate text-[10px] text-ink-muted">
+                      {d.vendor ?? "unknown vendor"}
+                    </span>
+                  </div>
 
-              {/* ── Active Telemetry Badges (Compact & Sleek) ────────── */}
-              {(activeAppCount > 0 || activeDomCount > 0) && (
-                <div className="mt-2.5 flex flex-wrap items-center gap-1 border-t border-hairline/50 pt-2">
-                  {d.active_apps?.slice(0, 2).map((app) => (
-                    <span
-                      key={app}
-                      className="inline-flex items-center gap-1 rounded border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 text-[9px] font-medium text-accent-300"
-                    >
-                      <Laptop className="h-2.5 w-2.5" />
-                      {app}
-                    </span>
-                  ))}
-                  {d.active_domains?.slice(0, 2).map((dom) => (
-                    <span
-                      key={dom}
-                      className="inline-flex max-w-[100px] items-center gap-1 truncate rounded border border-hairline bg-canvas/80 px-1.5 py-0.5 font-mono text-[9px] text-ink-secondary"
-                      title={dom}
-                    >
-                      <Globe className="h-2.5 w-2.5 text-accent-400" />
-                      <span className="truncate">{dom}</span>
-                    </span>
-                  ))}
-                  {(activeAppCount + activeDomCount > 4) && (
-                    <span className="rounded bg-surface-1 px-1 py-0.5 font-mono text-[9px] text-ink-muted">
-                      +{activeAppCount + activeDomCount - 4}
-                    </span>
+                  {/* ── Active Telemetry Badges (Compact & Sleek) ────────── */}
+                  {(activeAppCount > 0 || activeDomCount > 0) && (
+                    <div className="mt-2.5 flex flex-wrap items-center gap-1 border-t border-hairline/50 pt-2">
+                      {d.active_apps?.slice(0, 2).map((app) => (
+                        <span
+                          key={app}
+                          className="inline-flex items-center gap-1 rounded border border-accent-500/30 bg-accent-500/10 px-1.5 py-0.5 text-[9px] font-medium text-accent-300"
+                        >
+                          <Laptop className="h-2.5 w-2.5" />
+                          {app}
+                        </span>
+                      ))}
+                      {d.active_domains?.slice(0, 2).map((dom) => (
+                        <span
+                          key={dom}
+                          className="inline-flex max-w-[100px] items-center gap-1 truncate rounded border border-hairline bg-canvas/80 px-1.5 py-0.5 font-mono text-[9px] text-ink-secondary"
+                          title={dom}
+                        >
+                          <Globe className="h-2.5 w-2.5 text-accent-400" />
+                          <span className="truncate">{dom}</span>
+                        </span>
+                      ))}
+                      {(activeAppCount + activeDomCount > 4) && (
+                        <span className="rounded bg-surface-1 px-1 py-0.5 font-mono text-[9px] text-ink-muted">
+                          +{activeAppCount + activeDomCount - 4}
+                        </span>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-            </motion.button>
-          );
-        })}
-      </motion.div>
+                </motion.button>
+              );
+            })}
+          </motion.div>
+
+          {/* Progressive Infinite Load Indicator / Expand Button */}
+          {visibleCount < devices.length && (
+            <div className="flex flex-col items-center justify-center gap-2 pt-2 border-t border-hairline/30">
+              <span className="text-[11px] font-mono text-ink-muted">
+                Showing {displayedDevices.length} of {devices.length} devices (load-optimized)
+              </span>
+              <button
+                onClick={() => setVisibleCount((c) => Math.min(c + 12, devices.length))}
+                className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-4 py-1.5 text-xs font-semibold text-ink-primary hover:bg-surface-3 hover:border-accent-500/40 transition-all shadow-xs"
+              >
+                <RefreshCw className="h-3 w-3 text-accent-400" />
+                Load more nodes (+{Math.min(12, devices.length - visibleCount)} remaining)
+              </button>
+            </div>
+          )}
+        </div>
       )}
         {live &&
           createPortal(
@@ -1500,13 +1589,18 @@ function RadarGrid({
       }
       return true;
     });
-  }, [threats, filter, search, fiveMinAgo]);
+  }, [threats, filter, search]);
 
   const realTimeCount = threats.filter((t) => new Date(t.last_seen).getTime() >= fiveMinAgo).length;
   const threatCount = threats.filter((t) => t.band !== "Trusted").length;
 
   // risky first, so the dangerous ones sit at the top of the grid
-  const ordered = [...filtered].sort((a, b) => a.score - b.score);
+  const ordered = useMemo(() => [...filtered].sort((a, b) => a.score - b.score), [filtered]);
+
+  const [visibleThreatCount, setVisibleThreatCount] = useState(12);
+
+  // Progressive slicing for optimal load performance
+  const displayedThreats = useMemo(() => ordered.slice(0, visibleThreatCount), [ordered, visibleThreatCount]);
 
   return (
     <div className="space-y-3">
@@ -1514,7 +1608,7 @@ function RadarGrid({
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-hairline bg-surface-1/50 p-2">
         <div className="flex items-center gap-1">
           <button
-            onClick={() => setFilter("all")}
+            onClick={() => { setFilter("all"); setVisibleThreatCount(12); }}
             className={`rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
               filter === "all"
                 ? "bg-accent-500/15 text-accent-400 font-semibold"
@@ -1524,7 +1618,7 @@ function RadarGrid({
             All Activity ({threats.length})
           </button>
           <button
-            onClick={() => setFilter("realtime")}
+            onClick={() => { setFilter("realtime"); setVisibleThreatCount(12); }}
             className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
               filter === "realtime"
                 ? "bg-accent-500/15 text-accent-400 font-semibold"
@@ -1535,7 +1629,7 @@ function RadarGrid({
             Real-Time 5m ({realTimeCount})
           </button>
           <button
-            onClick={() => setFilter("threats")}
+            onClick={() => { setFilter("threats"); setVisibleThreatCount(12); }}
             className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
               filter === "threats"
                 ? "bg-risk-critical/15 text-risk-critical font-semibold"
@@ -1552,7 +1646,7 @@ function RadarGrid({
             type="text"
             placeholder="Search domain..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setVisibleThreatCount(12); }}
             className="rounded border border-hairline bg-surface-2 px-2 py-0.5 font-mono text-[11px] text-ink placeholder-ink-muted/60 outline-none focus:border-accent-500"
           />
         </div>
@@ -1563,52 +1657,80 @@ function RadarGrid({
           No domains matched the selected filter ({filter}).
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {ordered.map((t) => {
-            const hex = hexFor(t.band);
-            const risky = t.band !== "Trusted";
-            const isLive = new Date(t.last_seen).getTime() >= fiveMinAgo;
-            const active = selected?.id === t.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => onPick(t)}
-                className={`group relative flex flex-col items-start gap-2 rounded-node border bg-surface-2 p-3 text-left transition-all hover:-translate-y-0.5 ${
-                  active ? "border-accent-500" : "border-hairline hover:border-hairline-soft"
-                }`}
-                style={{ borderLeft: `3px solid ${hex}` }}
-              >
-                {risky && (
-                  <span
-                    aria-hidden
-                    className="absolute right-2 top-2 h-2 w-2 rounded-full"
-                    style={{ backgroundColor: hex, boxShadow: `0 0 0 4px ${hex}22` }}
-                  />
-                )}
-                <div className="flex w-full items-center justify-between">
-                  <span
-                    className="flex h-7 w-7 items-center justify-center rounded-md"
-                    style={{ backgroundColor: `${hex}1f`, color: hex }}
-                  >
-                    {risky ? <ShieldAlert className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
-                  </span>
-                  {isLive && (
-                    <span className="flex items-center gap-1 rounded bg-risk-safe/10 px-1.5 py-0.5 text-[8px] font-semibold text-risk-safe">
-                      <span className="h-1.5 w-1.5 rounded-full bg-risk-safe animate-pulse" />
-                      LIVE
-                    </span>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {displayedThreats.map((t) => {
+              const hex = hexFor(t.band);
+              const risky = t.band !== "Trusted";
+              const isLive = new Date(t.last_seen).getTime() >= fiveMinAgo;
+              const active = selected?.id === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => onPick(t)}
+                  className={`group relative flex flex-col items-start gap-2 rounded-node border bg-surface-2 p-3 text-left transition-all hover:-translate-y-0.5 ${
+                    active ? "border-accent-500" : "border-hairline hover:border-hairline-soft"
+                  }`}
+                  style={{ borderLeft: `3px solid ${hex}` }}
+                >
+                  {risky && (
+                    <span
+                      aria-hidden
+                      className="absolute right-2 top-2 h-2 w-2 rounded-full"
+                      style={{ backgroundColor: hex, boxShadow: `0 0 0 4px ${hex}22` }}
+                    />
                   )}
-                </div>
-                <span className="w-full truncate font-mono text-small text-ink" title={t.domain}>
-                  {t.domain}
-                </span>
-                <span className="flex w-full items-center justify-between font-mono text-[10px] text-ink-muted">
-                  <span style={{ color: hex }}>{t.band}</span>
-                  <span>×{t.hit_count}</span>
-                </span>
+                  <div className="flex w-full items-center justify-between">
+                    <span
+                      className="flex h-7 w-7 items-center justify-center rounded-md"
+                      style={{ backgroundColor: `${hex}1f`, color: hex }}
+                    >
+                      {risky ? <ShieldAlert className="h-3.5 w-3.5" /> : <Globe className="h-3.5 w-3.5" />}
+                    </span>
+                    {isLive && (
+                      <span className="flex items-center gap-1 rounded bg-risk-safe/10 px-1.5 py-0.5 text-[8px] font-semibold text-risk-safe">
+                        <span className="h-1.5 w-1.5 rounded-full bg-risk-safe animate-pulse" />
+                        LIVE
+                      </span>
+                    )}
+                  </div>
+                  <span className="w-full truncate font-mono text-small text-ink font-medium" title={t.domain}>
+                    {t.domain}
+                  </span>
+                  <span className="flex w-full items-center justify-between font-mono text-[10px] text-ink-muted">
+                    <span style={{ color: hex }} className="font-semibold">{t.band}</span>
+                    <span>×{t.hit_count} hits</span>
+                  </span>
+
+                  {/* ── Source Device IP / Host Badge ─────────────── */}
+                  {t.source_host && (
+                    <div className="flex w-full items-center gap-1.5 font-mono text-[10px] text-ink-secondary border-t border-hairline/40 pt-1.5 mt-0.5 truncate bg-black/5 rounded px-1.5 py-0.5">
+                      <Laptop className="h-3 w-3 shrink-0 text-accent-400" />
+                      <span className="truncate" title={`Client device: ${t.source_host}`}>
+                        {t.source_host}
+                      </span>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Progressive Load More Trigger */}
+          {visibleThreatCount < ordered.length && (
+            <div className="flex flex-col items-center justify-center gap-2 pt-2 border-t border-hairline/30">
+              <span className="text-[11px] font-mono text-ink-muted">
+                Showing {displayedThreats.length} of {ordered.length} live requests
+              </span>
+              <button
+                onClick={() => setVisibleThreatCount((c) => Math.min(c + 12, ordered.length))}
+                className="flex items-center gap-1.5 rounded-lg border border-hairline bg-surface-2 px-4 py-1.5 text-xs font-semibold text-ink-primary hover:bg-surface-3 hover:border-accent-500/40 transition-all shadow-xs"
+              >
+                <RefreshCw className="h-3 w-3 text-accent-400" />
+                Load more requests (+{Math.min(12, ordered.length - visibleThreatCount)} remaining)
               </button>
-            );
-          })}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -80,7 +80,8 @@ class Reporter:
     """POSTs newly-seen domains to the server, deduping within this run."""
 
     def __init__(self, server: str, token: str, source_host: str, cooldown: float = 3.0):
-        self.url = server.rstrip("/") + "/api/live/observe"
+        self.server = server.rstrip("/")
+        self.url = self.server + "/api/live/observe"
         self.token = token
         self.source_host = source_host
         self.cooldown = cooldown
