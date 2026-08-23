@@ -1,14 +1,13 @@
 <!-- Hero Section -->
 <div align="center">
 
-<!-- Logo / Title Block -->
-# <img src="https://img.shields.io/badge/Drishti-Cybersecurity_Platform-38c6f4?style=for-the-badge&logo=data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>" alt="Drishti" height="42" /> Drishti
+# <span style="font-size:48px;">👁️</span> Drishti
 
-![Badge](https://img.shields.io/badge/Status-Production_Ready-success?style=flat-square)
-![Badge](https://img.shields.io/badge/Version-v0.1.0-blue?style=flat-square)
-![Badge](https://img.shields.io/badge/Stance-Defensive_Only-red?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Production_Ready-success?style=flat-square)
+![Version](https://img.shields.io/badge/Version-v0.1.0-blue?style=flat-square)
+![Stance](https://img.shields.io/badge/Stance-Defensive_Only-red?style=flat-square)
 
-**AI-powered attack-path intelligence platform.** Maps how an attacker reads your network, traces every route from the internet to crown-jewel assets, prices each path in **dollars**, and drafts human-reviewed Ansible fixes. Never attacks.
+*AI-powered attack-path intelligence platform.* Maps how an attacker reads your network, traces every route from the internet to crown-jewel assets, prices each path in **dollars**, and drafts human-reviewed Ansible fixes. Never attacks.
 
 ---
 
