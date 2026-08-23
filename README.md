@@ -383,7 +383,7 @@ graph TB
  subgraph BUSINESS ["⚙️ Business Logic — 14 Services"]
  RISK["risk_engine.py<br/>Graph construction<br/>Node pricing"]
  ATK["attack_paths.py<br/>Yen's k-shortest<br/>Path enumeration"]
- IMPACT["impact.py<break/>Dollar value<br/>CVSS × blast radius"]
+ IMPACT["impact.py<br/>Dollar value<br/>CVSS × blast radius"]
  RECOMP["recompute.py<br/>Exposure recompute<br/>on events"]
  INGEST_S["ingest.py<br/>Agent payload<br/>normalization"]
  URLTRUST["urltrust/<br/>6-module scoring<br/>heuristic + ML"]
@@ -515,10 +515,10 @@ flowchart LR
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
 flowchart LR
- classDef input fill:#16213e,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0,rx:12
- classDef weight fill:#e94560,stroke:#ff6b6b,stroke-width:1.5px,color:#fff,rx:8
- classDef calc fill:#0f3460,stroke:#f4d03f,stroke-width:2px,color:#f4d03f,rx:12
- classDef out fill:#16213e,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0,rx:10
+ classDef input fill:#16213e,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0
+ classDef weight fill:#e94560,stroke:#ff6b6b,stroke-width:1.5px,color:#fff
+ classDef calc fill:#0f3460,stroke:#f4d03f,stroke-width:2px,color:#f4d03f
+ classDef out fill:#16213e,stroke:#38c6f4,stroke-width:2px,color:#e0e0e0
 
  subgraph INPUTS ["📥 Inputs"]
  F1["📋 CVSS Base Score<br/>0.0 – 10.0"]:::input
@@ -561,9 +561,9 @@ flowchart LR
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#38c6f4', 'lineColor': '#38c6f4', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'background': '#0a0a1a', 'mainBkg': '#1a1a2e', 'nodeBorder': '#38c6f4', 'clusterBkg': '#0f3460', 'titleColor': '#e94560', 'edgeLabelBackground': '#16213e'}}}%%
 flowchart TD
- classDef trigger fill:#e94560,stroke:#ff6b6b,stroke-width:2px,color:#fff,rx:12
- classDef step fill:#16213e,stroke:#38c6f4,stroke-width:1.5px,color:#e0e0e0,rx:10
- classDef result fill:#0f3460,stroke:#f4d03f,stroke-width:2px,color:#f4d03f,rx:10
+ classDef trigger fill:#e94560,stroke:#ff6b6b,stroke-width:2px,color:#fff
+ classDef step fill:#16213e,stroke:#38c6f4,stroke-width:1.5px,color:#e0e0e0
+ classDef result fill:#0f3460,stroke:#f4d03f,stroke-width:2px,color:#f4d03f
 
  subgraph TRIGGERS ["⚡ Trigger Events"]
  direction LR
